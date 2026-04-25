@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Underground Gallery · Logo Marks</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #0a0b10; color: #f5f6f7; font-family: "Inter Tight", system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  .mono { font-family: "JetBrains Mono", monospace; letter-spacing: 0.2em; text-transform: uppercase; font-size: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 28px; max-width: 1200px; margin: 0 auto; }
+  @media (min-width: 900px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .card { padding: 0; border: 0.5px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; }
+  .card-body { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+  .card-foot { padding: 12px 16px; border-top: 0.5px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
+  .label { color: #f5f6f7; font-weight: 700; }
+  .sub { color: rgba(201,204,209,0.5); font-size: 9px; letter-spacing: 0.22em; }
+  .corner { position: absolute; width: 10px; height: 10px; border-color: #ff2a2a; }
+  .corner.tl { top: 0; left: 0; border-top: 1.5px solid; border-left: 1.5px solid; }
+  .corner.br { bottom: 0; right: 0; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+  .download { background: transparent; border: 0.5px solid rgba(255,42,42,0.5); color: #ff2a2a; padding: 5px 10px; font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.22em; cursor: pointer; text-transform: uppercase; }
+  .download:hover { background: rgba(255,42,42,0.08); }
+  header { padding: 36px 28px 0; max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.02em; margin: 12px 0 6px; }
+  .lede { color: rgba(201,204,209,0.6); font-size: 13px; max-width: 540px; line-height: 1.6; }
+  .section-title { padding: 32px 28px 0; max-width: 1200px; margin: 16px auto 0; border-top: 0.5px solid rgba(255,255,255,0.08); }
+  .section-title .mono { color: #ff2a2a; }
+  .section-title h2 { font-size: 18px; font-weight: 600; margin: 6px 0 0; letter-spacing: -0.01em; }
+  .specs { padding: 28px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+  .spec { padding: 16px; border: 0.5px solid rgba(255,255,255,0.08); }
+  .spec .num { font-family: "JetBrains Mono", monospace; font-size: 22px; color: #ff2a2a; font-weight: 700; letter-spacing: 0.02em; }
+  .spec .nm { font-size: 11px; color: rgba(201,204,209,0.7); margin-top: 4px; }
+  footer { padding: 24px 28px 48px; max-width: 1200px; margin: 0 auto; color: rgba(201,204,209,0.4); font-size: 10px; font-family: "JetBrains Mono", monospace; letter-spacing: 0.2em; text-transform: uppercase; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="mono" style="color:#ff2a2a">∕∕ BRAND ASSETS · v1.0 · 2026</span>
+  <h1>Underground Gallery — Logo Marks</h1>
+  <p class="lede">Print-ready static variants in SVG. Click any mark to download — works for tees, decals, business cards, embroidery, signage. The animated version is reserved for screen use only.</p>
+</header>
+
+<div class="section-title">
+  <span class="mono">∕∕ 01 — PRIMARY MARKS</span>
+  <h2>Square monogram. The core identity.</h2>
+</div>
+
+<div class="grid" id="grid-primary"></div>
+
+<div class="section-title">
+  <span class="mono">∕∕ 02 — LOCKUPS</span>
+  <h2>Mark + wordmark. For headers, business cards, signage.</h2>
+</div>
+
+<div class="grid" id="grid-lockups"></div>
+
+<div class="section-title">
+  <span class="mono">∕∕ 03 — SINGLE-COLOR</span>
+  <h2>Black on white. Embroidery, single-color print, etching.</h2>
+</div>
+
+<div class="grid" id="grid-mono"></div>
+
+<div class="section-title">
+  <span class="mono">∕∕ SPECS</span>
+  <h2>Constants you can hand to a vendor.</h2>
+</div>
+
+<div class="specs">
+  <div class="spec"><div class="num">#FF2A2A</div><div class="nm">PRIMARY RED · PMS 185 C</div></div>
+  <div class="spec"><div class="num">#0A0B10</div><div class="nm">DEEP BLACK · PMS BLACK 6 C</div></div>
+  <div class="spec"><div class="num">#F5F6F7</div><div class="nm">PAPER WHITE · COOL GRAY 1 C</div></div>
+  <div class="spec"><div class="num">120 / 120</div><div class="nm">VIEWBOX · 1:1 SQUARE</div></div>
+  <div class="spec"><div class="num">3.5px</div><div class="nm">PRIMARY STROKE @ 120u</div></div>
+  <div class="spec"><div class="num">14u</div><div class="nm">CLEAR SPACE (MIN PADDING)</div></div>
+  <div class="spec"><div class="num">24px</div><div class="nm">MIN ON-SCREEN SIZE</div></div>
+  <div class="spec"><div class="num">0.375"</div><div class="nm">MIN PRINT SIZE (10mm)</div></div>
+</div>
+
+<footer>
+  <span>UG.GALLERY / BRAND</span>
+  <span>EST. MMXXVI</span>
+</footer>
+
+<script>
+// ── SVG generators (no React) ─────────────────────────────────────────────
+function markSvg({ size = 200, color = '#ff2a2a', bg = 'transparent' } = {}) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 120 120" fill="none">
+  <rect width="120" height="120" fill="${bg}"/>
+  ${[[6,6],[114,6],[6,114],[114,114]].map(([x,y])=>`<g stroke="${color}" stroke-width="1" opacity="0.4"><path d="M${x-4} ${y} L${x+4} ${y} M${x} ${y-4} L${x} ${y+4}"/></g>`).join('')}
+  <rect x="14" y="14" width="92" height="92" stroke="${color}" stroke-width="1.5" fill="none" stroke-opacity="0.35"/>
+  <path d="M14 14 L26 14 M106 14 L94 14 M14 106 L26 106 M106 106 L94 106" stroke="${color}" stroke-width="3" stroke-linecap="square"/>
+  <path d="M28 24 L28 92 L92 92 L92 24" stroke="${color}" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+  <path d="M80 44 L42 44 L42 80 L80 80 L80 64 L60 64" stroke="${color}" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+  <circle cx="60" cy="60" r="56" stroke="${color}" stroke-width="0.5" stroke-opacity="0.25" stroke-dasharray="2 4"/>
+</svg>`;
+}
+
+function lockupSvg({ width = 480, color = '#ff2a2a', textColor = '#f5f6f7', bg = 'transparent', orient = 'h' } = {}) {
+  if (orient === 'h') {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${width * 0.28}" viewBox="0 0 480 134" fill="none">
+  <rect width="480" height="134" fill="${bg}"/>
+  <g transform="translate(0,7) scale(1)">
+    ${markSvg({ color }).replace(/^<svg[^>]*>/, '<g transform="scale(1)">').replace(/<\/svg>$/, '</g>').replace(/<rect[^/]*\/>/, '')}
+  </g>
+  <g transform="translate(140, 50)">
+    <text x="0" y="0" fill="${textColor}" font-family="JetBrains Mono, monospace" font-size="22" font-weight="700" letter-spacing="3">UNDERGROUND</text>
+    <text x="190" y="0" fill="${color}" font-family="JetBrains Mono, monospace" font-size="22" font-weight="900" letter-spacing="0">∕∕</text>
+    <text x="220" y="0" fill="${textColor}" font-family="JetBrains Mono, monospace" font-size="22" font-weight="700" letter-spacing="3">GALLERY</text>
+    <text x="0" y="22" fill="${textColor}" opacity="0.5" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="4">MEMBERS // EST. MMXXVI</text>
+  </g>
+</svg>`;
+  }
+  // stacked
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${width * 1.05}" viewBox="0 0 480 504" fill="none">
+  <rect width="480" height="504" fill="${bg}"/>
+  <g transform="translate(120, 40)">
+    ${markSvg({ size: 240, color }).replace(/^<svg[^>]*>/, `<g transform="scale(2)">`).replace(/<\/svg>$/, '</g>').replace(/<rect[^/]*\/>/, '')}
+  </g>
+  <g transform="translate(0, 380)">
+    <text x="240" y="0" fill="${textColor}" font-family="JetBrains Mono, monospace" font-size="28" font-weight="700" letter-spacing="4" text-anchor="middle">UNDERGROUND ∕∕ GALLERY</text>
+    <text x="240" y="32" fill="${textColor}" opacity="0.5" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="5" text-anchor="middle">MEMBERS // EST. MMXXVI</text>
+  </g>
+</svg>`;
+}
+
+function downloadSvg(svgString, filename) {
+  const blob = new Blob([svgString], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function makeCard({ svg, label, sub, filename, bg }) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.background = bg || '#0a0b10';
+  card.innerHTML = `
+    <span class="corner tl"></span><span class="corner br"></span>
+    <div class="card-body">${svg}</div>
+    <div class="card-foot">
+      <div>
+        <div class="mono label">${label}</div>
+        <div class="mono sub" style="margin-top:4px">${sub}</div>
+      </div>
+      <button class="download">DOWNLOAD SVG ↓</button>
+    </div>
+  `;
+  card.querySelector('.download').addEventListener('click', () => downloadSvg(svg, filename));
+  return card;
+}
+
+// ── Build cards ───────────────────────────────────────────────────────────
+const primary = [
+  { svg: markSvg({ size: 200, color: '#ff2a2a' }), label: 'MARK · RED', sub: 'PRIMARY · ON DARK', filename: 'ug-mark-red-on-dark.svg' },
+  { svg: markSvg({ size: 200, color: '#ff2a2a', bg: '#f5f6f7' }), label: 'MARK · RED', sub: 'PRIMARY · ON LIGHT', filename: 'ug-mark-red-on-light.svg', bg: '#f5f6f7' },
+  { svg: markSvg({ size: 200, color: '#f5f6f7' }), label: 'MARK · KNOCKOUT', sub: 'WHITE · ON DARK', filename: 'ug-mark-white.svg' },
+];
+primary.forEach(c => document.getElementById('grid-primary').appendChild(makeCard(c)));
+
+const lockups = [
+  { svg: lockupSvg({ width: 480, color: '#ff2a2a', textColor: '#f5f6f7', orient: 'h' }), label: 'HORIZONTAL · DARK', sub: 'HEADERS · WEB · EMAIL', filename: 'ug-lockup-h-dark.svg' },
+  { svg: lockupSvg({ width: 480, color: '#ff2a2a', textColor: '#0a0b10', bg: '#f5f6f7', orient: 'h' }), label: 'HORIZONTAL · LIGHT', sub: 'STATIONERY · CARDS', filename: 'ug-lockup-h-light.svg', bg: '#f5f6f7' },
+  { svg: lockupSvg({ width: 480, color: '#ff2a2a', textColor: '#f5f6f7', orient: 'v' }), label: 'STACKED · DARK', sub: 'POSTERS · TEES', filename: 'ug-lockup-v-dark.svg' },
+];
+lockups.forEach(c => document.getElementById('grid-lockups').appendChild(makeCard(c)));
+
+const mono = [
+  { svg: markSvg({ size: 200, color: '#0a0b10', bg: '#f5f6f7' }), label: 'BLACK', sub: 'EMBROIDERY · STAMP', filename: 'ug-mark-black.svg', bg: '#f5f6f7' },
+  { svg: markSvg({ size: 200, color: '#f5f6f7', bg: '#0a0b10' }), label: 'WHITE', sub: 'ETCHING · DECAL', filename: 'ug-mark-white-knockout.svg' },
+  { svg: lockupSvg({ width: 480, color: '#0a0b10', textColor: '#0a0b10', bg: '#f5f6f7', orient: 'h' }), label: 'LOCKUP · BLACK', sub: 'INVOICES · LETTERHEAD', filename: 'ug-lockup-black.svg', bg: '#f5f6f7' },
+];
+mono.forEach(c => document.getElementById('grid-mono').appendChild(makeCard(c)));
+</script>
+</body>
+</html>

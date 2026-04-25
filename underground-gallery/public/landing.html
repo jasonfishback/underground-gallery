@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Underground Gallery</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="description" content="A members-only gallery for the work most people never see. Invite only. Est. MMXXVI."/>
+<meta property="og:title" content="Underground Gallery"/>
+<meta property="og:description" content="A members-only gallery for the work most people never see. Invite only."/>
+<meta property="og:image" content="/og.png"/>
+<meta property="og:url" content="https://undergroundgallery.ai"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+<link rel="alternate icon" href="/favicon.ico"/>
+<link rel="apple-touch-icon" href="/apple-icon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #05060a; color: #f5f6f7; font-family: 'Inter Tight', system-ui, -apple-system, sans-serif; min-height: 100vh; overflow-x: hidden; }
+  * { box-sizing: border-box; }
+  @keyframes ugBlink { 50% { opacity: 0.3; } }
+  @keyframes ugScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
+  @keyframes ugFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes ugCountTick { 0%, 100% { color: #ff2a2a; } 50% { color: #fff; } }
+  .ug-fade-1 { animation: ugFadeUp 0.8s ease-out 0.1s both; }
+  .ug-fade-2 { animation: ugFadeUp 0.8s ease-out 0.3s both; }
+  .ug-fade-3 { animation: ugFadeUp 0.8s ease-out 0.5s both; }
+  .ug-fade-4 { animation: ugFadeUp 0.8s ease-out 0.7s both; }
+  .ug-fade-5 { animation: ugFadeUp 0.8s ease-out 0.9s both; }
+  .ug-blink { animation: ugBlink 1.4s infinite; }
+  .ug-pulse { animation: ugCountTick 4s infinite; }
+  input, textarea { font-family: inherit; }
+  input:focus, textarea:focus { outline: none; border-color: #ff2a2a !important; box-shadow: 0 0 0 1px #ff2a2a, 0 0 18px rgba(255,42,42,0.18); }
+  button { cursor: pointer; font-family: inherit; }
+  ::selection { background: #ff2a2a; color: #05060a; }
+</style>
+</head>
+<body>
+
+<!-- Carbon-fiber backdrop -->
+<div style="position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.6;
+            background-color: #05060a;
+            background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px), repeating-linear-gradient(-45deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px);
+            "></div>
+
+<!-- Vignette glow -->
+<div style="position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background: radial-gradient(ellipse at top, rgba(255,42,42,0.08), transparent 60%);
+            "></div>
+
+<!-- Scan line -->
+<div style="position: fixed; left: 0; right: 0; height: 1px; pointer-events: none; z-index: 1;
+            background: linear-gradient(90deg, transparent, rgba(255,42,42,0.6), transparent);
+            box-shadow: 0 0 12px rgba(255,42,42,0.4);
+            animation: ugScan 8s linear infinite;
+            "></div>
+
+<main style="position: relative; z-index: 2; max-width: 1280px; margin: 0 auto; padding: 32px 48px 80px; min-height: 100vh; display: flex; flex-direction: column;">
+
+  <!-- Top bar -->
+  <header style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 24px; border-bottom: 0.5px solid rgba(255,255,255,0.08);">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+        <rect x="3" y="3" width="34" height="34" stroke="#ff2a2a" stroke-width="1.5" fill="none" stroke-opacity="0.4"/>
+        <path d="M3 3 L7 3 M37 3 L33 3 M3 37 L7 37 M37 37 L33 37" stroke="#ff2a2a" stroke-width="2" stroke-linecap="square"/>
+        <path d="M8 8 L8 32 L32 32 L32 8" stroke="#ff2a2a" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+        <path d="M25 15 L15 15 L15 27 L25 27 L25 22 L20 22" stroke="#ff2a2a" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+      </svg>
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; letter-spacing: 0.18em;">UNDERGROUND<span style="color: #ff2a2a; padding: 0 4px; font-weight: 900;">∕∕</span>GALLERY</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.3em; color: rgba(201,204,209,0.4); text-transform: uppercase;">MEMBERS // EST. MMXXVI</div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.3em; color: rgba(201,204,209,0.6); text-transform: uppercase;">
+      <span style="display: inline-block; width: 6px; height: 6px; background: #ff2a2a; border-radius: 50%; box-shadow: 0 0 6px #ff2a2a;" class="ug-blink"></span>
+      <span>ACCEPTING APPLICATIONS</span>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 80px; align-items: center; flex: 1; padding-top: 80px;">
+
+    <!-- Left: Manifesto -->
+    <div>
+      <div class="ug-fade-1" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.4em; font-weight: 700; margin-bottom: 24px;">
+        ∕∕ INVITATION REQUIRED · SEASON 01
+      </div>
+
+      <h1 class="ug-fade-2" style="font-size: clamp(56px, 7vw, 96px); font-weight: 800; letter-spacing: -0.035em; line-height: 0.95; margin: 0 0 32px;">
+        The work<br/>
+        most people<br/>
+        <span style="color: #ff2a2a;">never see.</span>
+      </h1>
+
+      <p class="ug-fade-3" style="font-size: 17px; color: rgba(201,204,209,0.75); line-height: 1.65; max-width: 520px; margin: 0 0 40px;">
+        Underground Gallery is a private, members-only home for the builders, fabricators, painters, and the cars they make.
+        Doors open four times a year. Membership is by invitation. There is no public feed.
+      </p>
+
+      <!-- Numbers strip -->
+      <div class="ug-fade-4" style="display: flex; gap: 0; padding: 20px 0; border-top: 0.5px solid rgba(255,255,255,0.08); border-bottom: 0.5px solid rgba(255,255,255,0.08); margin-bottom: 40px;">
+        <Stat label="ON THE LIST" value="" id="ug-counter" placeholder="114"/>
+        <Stat label="SEASON" value="01"/>
+        <Stat label="EST." value="MMXXVI"/>
+      </div>
+
+      <div class="ug-fade-5" style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <a href="#apply" style="display: inline-flex; align-items: center; gap: 10px; padding: 16px 28px; background: #ff2a2a; color: #05060a; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-decoration: none; text-transform: uppercase; box-shadow: 0 0 24px rgba(255,42,42,0.25);">
+          REQUEST INVITATION <span style="font-size: 14px;">→</span>
+        </a>
+        <a href="#about" style="display: inline-flex; align-items: center; padding: 16px 28px; border: 0.5px solid rgba(255,255,255,0.2); color: rgba(201,204,209,0.85); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-decoration: none; text-transform: uppercase;">
+          WHAT'S INSIDE
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: Hero mark -->
+    <div class="ug-fade-3" style="display: flex; align-items: center; justify-content: center; position: relative;">
+      <div style="position: relative; width: 360px; height: 360px;">
+        <svg width="360" height="360" viewBox="0 0 120 120" fill="none" style="position: absolute; inset: 0;">
+          <style>
+            @keyframes ugRingSpin { to { transform: rotate(360deg); } }
+            @keyframes ugScanSweep { 0% { transform: translateY(-8px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(94px); opacity: 0; } }
+            .ring { transform-origin: 60px 60px; animation: ugRingSpin 18s linear infinite; }
+            .scan { animation: ugScanSweep 4.2s ease-in-out infinite; }
+          </style>
+          <g stroke="#ff2a2a" stroke-width="1" opacity="0.4">
+            <path d="M2 6 L10 6 M6 2 L6 10"/>
+            <path d="M118 6 L110 6 M114 2 L114 10"/>
+            <path d="M2 114 L10 114 M6 110 L6 118"/>
+            <path d="M118 114 L110 114 M114 110 L114 118"/>
+          </g>
+          <rect x="14" y="14" width="92" height="92" stroke="#ff2a2a" stroke-width="1.5" fill="none" stroke-opacity="0.35"/>
+          <path d="M14 14 L26 14 M106 14 L94 14 M14 106 L26 106 M106 106 L94 106" stroke="#ff2a2a" stroke-width="3" stroke-linecap="square"/>
+          <clipPath id="ug-clip"><rect x="14" y="14" width="92" height="92"/></clipPath>
+          <g clip-path="url(#ug-clip)">
+            <line class="scan" x1="18" y1="18" x2="102" y2="18" stroke="#ff2a2a" stroke-width="1" opacity="0.7" style="filter: drop-shadow(0 0 4px #ff2a2a);"/>
+          </g>
+          <path d="M28 24 L28 92 L92 92 L92 24" stroke="#ff2a2a" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+          <path d="M80 44 L42 44 L42 80 L80 80 L80 64 L60 64" stroke="#ff2a2a" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+          <g class="ring">
+            <circle cx="60" cy="60" r="56" stroke="#ff2a2a" stroke-width="0.5" stroke-opacity="0.25" stroke-dasharray="2 4"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- About anchor -->
+  <section id="about" style="padding: 120px 0 80px; max-width: 880px;">
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.4em; margin-bottom: 24px;">∕∕ WHAT'S INSIDE</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px;">
+      <Pillar n="01" title="Private feed" body="No public profile, no algorithm. Members see members. The work, the process, the parts list, the people."/>
+      <Pillar n="02" title="Seasonal drops" body="Four times a year we open the doors for new members. Each season has a theme, a juror, and a hard cap."/>
+      <Pillar n="03" title="Off-site meets" body="Coordinates released the morning of. Location dies after. Bring the car, leave with the photos."/>
+      <Pillar n="04" title="Member store" body="Limited drops curated by members for members. Made-to-order parts, prints, garments. No restocks."/>
+    </div>
+  </section>
+
+  <!-- Apply form -->
+  <section id="apply" style="padding: 80px 0; max-width: 720px; margin: 0 auto; width: 100%;">
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.4em; margin-bottom: 16px; text-align: center;">∕∕ REQUEST INVITATION</div>
+    <h2 style="font-size: clamp(36px, 4vw, 56px); font-weight: 800; letter-spacing: -0.025em; line-height: 1; margin: 0 0 16px; text-align: center;">
+      The doors open <span style="color: #ff2a2a;">once a season.</span>
+    </h2>
+    <p style="font-size: 15px; color: rgba(201,204,209,0.6); line-height: 1.6; text-align: center; max-width: 540px; margin: 0 auto 48px;">
+      We review every application by hand. Tell us who you are and what you build. The more specific, the better.
+    </p>
+
+    <form id="apply-form" autocomplete="off" novalidate style="background: rgba(255,255,255,0.02); border: 0.5px solid rgba(255,255,255,0.08); padding: 40px;">
+
+      <Field label="EMAIL" name="email" type="email" required placeholder="name@domain.com"/>
+      <Field label="CALLSIGN / NAME" name="callsign" placeholder="What people call you in the garage"/>
+      <Field label="REGION" name="region" placeholder="LA · NYC · Tokyo · etc."/>
+      <Field label="WHAT YOU DRIVE" name="drive" placeholder="Year · make · model · what you've done to it"/>
+      <Field label="INSTAGRAM (OPTIONAL)" name="instagram" placeholder="@yourhandle"/>
+      <Field label="WHO INVITED YOU? (OPTIONAL)" name="invitedBy" placeholder="If someone sent you a link, their callsign"/>
+
+      <div style="margin-bottom: 28px;">
+        <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.7); letter-spacing: 0.25em; margin-bottom: 10px;">WHY YOU?</label>
+        <textarea name="message" rows="4" placeholder="One paragraph. What makes you not boring." style="width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.4); border: 0.5px solid rgba(255,255,255,0.12); color: #f5f6f7; font-size: 14px; line-height: 1.6; resize: vertical; transition: border-color 0.15s, box-shadow 0.15s;"></textarea>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <button type="submit" id="apply-submit" style="padding: 16px 32px; background: #ff2a2a; color: #05060a; border: none; font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; box-shadow: 0 0 24px rgba(255,42,42,0.25); transition: transform 0.1s, box-shadow 0.15s;">
+          SUBMIT APPLICATION →
+        </button>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.4); letter-spacing: 0.18em; text-transform: uppercase;">
+          By submitting, you agree to our <a href="/terms" style="color: rgba(201,204,209,0.7);">terms</a> & <a href="/privacy" style="color: rgba(201,204,209,0.7);">privacy</a>.
+        </span>
+      </div>
+
+      <div id="apply-error" style="display: none; margin-top: 20px; padding: 14px; border: 0.5px solid #ff2a2a; background: rgba(255,42,42,0.08); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.1em;"></div>
+    </form>
+
+    <!-- Confirmation state (hidden until success) -->
+    <div id="apply-success" style="display: none; padding: 48px 40px; background: rgba(255,42,42,0.04); border: 0.5px solid rgba(255,42,42,0.4); margin-top: 24px; text-align: center;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.4em; margin-bottom: 16px;">∕∕ APPLICATION RECEIVED</div>
+      <h3 style="font-size: 32px; font-weight: 800; margin: 0 0 16px; letter-spacing: -0.02em;">You're on the list.</h3>
+      <p style="font-size: 14px; color: rgba(201,204,209,0.7); line-height: 1.7; max-width: 480px; margin: 0 auto;">
+        Confirmation sent to <span id="apply-success-email" style="color: #f5f6f7; font-family: 'JetBrains Mono', monospace; font-size: 13px;"></span>.<br/>
+        We review every application by hand. When the next door opens, you'll hear from us — not before.
+      </p>
+      <p style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.4); letter-spacing: 0.3em; margin: 24px 0 0;">
+        ∕∕ STATUS: PENDING REVIEW
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="margin-top: 80px; padding-top: 32px; border-top: 0.5px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.4); letter-spacing: 0.3em; text-transform: uppercase;">
+      © MMXXVI · UNDERGROUND GALLERY · ALL ACCESS REVOKED
+    </div>
+    <div style="display: flex; gap: 24px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;">
+      <a href="/privacy" style="color: rgba(201,204,209,0.6); text-decoration: none;">PRIVACY</a>
+      <a href="/terms" style="color: rgba(201,204,209,0.6); text-decoration: none;">TERMS</a>
+      <a href="mailto:info@undergroundgallery.ai" style="color: rgba(201,204,209,0.6); text-decoration: none;">CONTACT</a>
+      <a href="https://instagram.com/undergroundgalleryai" target="_blank" rel="noopener" style="color: rgba(201,204,209,0.6); text-decoration: none;">@UNDERGROUNDGALLERYAI</a>
+    </div>
+  </footer>
+
+</main>
+
+<!--
+  Light template helpers below — written as inline custom elements so the page
+  needs zero build step. The dev gets a single static landing page that talks
+  to /api/apply via fetch.
+-->
+<script>
+// ─── Tiny "components" — replace <Stat>, <Field>, <Pillar> with real markup ──
+(function () {
+  // <Stat label="..." value="..."> → renders a labeled number.
+  document.querySelectorAll('Stat').forEach(el => {
+    const label = el.getAttribute('label') || '';
+    const value = el.getAttribute('value') || '';
+    const id = el.getAttribute('id') || '';
+    const placeholder = el.getAttribute('placeholder') || '';
+    const node = document.createElement('div');
+    node.style.cssText = 'flex: 1; padding-right: 32px; border-right: 0.5px solid rgba(255,255,255,0.08);';
+    node.innerHTML = `
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.3em;color:rgba(201,204,209,0.4);margin-bottom:8px;">${label}</div>
+      <div ${id ? `id="${id}"` : ''} class="ug-pulse" style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;letter-spacing:0.04em;color:#fff;">${value || placeholder}</div>
+    `;
+    // remove right border on last
+    el.replaceWith(node);
+  });
+  // strip last border
+  const stats = document.querySelectorAll('.ug-pulse');
+  if (stats.length) {
+    const lastWrap = stats[stats.length - 1].parentElement;
+    if (lastWrap) lastWrap.style.borderRight = 'none';
+  }
+
+  // <Field label name type required placeholder>
+  document.querySelectorAll('Field').forEach(el => {
+    const label = el.getAttribute('label') || '';
+    const name = el.getAttribute('name') || '';
+    const type = el.getAttribute('type') || 'text';
+    const required = el.hasAttribute('required');
+    const placeholder = el.getAttribute('placeholder') || '';
+    const node = document.createElement('div');
+    node.style.marginBottom = '20px';
+    node.innerHTML = `
+      <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(201,204,209,0.7);letter-spacing:0.25em;margin-bottom:10px;">${label}${required ? ' <span style="color:#ff2a2a;">*</span>' : ''}</label>
+      <input type="${type}" name="${name}" ${required ? 'required' : ''} placeholder="${placeholder.replace(/"/g, '&quot;')}" style="width:100%;padding:14px 16px;background:rgba(0,0,0,0.4);border:0.5px solid rgba(255,255,255,0.12);color:#f5f6f7;font-size:14px;transition:border-color 0.15s, box-shadow 0.15s;"/>
+    `;
+    el.replaceWith(node);
+  });
+
+  // <Pillar n title body>
+  document.querySelectorAll('Pillar').forEach(el => {
+    const n = el.getAttribute('n') || '';
+    const title = el.getAttribute('title') || '';
+    const body = el.getAttribute('body') || '';
+    const node = document.createElement('div');
+    node.innerHTML = `
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#ff2a2a;letter-spacing:0.3em;margin-bottom:8px;">${n}</div>
+      <h3 style="font-size:22px;font-weight:700;margin:0 0 10px;letter-spacing:-0.01em;">${title}</h3>
+      <p style="font-size:14px;line-height:1.65;color:rgba(201,204,209,0.65);margin:0;">${body}</p>
+    `;
+    el.replaceWith(node);
+  });
+})();
+
+// ─── Live waitlist counter ────────────────────────────────────────────────
+fetch('/api/waitlist')
+  .then(r => r.ok ? r.json() : null)
+  .then(d => {
+    if (!d) return;
+    const el = document.getElementById('ug-counter');
+    if (el) el.textContent = d.count.toLocaleString();
+  })
+  .catch(() => { /* leave placeholder */ });
+
+// ─── Form submit ──────────────────────────────────────────────────────────
+const form = document.getElementById('apply-form');
+const errorBox = document.getElementById('apply-error');
+const successBox = document.getElementById('apply-success');
+const submitBtn = document.getElementById('apply-submit');
+
+function showError(msg) {
+  errorBox.textContent = '∕∕ ERROR · ' + msg;
+  errorBox.style.display = 'block';
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorBox.style.display = 'none';
+  const data = Object.fromEntries(new FormData(form).entries());
+  if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    showError('VALID EMAIL REQUIRED');
+    return;
+  }
+
+  submitBtn.disabled = true;
+  const original = submitBtn.textContent;
+  submitBtn.textContent = 'TRANSMITTING…';
+  submitBtn.style.opacity = '0.6';
+
+  try {
+    const res = await fetch('/api/apply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      showError(json.error || 'TRANSMISSION FAILED · TRY AGAIN');
+      submitBtn.disabled = false;
+      submitBtn.textContent = original;
+      submitBtn.style.opacity = '1';
+      return;
+    }
+    // Success
+    document.getElementById('apply-success-email').textContent = data.email;
+    form.style.display = 'none';
+    successBox.style.display = 'block';
+    successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch (err) {
+    showError('NETWORK ERROR · TRY AGAIN');
+    submitBtn.disabled = false;
+    submitBtn.textContent = original;
+    submitBtn.style.opacity = '1';
+  }
+});
+
+// Mobile users — middleware should have routed them to /m. Belt-and-suspenders client check.
+if (window.matchMedia('(max-width: 720px)').matches && !location.search.includes('desktop')) {
+  // location.replace('/m');  // uncomment if middleware isn't catching them
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Underground Gallery · Invite</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #05060a; overflow: hidden; min-height: 100vh; }
+  * { box-sizing: border-box; }
+  @keyframes aiBlink { 50% { opacity: 0; } }
+  @keyframes aiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+  @keyframes aiSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes aiScanLine { 0%, 100% { top: 15%; } 50% { top: 85%; } }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#05060a">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#05060a"/>
+    <path d="M600 200 L880 620 L320 620 Z" stroke="#ff2a2a" stroke-width="14" fill="none"/>
+    <path d="M440 500 L620 500 L540 640" stroke="#ff2a2a" stroke-width="16" fill="none" stroke-linecap="square"/>
+    <circle cx="600" cy="200" r="10" fill="#ff2a2a"/>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="brand.jsx"></script>
+<script type="text/babel" src="screens-entry.jsx"></script>
+<script type="text/babel" src="screens-unlock.jsx"></script>
+<script type="text/babel" src="car-show.jsx"></script>
+<script type="text/babel" src="build-garage.jsx"></script>
+
+<script type="text/babel">
+const TWEAKS = { accent: 'red', texture: 'carbon', invitedBy: 'R_APEX', statusProminence: 'gamified' };
+const FLOW = [ScreenLanding, ScreenInvite, ScreenCode, ScreenSMS, ScreenIdentity, ScreenUnlock, ScreenHome, ScreenSecret, ScreenCarShow, ScreenBuildPage, ScreenGarage, ScreenQR, ScreenShop];
+
+function App() {
+  const [idx, setIdx] = React.useState(0);
+  const accent = ACCENTS.red;
+  const Current = FLOW[idx];
+  const go = (n) => setIdx(Math.max(0, Math.min(FLOW.length - 1, n)));
+
+  React.useEffect(() => {
+    const k = (e) => {
+      if (e.key === 'ArrowRight') go(idx + 1);
+      if (e.key === 'ArrowLeft') go(idx - 1);
+    };
+    window.addEventListener('keydown', k);
+    return () => window.removeEventListener('keydown', k);
+  }, [idx]);
+
+  return (
+    <div
+      onClick={(e) => {
+        // don't advance if they clicked a button (prev/next/dots)
+        if (e.target.closest('button')) return;
+        go((idx + 1) % FLOW.length);
+      }}
+      style={{
+      minHeight: '100vh', width: '100vw',
+      background: '#05060a',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 24, position: 'relative',
+      fontFamily: '"Inter Tight", system-ui, sans-serif',
+      cursor: 'pointer',
+      userSelect: 'none',
+    }}>
+      {/* ambient glow */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse at 50% 40%, rgba(255,42,42,0.08) 0%, transparent 60%)',
+        pointerEvents: 'none',
+      }}/>
+
+      {/* nav hint top */}
+      <div style={{
+        position: 'fixed', top: 20, left: 24,
+        fontFamily: '"JetBrains Mono", monospace', fontSize: 10,
+        color: 'rgba(201,204,209,0.45)', letterSpacing: '0.24em',
+      }}>
+        UNDERGROUND GALLERY · INVITE PREVIEW
+      </div>
+      <div style={{
+        position: 'fixed', top: 20, right: 24,
+        fontFamily: '"JetBrains Mono", monospace', fontSize: 10,
+        color: 'rgba(201,204,209,0.45)', letterSpacing: '0.22em',
+      }}>
+        SCREEN {String(idx + 1).padStart(2, '0')} / {String(FLOW.length).padStart(2, '0')} · TAP TO ADVANCE
+      </div>
+
+      {/* device */}
+      <div style={{ filter: 'drop-shadow(0 40px 60px rgba(255,42,42,0.12))' }}>
+        <IOSDevice dark>
+          <div style={{ width: '100%', height: '100%', overflow: 'auto' }} className="no-scrollbar">
+            <Current
+              tweaks={TWEAKS}
+              accent={accent}
+              onNext={() => go(idx + 1)}
+              onBack={() => go(idx - 1)}
+              onSecret={() => go(7)}
+            />
+          </div>
+        </IOSDevice>
+      </div>
+
+      {/* next/prev buttons */}
+      <button onClick={() => go(idx - 1)} disabled={idx === 0} style={{
+        position: 'fixed', left: 24, top: '50%', transform: 'translateY(-50%)',
+        appearance: 'none', width: 44, height: 44,
+        background: 'rgba(255,255,255,0.04)',
+        border: '0.5px solid rgba(255,255,255,0.15)',
+        color: idx === 0 ? 'rgba(201,204,209,0.2)' : '#f5f6f7',
+        cursor: idx === 0 ? 'default' : 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <svg width="14" height="14" viewBox="0 0 14 14"><path d="M9 2L3 7l6 5" stroke="currentColor" strokeWidth="1.8" fill="none"/></svg>
+      </button>
+      <button onClick={() => go(idx + 1)} disabled={idx === FLOW.length - 1} style={{
+        position: 'fixed', right: 24, top: '50%', transform: 'translateY(-50%)',
+        appearance: 'none', width: 44, height: 44,
+        background: idx === FLOW.length - 1 ? 'rgba(255,255,255,0.04)' : accent.primary,
+        border: `0.5px solid ${idx === FLOW.length - 1 ? 'rgba(255,255,255,0.15)' : accent.primary}`,
+        color: idx === FLOW.length - 1 ? 'rgba(201,204,209,0.2)' : '#05060a',
+        cursor: idx === FLOW.length - 1 ? 'default' : 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: idx === FLOW.length - 1 ? 'none' : `0 0 24px rgba(255,42,42,0.3)`,
+      }}>
+        <svg width="14" height="14" viewBox="0 0 14 14"><path d="M5 2l6 5-6 5" stroke="currentColor" strokeWidth="1.8" fill="none"/></svg>
+      </button>
+
+      {/* progress dots bottom */}
+      <div style={{
+        position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+        display: 'flex', gap: 6,
+      }}>
+        {FLOW.map((_, i) => (
+          <button key={i} onClick={() => go(i)} style={{
+            appearance: 'none', border: 'none', padding: 0, cursor: 'pointer',
+            width: i === idx ? 24 : 6, height: 4,
+            background: i === idx ? accent.primary : 'rgba(255,255,255,0.2)',
+            transition: 'all 0.2s',
+          }}/>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
