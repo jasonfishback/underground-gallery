@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="robots" content="noindex,nofollow,nosnippet,noarchive"/>
+<title>Underground Gallery · Onboarding</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #1a1613; overflow: hidden; }
+  * { box-sizing: border-box; }
+  @keyframes aiBlink { 50% { opacity: 0; } }
+  @keyframes aiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+  @keyframes aiSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes aiScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#05060a">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#05060a"/>
+    <path d="M600 200 L880 620 L320 620 Z" stroke="#ff2a2a" stroke-width="14" fill="none" stroke-linejoin="miter"/>
+    <path d="M440 500 L620 500 L540 640" stroke="#ff2a2a" stroke-width="16" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+    <circle cx="600" cy="200" r="10" fill="#ff2a2a"/>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="brand.jsx"></script>
+<script type="text/babel" src="screens-entry.jsx"></script>
+<script type="text/babel" src="screens-unlock.jsx"></script>
+<script type="text/babel" src="login-approval.jsx"></script>
+<script type="text/babel" src="role-chooser.jsx"></script>
+<script type="text/babel" src="store.jsx"></script>
+<script type="text/babel" src="forgot-password.jsx"></script>
+<script type="text/babel" src="boot-sequence.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "red",
+  "statusProminence": "gamified",
+  "texture": "carbon",
+  "invitedBy": "R_APEX",
+  "modMode": true,
+  "replayBoot": false
+}/*EDITMODE-END*/;
+
+const SCREENS = [
+  { id: 'invite',   Comp: ScreenInvite,   label: '01 · INVITE RECEIVED' },
+  { id: 'code',     Comp: ScreenCode,     label: '02 · CONFIRM CODE' },
+  { id: 'sms',      Comp: ScreenSMS,      label: '03 · SMS VERIFY' },
+  { id: 'identity', Comp: ScreenIdentity, label: '04 · IDENTITY' },
+  { id: 'unlock',   Comp: ScreenUnlock,   label: '05 · RANK UNLOCK' },
+  { id: 'home',     Comp: ScreenHome,     label: '06 · GRID ACCESS' },
+  { id: 'secret',   Comp: ScreenSecret,   label: '07 · SECRET MEET' },
+];
+
+// ─── Interactive prototype: a single iOS frame wired through the flow ───
+function Prototype({ tweaks, setTweak }) {
+  const [idx, setIdx] = React.useState(0);
+  const accent = ACCENTS[tweaks.accent] || ACCENTS.red;
+  const go = (n) => setIdx(Math.max(0, Math.min(SCREENS.length - 1, n)));
+  const Current = SCREENS[idx].Comp;
+
+  // Keyboard nav
+  React.useEffect(() => {
+    const k = (e) => {
+      if (e.key === 'ArrowRight') go(idx + 1);
+      if (e.key === 'ArrowLeft') go(idx - 1);
+    };
+    window.addEventListener('keydown', k);
+    return () => window.removeEventListener('keydown', k);
+  }, [idx]);
+
+  const onSecret = idx === 5 ? () => go(6) : undefined;
+
+  return (
+    <div style={{
+      display: 'flex', gap: 40, alignItems: 'center', justifyContent: 'center',
+      minHeight: '100vh', padding: '40px 20px', position: 'relative',
+    }}>
+      {/* Left: flow stepper */}
+      <FlowStepper screens={SCREENS} idx={idx} onJump={go} accent={accent}/>
+
+      {/* Center: device */}
+      <div data-screen-label={`${String(idx+1).padStart(2,'0')} ${SCREENS[idx].label.split(' · ')[1]}`}>
+        <IOSDevice dark={true}>
+          <div style={{ width: '100%', height: '100%', overflow: 'auto' }} className="no-scrollbar">
+            <Current
+              tweaks={tweaks}
+              accent={accent}
+              onNext={() => go(idx + 1)}
+              onBack={() => go(idx - 1)}
+              onSecret={onSecret}
+            />
+          </div>
+        </IOSDevice>
+      </div>
+
+      {/* Right: brief */}
+      <FlowBrief idx={idx} screens={SCREENS} accent={accent}/>
+
+      <TweaksPanel title="TWEAKS · UG">
+        <TweakSection label="Accent"/>
+        <TweakRadio label="Color" value={tweaks.accent}
+          options={[{value:'red',label:'Red'},{value:'blue',label:'Blue'},{value:'cyan',label:'Cyan'},{value:'silver',label:'Silver'}]}
+          onChange={(v)=>setTweak('accent', v)}/>
+        <TweakSection label="Surface"/>
+        <TweakRadio label="Texture" value={tweaks.texture}
+          options={[{value:'flat',label:'Flat'},{value:'carbon',label:'Carbon'},{value:'grain',label:'Grain'}]}
+          onChange={(v)=>setTweak('texture', v)}/>
+        <TweakSection label="Status system"/>
+        <TweakRadio label="Prominence" value={tweaks.statusProminence}
+          options={[{value:'subtle',label:'Subtle'},{value:'core',label:'Core'},{value:'gamified',label:'Gamified'}]}
+          onChange={(v)=>setTweak('statusProminence', v)}/>
+        <TweakSection label="Content"/>
+        <TweakText label="Invited by" value={tweaks.invitedBy} onChange={(v)=>setTweak('invitedBy', v)}/>
+        <TweakSection label="Navigation"/>
+        <TweakButton label="← PREV SCREEN" secondary onClick={() => go(idx - 1)}/>
+        <TweakButton label="NEXT SCREEN →" onClick={() => go(idx + 1)}/>
+      </TweaksPanel>
+    </div>
+  );
+}
+
+function FlowStepper({ screens, idx, onJump, accent }) {
+  return (
+    <div style={{
+      width: 260, flexShrink: 0,
+      fontFamily: '"JetBrains Mono", monospace', color: '#f5f6f7',
+    }}>
+      <AILockup accent={accent.primary} size={40}/>
+      <div style={{ marginTop: 26 }}>
+        <Mono size={9.5} color={accent.primary} spacing="0.3em">∕∕ ONBOARDING FLOW</Mono>
+        <div style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 26, fontWeight: 700,
+          color: '#f5f6f7', margin: '8px 0 4px', letterSpacing: '-0.02em', lineHeight: 1.05 }}>
+          Invite → Ignition.
+        </div>
+        <Mono size={10} color="rgba(201,204,209,0.45)" spacing="0.05em">
+          7 screens · invite-only auth · gamified rank reveal
+        </Mono>
+      </div>
+      <Hairline color="rgba(255,255,255,0.12)" style={{ margin: '24px 0 20px' }}/>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {screens.map((s, i) => (
+          <button key={s.id} onClick={() => onJump(i)} style={{
+            appearance: 'none', background: 'transparent', border: 'none',
+            padding: '10px 12px',
+            textAlign: 'left', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 12,
+            borderLeft: `2px solid ${i === idx ? accent.primary : 'transparent'}`,
+            background: i === idx ? 'rgba(255,255,255,0.03)' : 'transparent',
+            transition: 'all 0.15s',
+          }}>
+            <div style={{
+              width: 18, height: 18, flexShrink: 0,
+              border: `1px solid ${i <= idx ? accent.primary : 'rgba(255,255,255,0.2)'}`,
+              background: i < idx ? accent.primary : 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {i < idx && <svg width="9" height="7"><path d="M1 3.5L3.5 6 8 1" fill="none" stroke="#05060a" strokeWidth="1.6"/></svg>}
+              {i === idx && <div style={{ width: 6, height: 6, background: accent.primary }}/>}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Mono size={10} color={i === idx ? accent.primary : 'rgba(201,204,209,0.65)'} weight={i === idx ? 700 : 500}>
+                {s.label}
+              </Mono>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FlowBrief({ idx, screens, accent }) {
+  const briefs = [
+    { title: 'Invite received', body: 'QR invite delivered via share sheet. Single-use. Lineage baked in.' },
+    { title: 'Confirm code', body: 'Pre-filled from the deep link. Manual entry works too.' },
+    { title: 'SMS verify', body: 'Auto-advances on the 6th digit. Resend cooldown for abuse prevention.' },
+    { title: 'Identity', body: 'Callsign, region, primary drive. Frames your first feed post.' },
+    { title: 'Rank unlock', body: 'Tachometer sweep to RANK 01. Perks animate in. First taste of the gamified loop.' },
+    { title: 'Grid access', body: 'Home feed with tabs, plus a live Secret Meet card with live countdown.' },
+    { title: 'Secret meet', body: 'Location redacted, coords scrambled. Pulsing timer. Unlock at convergence.' },
+  ];
+  const b = briefs[idx];
+  return (
+    <div style={{ width: 240, flexShrink: 0 }}>
+      <Mono size={9.5} color={accent.primary} spacing="0.3em">∕∕ CONTEXT</Mono>
+      <div style={{
+        fontFamily: '"Inter Tight", sans-serif', fontSize: 20, fontWeight: 700,
+        color: '#f5f6f7', margin: '8px 0 10px', letterSpacing: '-0.02em', lineHeight: 1.1,
+      }}>{b.title}</div>
+      <p style={{
+        fontFamily: '"JetBrains Mono", monospace', fontSize: 11, lineHeight: 1.65,
+        color: 'rgba(201,204,209,0.65)', margin: 0, letterSpacing: '0.01em',
+      }}>{b.body}</p>
+
+      <Hairline color="rgba(255,255,255,0.1)" style={{ margin: '20px 0' }}/>
+
+      <Mono size={9.5} color="rgba(201,204,209,0.45)" spacing="0.22em">SHORTCUTS</Mono>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
+        <KB k="←  →" label="Prev / next screen"/>
+        <KB k="TAB" label="Open tweaks"/>
+      </div>
+    </div>
+  );
+}
+function KB({ k, label }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{
+        fontFamily: '"JetBrains Mono", monospace', fontSize: 9.5, fontWeight: 600,
+        padding: '3px 7px', background: 'rgba(255,255,255,0.05)',
+        border: '0.5px solid rgba(255,255,255,0.12)', color: '#f5f6f7',
+        letterSpacing: '0.1em',
+      }}>{k}</div>
+      <Mono size={9.5} color="rgba(201,204,209,0.55)" spacing="0.08em">{label}</Mono>
+    </div>
+  );
+}
+
+// ─── Mini thumbnails for design canvas variants ─────────────────────────
+function VariantTuner({ tweaks }) {
+  const accent = ACCENTS.red;
+  const t = { ...tweaks, accent: 'red', texture: 'carbon' };
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ transform: 'scale(0.78)', transformOrigin: 'center', width: 402, height: 874 }}>
+        <IOSDevice dark>
+          <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+            <ScreenInvite tweaks={t} accent={accent} onNext={()=>{}}/>
+          </div>
+        </IOSDevice>
+      </div>
+    </div>
+  );
+}
+
+function VariantStealth({ tweaks }) {
+  // Monochrome silver accent + flat
+  const accent = ACCENTS.silver;
+  const t = { ...tweaks, accent: 'silver', texture: 'flat' };
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ transform: 'scale(0.78)', transformOrigin: 'center', width: 402, height: 874 }}>
+        <IOSDevice dark>
+          <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+            <ScreenUnlock tweaks={t} accent={accent} onNext={()=>{}} onBack={()=>{}}/>
+          </div>
+        </IOSDevice>
+      </div>
+    </div>
+  );
+}
+
+function VariantIgnition({ tweaks }) {
+  const accent = ACCENTS.red;
+  const t = { ...tweaks, accent: 'red', texture: 'grain' };
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ transform: 'scale(0.78)', transformOrigin: 'center', width: 402, height: 874 }}>
+        <IOSDevice dark>
+          <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+            <ScreenSecret tweaks={t} accent={accent} onBack={()=>{}}/>
+          </div>
+        </IOSDevice>
+      </div>
+    </div>
+  );
+}
+
+// ─── Mode switcher between Prototype and Canvas ─────────────────────────
+function App() {
+  const [mode, setMode] = React.useState('prototype'); // 'prototype' | 'canvas'
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [booted, setBooted] = React.useState(false);
+  const accent = ACCENTS[tweaks.accent] || ACCENTS.red;
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      ...surfaceBg('grain', '#0a0b10'),
+      position: 'relative',
+    }}>
+      {!booted && <BootSequence accent={accent} texture={tweaks.texture} onComplete={() => setBooted(true)} force={tweaks.replayBoot}/>}
+      {/* toggle */}
+      <div style={{
+        position: 'fixed', top: 18, left: '50%', transform: 'translateX(-50%)',
+        display: 'flex', gap: 2, padding: 3,
+        background: 'rgba(10,11,16,0.8)', backdropFilter: 'blur(16px)',
+        border: '0.5px solid rgba(255,255,255,0.1)',
+        zIndex: 100,
+      }}>
+        {[{id:'prototype',l:'LOGIN · STATUS'},{id:'canvas',l:'VARIANTS · 3'}].map(o => (
+          <button key={o.id} onClick={()=>setMode(o.id)} style={{
+            appearance: 'none', background: mode === o.id ? accent.primary : 'transparent',
+            color: mode === o.id ? '#05060a' : 'rgba(201,204,209,0.7)',
+            border: 'none', padding: '8px 16px', cursor: 'pointer',
+            fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: 10,
+            letterSpacing: '0.2em',
+          }}>{o.l}</button>
+        ))}
+      </div>
+
+      {mode === 'prototype' && <LoginApproval tweaks={tweaks} setTweak={setTweak}/>}
+      {mode === 'canvas' && (
+        <DesignCanvas>
+          <DCSection id="directions" title="Visual Directions" subtitle="Three aesthetic leans — same flow, different voice">
+            <DCArtboard id="tuner" label="A · TUNER · carbon + red" width={402} height={874}>
+              <VariantTuner tweaks={tweaks}/>
+            </DCArtboard>
+            <DCArtboard id="stealth" label="B · STEALTH · mono + silver" width={402} height={874}>
+              <VariantStealth tweaks={tweaks}/>
+            </DCArtboard>
+            <DCArtboard id="ignition" label="C · IGNITION · grain + poster" width={402} height={874}>
+              <VariantIgnition tweaks={tweaks}/>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="flow" title="Onboarding Flow · A (Tuner)" subtitle="The seven hero screens in order">
+            {SCREENS.map((s) => (
+              <DCArtboard key={s.id} id={s.id} label={s.label} width={402} height={874}>
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IOSDevice dark>
+                    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+                      <s.Comp tweaks={tweaks} accent={accent} onNext={()=>{}} onBack={()=>{}} onSecret={()=>{}}/>
+                    </div>
+                  </IOSDevice>
+                </div>
+              </DCArtboard>
+            ))}
+          </DCSection>
+        </DesignCanvas>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

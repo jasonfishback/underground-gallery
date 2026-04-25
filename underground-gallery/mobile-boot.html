@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow,nosnippet,noarchive">
+<title>UG · Mobile Boot Preview</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+
+<style>
+  html, body { margin: 0; padding: 0; background: #0d0a08; overflow: hidden; min-height: 100vh; }
+  * { box-sizing: border-box; }
+  @keyframes aiBlink { 50% { opacity: 0; } }
+  @keyframes aiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+  @keyframes aiSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes aiScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="brand.jsx"></script>
+<script type="text/babel" src="screens-entry.jsx"></script>
+<script type="text/babel" src="screens-unlock.jsx"></script>
+<script type="text/babel" src="boot-sequence.jsx"></script>
+
+<script type="text/babel">
+const ACCENT = (window.ACCENTS && window.ACCENTS.red) || { primary: '#ff2a2a', soft: 'rgba(255,42,42,0.32)' };
+
+function MobileBootPreview() {
+  const [booted, setBooted] = React.useState(false);
+  const [replayKey, setReplayKey] = React.useState(0);
+
+  // Always start fresh in this preview
+  React.useEffect(() => {
+    try { sessionStorage.removeItem('ai_boot_played'); } catch (e) {}
+  }, []);
+
+  const replay = () => {
+    try { sessionStorage.removeItem('ai_boot_played'); } catch (e) {}
+    setBooted(false);
+    setReplayKey(k => k + 1);
+  };
+
+  // Pretend "tweaks" object
+  const tweaks = { texture: 'carbon', accent: 'red', invitedBy: 'R_APEX' };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'radial-gradient(ellipse at center, #1a1410 0%, #08070a 80%)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      padding: 32, gap: 24, position: 'relative',
+      fontFamily: '"Inter Tight", system-ui, sans-serif',
+    }}>
+      {/* Backdrop pattern */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.4,
+        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,42,42,0.12) 1px, transparent 0)`,
+        backgroundSize: '32px 32px',
+      }}/>
+
+      {/* Title */}
+      <div style={{ position: 'relative', textAlign: 'center', maxWidth: 680 }}>
+        <div style={{
+          fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: ACCENT.primary,
+          letterSpacing: '0.4em', fontWeight: 700, marginBottom: 12,
+        }}>∕∕ MOBILE BOOT · DEVICE PREVIEW</div>
+        <h1 style={{
+          fontFamily: '"Inter Tight", sans-serif', fontSize: 'clamp(28px, 4vw, 44px)',
+          fontWeight: 800, color: '#f5f6f7', letterSpacing: '-0.02em', margin: 0, lineHeight: 1,
+        }}>
+          What members see <span style={{ color: ACCENT.primary }}>on their phone</span>
+        </h1>
+        <p style={{
+          fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: 'rgba(201,204,209,0.6)',
+          margin: '14px auto 0', maxWidth: 480, lineHeight: 1.6,
+        }}>
+          The full intro sequence rendered inside an iPhone 14 Pro. Tap REPLAY anytime to
+          scrub through it again. After the boot completes, the landing flow opens.
+        </p>
+      </div>
+
+      {/* Device */}
+      <div style={{
+        position: 'relative',
+        transform: 'scale(min(1, calc((100vh - 280px) / 874)))',
+        transformOrigin: 'top center',
+      }}>
+        <IOSDevice dark>
+          <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', background: '#05060a' }}>
+            {/* Boot overlay (contained inside the device) */}
+            {!booted && (
+              <BootSequence
+                key={replayKey}
+                accent={ACCENT}
+                texture="carbon"
+                contained
+                force
+                onComplete={() => setBooted(true)}
+              />
+            )}
+
+            {/* Underlying app — what they see after boot */}
+            <div style={{ width: '100%', height: '100%', overflow: 'auto' }} className="no-scrollbar">
+              <ScreenLanding tweaks={tweaks} accent={ACCENT} onNext={() => {}}/>
+            </div>
+          </div>
+        </IOSDevice>
+      </div>
+
+      {/* Controls */}
+      <div style={{
+        position: 'relative',
+        display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center',
+      }}>
+        <button onClick={replay} style={{
+          appearance: 'none', cursor: 'pointer',
+          padding: '12px 22px',
+          background: ACCENT.primary, border: `1px solid ${ACCENT.primary}`,
+          color: '#05060a', fontFamily: '"JetBrains Mono", monospace',
+          fontSize: 11, fontWeight: 700, letterSpacing: '0.3em',
+          boxShadow: `0 0 20px ${ACCENT.soft}`,
+        }}>
+          ▸ REPLAY BOOT
+        </button>
+
+        <a href="index.html" style={{
+          appearance: 'none', cursor: 'pointer', textDecoration: 'none',
+          padding: '12px 22px',
+          background: 'transparent', border: '1px solid rgba(255,255,255,0.2)',
+          color: 'rgba(201,204,209,0.85)', fontFamily: '"JetBrains Mono", monospace',
+          fontSize: 11, fontWeight: 700, letterSpacing: '0.3em',
+        }}>
+          ← DESKTOP VIEW
+        </a>
+
+        <div style={{
+          fontFamily: '"JetBrains Mono", monospace', fontSize: 9.5,
+          color: 'rgba(201,204,209,0.4)', letterSpacing: '0.22em',
+          paddingLeft: 16, borderLeft: '0.5px solid rgba(255,255,255,0.1)',
+        }}>
+          STATUS: <span style={{ color: ACCENT.primary }}>{booted ? 'LANDED' : 'BOOTING…'}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<MobileBootPreview/>);
+</script>
+</body>
+</html>
