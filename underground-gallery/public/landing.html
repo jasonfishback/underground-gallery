@@ -348,7 +348,7 @@ form.addEventListener('submit', async (e) => {
 
 // Mobile users — middleware should have routed them to /m. Belt-and-suspenders client check.
 if (window.matchMedia('(max-width: 720px)').matches && !location.search.includes('desktop')) {
-  // location.replace('/m');  // uncomment if middleware isn't catching them
+  location.replace('/m');
 }
 </script>
 
