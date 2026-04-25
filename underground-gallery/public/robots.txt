@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /flow
+Disallow: /mobile-boot
+Disallow: /moderator
+Disallow: /api/
+Allow: /
+
+Sitemap: https://undergroundgallery.ai/sitemap.xml
