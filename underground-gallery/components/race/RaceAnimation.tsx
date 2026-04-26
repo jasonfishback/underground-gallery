@@ -358,6 +358,7 @@ function Lane({
           transition: 'none',
           textShadow: isLeading ? `0 0 12px ${colors.accent}` : 'none',
           willChange: 'left',
+          transform: 'scaleX(-1)',
         }}
       >
         🏎️

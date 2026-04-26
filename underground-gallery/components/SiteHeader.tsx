@@ -53,6 +53,7 @@ export async function SiteHeader() {
         <NavLink href="/me">GARAGE</NavLink>
         <NavLink href="/race">RACE</NavLink>
         <NavLink href="/members">MEMBERS</NavLink>
+        <NavLink href="/invites">INVITES</NavLink>
         {ctx.isModerator && <NavLink href="/admin">ADMIN</NavLink>}
         <NotificationBell notifications={notifs} />
       </nav>

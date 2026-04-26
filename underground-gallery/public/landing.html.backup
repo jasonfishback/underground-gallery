@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>Underground Gallery Â· Access Restricted</title>
+<title>Underground Gallery · Access Restricted</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="description" content="Members-only. Invitation required."/>
 <meta name="robots" content="noindex,nofollow"/>
@@ -36,13 +36,13 @@
   @keyframes ugRingSpin { to { transform: rotate(360deg); } }
   @keyframes ugScanSweep { 0% { transform: translateY(-8px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(94px); opacity: 0; } }
 
-  /* â”€â”€â”€ Boot intro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-  /* Reality-glitch flicker â€” total ~4.5s.
+  /* ─── Boot intro ─────────────────────────────────────────────── */
+  /* Reality-glitch flicker — total ~4.5s.
      Each element runs its OWN flicker timeline, intentionally desynced
      so nothing pulses in unison. The container fades the whole scene
      in and out, but inside it everything has its own rhythm. */
 
-  /* Master container â€” softer envelope, just bringing the scene in/out */
+  /* Master container — softer envelope, just bringing the scene in/out */
   @keyframes ugBootEnvelope {
       0%   { opacity: 0;    }
       6%   { opacity: 1;    }
@@ -50,7 +50,7 @@
     100%   { opacity: 0;    }
   }
 
-  /* Logo: the "main bulb" â€” sputters on, holds, dies hard */
+  /* Logo: the "main bulb" — sputters on, holds, dies hard */
   @keyframes ugBootLogo {
       0%   { opacity: 0;    }
       4%   { opacity: 0.85; }
@@ -60,7 +60,7 @@
      14%   { opacity: 1;    }
      17%   { opacity: 0.7;  }
      20%   { opacity: 1;    }
-     /* hold â€” but with TWO mid-show micro-dips */
+     /* hold — but with TWO mid-show micro-dips */
      45%   { opacity: 1;    }
      46%   { opacity: 0.4;  }   /* tiny flicker mid-hold */
      47%   { opacity: 1;    }
@@ -77,7 +77,7 @@
     100%   { opacity: 0;    }
   }
 
-  /* Wordmark: lags behind â€” comes on AFTER logo stabilizes,
+  /* Wordmark: lags behind — comes on AFTER logo stabilizes,
      and dies BEFORE logo dies (different rhythm entirely) */
   @keyframes ugBootWordmark {
       0%   { opacity: 0;    }
@@ -132,7 +132,7 @@
       0%   { opacity: 0; transform: translateY(-100%); }
       8%   { opacity: 0.6; transform: translateY(20vh); }
      16%   { opacity: 0; transform: translateY(60vh); }
-     /* dark hold â€” bar invisible during steady-state */
+     /* dark hold — bar invisible during steady-state */
      74%   { opacity: 0; transform: translateY(60vh); }
      78%   { opacity: 0.7; transform: translateY(30vh); }
      86%   { opacity: 0.3; transform: translateY(80vh); }
@@ -140,7 +140,7 @@
     100%   { opacity: 0; transform: translateY(110vh); }
   }
 
-  /* Logo's slow physical pulse â€” kept smooth so it grounds the chaos */
+  /* Logo's slow physical pulse — kept smooth so it grounds the chaos */
   @keyframes ugBootLogoPulse {
       0%   { transform: scale(0.94); }
      20%   { transform: scale(1.01); }
@@ -189,7 +189,7 @@
     will-change: opacity;
   }
 
-  /* Glitch sweep bar â€” sits behind the boot content, sweeps vertically */
+  /* Glitch sweep bar — sits behind the boot content, sweeps vertically */
   .ug-boot-glitch {
     position: absolute; left: 0; right: 0;
     height: 2px;
@@ -205,7 +205,7 @@
   .ug-stage-hidden { opacity: 0; }
   .ug-stage-revealed { animation: ugRevealStage 0.6s ease-out 0s forwards; }
 
-  /* Honor user's reduced-motion preference â€” skip the show entirely */
+  /* Honor user's reduced-motion preference — skip the show entirely */
   @media (prefers-reduced-motion: reduce) {
     #ug-boot { display: none !important; animation: none !important; }
     .ug-stage-hidden { opacity: 1 !important; }
@@ -257,7 +257,7 @@
     text-transform: uppercase; font-weight: 700;
     transition: background 0.3s, border-color 0.3s, color 0.3s;
   }
-  /* Granted state â€” flipped from red restricted to green granted.
+  /* Granted state — flipped from red restricted to green granted.
      The transition animates color + bg + border so the change feels
      like a real unlock, not a swap. */
   .ug-restricted-strip.granted {
@@ -430,7 +430,7 @@
 </head>
 <body>
 
-<!-- â”€â”€â”€ Boot intro overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+<!-- ─── Boot intro overlay ──────────────────────────────────────────
      Plays once per browser session. Tap anywhere to skip.
      Hidden entirely if user prefers reduced motion. -->
 <div id="ug-boot" aria-hidden="true">
@@ -443,7 +443,7 @@
       <path d="M25 15 L15 15 L15 27 L25 27 L25 22 L20 22" stroke="#ff2a2a" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
     </svg>
     <div class="ug-boot-wordmark">
-      UNDERGROUND<span style="color: #ff2a2a; font-weight: 900; padding: 0 6px;">âˆ•âˆ•</span>GALLERY
+      UNDERGROUND<span style="color: #ff2a2a; font-weight: 900; padding: 0 6px;">∕∕</span>GALLERY
     </div>
     <div class="ug-boot-line">
       <span class="ug-loading-dot ug-blink"></span>
@@ -472,7 +472,7 @@
         <path d="M25 15 L15 15 L15 27 L25 27 L25 22 L20 22" stroke="#ff2a2a" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
       </svg>
       <div style="display: flex; flex-direction: column; gap: 2px;">
-        <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; letter-spacing: 0.18em;">UNDERGROUND<span style="color: #ff2a2a; padding: 0 4px; font-weight: 900;">âˆ•âˆ•</span>GALLERY</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; letter-spacing: 0.18em;">UNDERGROUND<span style="color: #ff2a2a; padding: 0 4px; font-weight: 900;">∕∕</span>GALLERY</div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.3em; color: rgba(201,204,209,0.4); text-transform: uppercase;">MEMBERS // EST. MMXXVI</div>
       </div>
     </div>
@@ -521,12 +521,12 @@
     <div id="ug-state" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px;">
 
       <div id="state-loading" class="ug-fade-4" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(201,204,209,0.4); letter-spacing: 0.3em; text-transform: uppercase;">
-        <span class="ug-loading-dot ug-blink"></span> CHECKING CREDENTIALSâ€¦
+        <span class="ug-loading-dot ug-blink"></span> CHECKING CREDENTIALS…
       </div>
 
       <div id="state-signedin" hidden class="ug-fade-in" style="display: none; flex-direction: column; align-items: center; gap: 14px; width: 100%;">
         <a id="enter-link" href="/garage" class="ug-enter-btn">
-          ENTER <span style="font-size: 18px;">â†’</span>
+          ENTER <span style="font-size: 18px;">→</span>
         </a>
         <p id="signedin-as" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.4); letter-spacing: 0.25em; text-transform: uppercase; margin: 0;">
           SIGNED IN
@@ -536,30 +536,30 @@
 
       <div id="state-actions" hidden class="ug-actions ug-fade-in" style="display: none;">
         <button class="ug-action-btn" data-action="signin" type="button">
-          <span>SIGN IN</span><span class="arrow">â†’</span>
+          <span>SIGN IN</span><span class="arrow">→</span>
         </button>
         <button class="ug-action-btn" data-action="scan" type="button">
-          <span>SCAN INVITE CODE</span><span class="arrow">â†’</span>
+          <span>SCAN INVITE CODE</span><span class="arrow">→</span>
         </button>
         <button class="ug-action-btn" data-action="apply" type="button">
-          <span>REQUEST ACCESS</span><span class="arrow">â†’</span>
+          <span>REQUEST ACCESS</span><span class="arrow">→</span>
         </button>
       </div>
 
       <div id="panel-signin" hidden class="ug-panel ug-fade-in" style="display: none;">
-        <div class="ug-panel-label">âˆ•âˆ• SIGN IN â€” MAGIC LINK</div>
+        <div class="ug-panel-label">∕∕ SIGN IN — MAGIC LINK</div>
         <form id="signin-form" autocomplete="off" novalidate>
           <input type="email" name="email" id="signin-email" class="ug-input" placeholder="name@domain.com" required/>
           <div class="ug-panel-row">
-            <button type="submit" id="signin-submit" class="ug-panel-submit">SEND LINK â†’</button>
+            <button type="submit" id="signin-submit" class="ug-panel-submit">SEND LINK →</button>
           </div>
           <div id="signin-msg" class="ug-panel-msg"></div>
         </form>
-        <button class="ug-panel-back" data-action="back" type="button">â† BACK</button>
+        <button class="ug-panel-back" data-action="back" type="button">← BACK</button>
       </div>
 
       <div id="panel-scan" hidden class="ug-panel ug-fade-in" style="display: none;">
-        <div class="ug-panel-label">âˆ•âˆ• INVITE CODE</div>
+        <div class="ug-panel-label">∕∕ INVITE CODE</div>
         <form id="scan-form" autocomplete="off" novalidate>
           <div style="display: flex; gap: 8px;">
             <input type="text" name="code" id="scan-code" class="ug-input" placeholder="XXXX-XXXX-XXXX" required style="text-transform: uppercase; letter-spacing: 0.15em;"/>
@@ -571,19 +571,18 @@
             </button>
           </div>
           <div class="ug-panel-row">
-            <button type="submit" id="scan-submit" class="ug-panel-submit">REDEEM â†’</button>
+            <button type="submit" id="scan-submit" class="ug-panel-submit">REDEEM →</button>
           </div>
           <div id="scan-msg" class="ug-panel-msg"></div>
           <video id="scan-video" class="ug-scan-video" hidden playsinline muted></video>
-<canvas id="qr-canvas" hidden width="640" height="480"></canvas>
         </form>
-        <button class="ug-panel-back" data-action="back" type="button">â† BACK</button>
+        <button class="ug-panel-back" data-action="back" type="button">← BACK</button>
       </div>
     </div>
   </main>
 
   <footer class="ug-footer">
-    <div>Â© MMXXVI Â· UNDERGROUND GALLERY</div>
+    <div>© MMXXVI · UNDERGROUND GALLERY</div>
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
       <a href="/privacy">PRIVACY</a>
       <a href="/terms">TERMS</a>
@@ -595,7 +594,7 @@
 
 <script>
 (function () {
-  // â”€â”€â”€ Boot intro orchestration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Boot intro orchestration ────────────────────────────────────
   // Plays once per browser tab session. Skips on tap, on reduced-motion,
   // or for visitors who've already seen it this session.
   const boot = document.getElementById('ug-boot');
@@ -651,7 +650,7 @@
     .then(data => {
       if (data && data.user && (data.user.email || data.user.id)) {
         const label = document.getElementById('signedin-as');
-        if (data.user.email) label.textContent = 'SIGNED IN Â· ' + data.user.email;
+        if (data.user.email) label.textContent = 'SIGNED IN · ' + data.user.email;
         showOnly(state.signedin);
       } else {
         showOnly(state.actions);
@@ -675,7 +674,7 @@
     }
   });
 
-  // â”€â”€ ENTER button: play the unlock animation, THEN navigate â”€â”€â”€â”€â”€â”€
+  // ── ENTER button: play the unlock animation, THEN navigate ──────
   // Subsequent taps skip the animation (impatient users go straight through).
   const enterLink = document.getElementById('enter-link');
   let enterTaps = 0;
@@ -722,7 +721,7 @@
 
   function showMsg(el, kind, text) {
     el.className = 'ug-panel-msg ' + kind;
-    el.textContent = (kind === 'error' ? 'âˆ•âˆ• ERROR Â· ' : 'âˆ•âˆ• ') + text;
+    el.textContent = (kind === 'error' ? '∕∕ ERROR · ' : '∕∕ ') + text;
     el.style.display = 'block';
   }
   function clearMsg(el) {
@@ -740,7 +739,7 @@
       return;
     }
     signinSubmit.disabled = true;
-    signinSubmit.textContent = 'SENDINGâ€¦';
+    signinSubmit.textContent = 'SENDING…';
     try {
       const csrfRes = await fetch('/api/auth/csrf', { credentials: 'include' });
       const csrf = csrfRes.ok ? (await csrfRes.json()).csrfToken : '';
@@ -759,13 +758,13 @@
         showMsg(signinMsg, 'success', 'CHECK YOUR EMAIL FOR THE LINK');
         document.getElementById('signin-email').value = '';
       } else {
-        showMsg(signinMsg, 'error', 'COULD NOT SEND LINK Â· TRY AGAIN');
+        showMsg(signinMsg, 'error', 'COULD NOT SEND LINK · TRY AGAIN');
       }
     } catch (_) {
-      showMsg(signinMsg, 'error', 'NETWORK ERROR Â· TRY AGAIN');
+      showMsg(signinMsg, 'error', 'NETWORK ERROR · TRY AGAIN');
     } finally {
       signinSubmit.disabled = false;
-      signinSubmit.textContent = 'SEND LINK â†’';
+      signinSubmit.textContent = 'SEND LINK →';
     }
   });
 
@@ -791,11 +790,11 @@
       return;
     }
     scanSubmit.disabled = true;
-    scanSubmit.textContent = 'OPENINGâ€¦';
+    scanSubmit.textContent = 'OPENING…';
     window.location.href = '/invite/' + encodeURIComponent(code);
   });
 
-  // Camera-based QR scanning (BarcodeDetector â€” Safari 17+, Chrome Android, Edge)
+  // Camera-based QR scanning (BarcodeDetector — Safari 17+, Chrome Android, Edge)
   const scanCameraBtn = document.getElementById('scan-camera-btn');
   const scanVideo = document.getElementById('scan-video');
   let scanStream = null;
@@ -867,134 +866,5 @@
 })();
 </script>
 
-
-<!-- BEGIN UG-QR-SCANNER -->
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<script>
-(function () {
-  // Pre-fill from ?code= URL param
-  try {
-    var sp = new URLSearchParams(window.location.search);
-    var preCode = sp.get('code');
-    if (preCode) {
-      var inputs = document.querySelectorAll('input');
-      for (var i = 0; i < inputs.length; i++) {
-        var id = (inputs[i].id || '').toLowerCase();
-        var name = (inputs[i].name || '').toLowerCase();
-        if (id.indexOf('invite') !== -1 || id.indexOf('code') !== -1 ||
-            name.indexOf('invite') !== -1 || name.indexOf('code') !== -1) {
-          inputs[i].value = preCode;
-          break;
-        }
-      }
-      if (window.history && window.history.replaceState) {
-        var clean = window.location.pathname + window.location.hash;
-        window.history.replaceState({}, document.title, clean);
-      }
-    }
-  } catch (_) {}
-
-  // Camera + QR decode loop
-  var video = document.querySelector('video');
-  var canvas = document.getElementById('qr-canvas');
-  if (!video || !canvas || !navigator.mediaDevices) return;
-  var ctx = canvas.getContext('2d');
-  var stream = null;
-  var rafId = null;
-
-  function findCodeInput() {
-    var inputs = document.querySelectorAll('input');
-    for (var i = 0; i < inputs.length; i++) {
-      var id = (inputs[i].id || '').toLowerCase();
-      var name = (inputs[i].name || '').toLowerCase();
-      if (id.indexOf('invite') !== -1 || id.indexOf('code') !== -1 ||
-          name.indexOf('invite') !== -1 || name.indexOf('code') !== -1) {
-        return inputs[i];
-      }
-    }
-    return null;
-  }
-
-  function extractCodeFromText(text) {
-    if (!text) return null;
-    var m = text.match(/\/i\/([A-Za-z0-9]+)/);
-    if (m) return m[1];
-    return text.trim().substring(0, 32);
-  }
-
-  function tickFrame() {
-    if (!stream) return;
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      try {
-        var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        if (typeof jsQR === 'function') {
-          var decoded = jsQR(imgData.data, imgData.width, imgData.height, {
-            inversionAttempts: 'dontInvert',
-          });
-          if (decoded && decoded.data) {
-            var code = extractCodeFromText(decoded.data);
-            if (code) {
-              var input = findCodeInput();
-              if (input) input.value = code;
-              stopCamera();
-              return;
-            }
-          }
-        }
-      } catch (_) {}
-    }
-    rafId = requestAnimationFrame(tickFrame);
-  }
-
-  function stopCamera() {
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
-    if (stream) {
-      stream.getTracks().forEach(function (t) { t.stop(); });
-      stream = null;
-    }
-    video.srcObject = null;
-  }
-
-  async function startCamera() {
-    if (stream) return;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-      });
-      video.srcObject = stream;
-      try { await video.play(); } catch (_) {}
-      rafId = requestAnimationFrame(tickFrame);
-    } catch (err) {
-      console.error('[QR] camera failed:', err);
-      alert('Camera unavailable. You can type the code instead.');
-    }
-  }
-
-  function isCameraButton(el) {
-    if (!el) return false;
-    if (el.tagName !== 'BUTTON' && el.tagName !== 'A') return false;
-    var hint = ((el.id || '') + ' ' + (el.className || '') + ' ' +
-                (el.textContent || '')).toLowerCase();
-    return hint.indexOf('scan') !== -1 || hint.indexOf('camera') !== -1;
-  }
-  document.querySelectorAll('button, a').forEach(function (el) {
-    if (isCameraButton(el)) {
-      el.addEventListener('click', function (e) {
-        e.preventDefault();
-        startCamera();
-      });
-    }
-  });
-
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden) stopCamera();
-  });
-})();
-</script>
-<!-- END UG-QR-SCANNER -->
 </body>
 </html>

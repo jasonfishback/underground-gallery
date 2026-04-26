@@ -1,30 +1,34 @@
 // app/v/[id]/page.tsx
-//
-// Public vehicle detail page. Anyone logged-in can view; only the owner
-// can edit (currently shown as the "Race This Car" button being a
-// challenge link if you're not the owner).
+// FULL FILE — replace the whole thing.
+// Includes existing layout + the new owner panel (photos + mods + hero).
 
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { vehicles, users, photos, vehicleSpecs, userCarMods } from '@/lib/db/schema';
+import {
+  vehicles,
+  users,
+  photos,
+  vehicleSpecs,
+  userCarMods,
+} from '@/lib/db/schema';
 import { CallsignWithBadge } from '@/components/AdminBadge';
-import { colors, fonts, styles } from '@/lib/design';
+import { colors, fonts } from '@/lib/design';
+import VehicleOwnerPanel from '@/components/vehicle/VehicleOwnerPanel';
 
 export const dynamic = 'force-dynamic';
 
-export default async function VehicleDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+type Params = { params: Promise<{ id: string }> };
+
+export default async function VehicleDetailPage({ params }: Params) {
   const { id } = await params;
   const session = await auth();
-  if (!session?.user?.id) redirect('/auth/signin');
+  if (!session?.user?.id) redirect(`/auth/signin?next=/v/${id}`);
 
-  const [v] = await db
+  // ---- Load vehicle + owner + spec + (optional) primary photo ----
+  const rows = await db
     .select({
       id: vehicles.id,
       userId: vehicles.userId,
@@ -33,6 +37,7 @@ export default async function VehicleDetailPage({
       model: vehicles.model,
       trim: vehicles.trim,
       isPrimary: vehicles.isPrimary,
+      primaryPhotoId: vehicles.primaryPhotoId,
       tireType: vehicles.tireType,
       driverSkill: vehicles.driverSkill,
       currentHpOverride: vehicles.currentHpOverride,
@@ -41,200 +46,358 @@ export default async function VehicleDetailPage({
       drivetrainOverride: vehicles.drivetrainOverride,
       transmissionOverride: vehicles.transmissionOverride,
       ownerCallsign: users.callsign,
-      ownerIsAdmin: users.isModerator,
+      ownerIsModerator: users.isModerator,
       ownerId: users.id,
-      thumbUrl: photos.urlFull,
-      stockHp: vehicleSpecs.stockHp,
-      stockTorque: vehicleSpecs.stockTorque,
-      curbWeight: vehicleSpecs.curbWeight,
+      heroUrl: photos.urlFull,
+      stockHp: vehicleSpecs.hpStock,
+      stockTorque: vehicleSpecs.torqueStock,
+      curbWeight: vehicleSpecs.weightStock,
       drivetrain: vehicleSpecs.drivetrain,
       transmission: vehicleSpecs.transmission,
       engine: vehicleSpecs.engine,
-      displacement: vehicleSpecs.displacement,
-      aspiration: vehicleSpecs.aspiration,
-      stockZeroToSixty: vehicleSpecs.zeroToSixty,
-      stockQuarterMile: vehicleSpecs.quarterMile,
     })
     .from(vehicles)
-    .leftJoin(users, eq(users.id, vehicles.userId))
+    .innerJoin(users, eq(users.id, vehicles.userId))
     .leftJoin(photos, eq(photos.id, vehicles.primaryPhotoId))
     .leftJoin(vehicleSpecs, eq(vehicleSpecs.id, vehicles.vehicleSpecId))
     .where(eq(vehicles.id, id))
     .limit(1);
 
+  const v = rows[0];
   if (!v) notFound();
 
-  const mods = await db.select().from(userCarMods).where(eq(userCarMods.vehicleId, id));
   const isOwner = v.userId === session.user.id;
 
-  // Use overrides if set, otherwise stock
-  const currentHp = v.currentHpOverride ?? v.stockHp;
-  const currentTorque = v.currentTorqueOverride ?? v.stockTorque;
-  const currentWeight = v.currentWeightOverride ?? v.curbWeight;
-  const drivetrain = v.drivetrainOverride ?? v.drivetrain;
-  const transmission = v.transmissionOverride ?? v.transmission;
+  // ---- Mods (used by both owner panel and read-only display) ----
+  const mods = await db
+    .select({
+      id: userCarMods.id,
+      name: userCarMods.name,
+      category: userCarMods.category,
+      brand: userCarMods.brand,
+      hpDelta: userCarMods.hpDelta,
+      notes: userCarMods.notes,
+    })
+    .from(userCarMods)
+    .where(eq(userCarMods.vehicleId, v.id));
+
+  // ---- Photos (used by owner panel) ----
+  const vehiclePhotos = isOwner
+    ? await db
+        .select({
+          id: photos.id,
+          urlFull: photos.urlFull,
+          urlThumb: photos.urlThumb,
+        })
+        .from(photos)
+        .where(
+          and(
+            eq(photos.subjectType, 'vehicle'),
+            eq(photos.subjectId, v.id),
+          ),
+        )
+        .orderBy(photos.sortOrder)
+    : [];
+
+  // ---- Build display values ----
+  const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(' ');
+  const currentHp = v.currentHpOverride ?? v.stockHp ?? null;
+  const currentTorque = v.currentTorqueOverride ?? v.stockTorque ?? null;
+  const currentWeight = v.currentWeightOverride ?? v.curbWeight ?? null;
+  const drivetrainDisplay = v.drivetrainOverride ?? v.drivetrain ?? '—';
+  const transmissionDisplay = v.transmissionOverride ?? v.transmission ?? '—';
+
+  const totalModHp = mods.reduce((sum, m) => sum + (m.hpDelta ?? 0), 0);
 
   return (
-    <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
-        <div style={{ marginBottom: 16 }}>
-          <Link
-            href={isOwner ? '/me' : `/u/${v.ownerCallsign}`}
-            style={{ fontSize: 11, letterSpacing: '0.3em', color: colors.textMuted, textDecoration: 'none', fontFamily: fonts.mono }}
-          >
-            ← {isOwner ? 'YOUR GARAGE' : `@${v.ownerCallsign}`}
-          </Link>
-        </div>
-
-        {/* Hero with photo */}
+    <div
+      style={{
+        minHeight: '100vh',
+        background: colors.bg,
+        color: colors.text,
+        fontFamily: fonts.sans,
+      }}
+    >
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px' }}>
+        {/* Breadcrumbs */}
         <div
           style={{
-            aspectRatio: '16 / 7',
-            background: v.thumbUrl
-              ? `linear-gradient(180deg, rgba(10,10,10,0.2) 0%, rgba(10,10,10,0.95) 100%), url(${v.thumbUrl}) center/cover`
-              : '#0d0d0d',
-            border: `0.5px solid ${colors.border}`,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-end',
-            padding: 32,
-            marginBottom: 24,
+            fontFamily: fonts.mono,
+            fontSize: 10,
+            letterSpacing: '0.3em',
+            color: colors.textMuted,
+            marginBottom: 16,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <CallsignWithBadge callsign={v.ownerCallsign} isAdmin={v.ownerIsAdmin ?? false} size="md" />
-            {v.isPrimary && (
-              <span
-                style={{
-                  fontSize: 9,
-                  letterSpacing: '0.3em',
-                  color: colors.accent,
-                  border: `0.5px solid ${colors.accent}`,
-                  padding: '2px 8px',
-                  fontFamily: fonts.mono,
-                  fontWeight: 700,
-                }}
-              >
-                PRIMARY
-              </span>
-            )}
+          <Link href="/me" style={{ color: colors.textMuted, textDecoration: 'none' }}>
+            GARAGE
+          </Link>
+          {' / '}
+          <Link
+            href={v.ownerCallsign ? `/u/${v.ownerCallsign}` : '#'}
+            style={{ color: colors.textMuted, textDecoration: 'none' }}
+          >
+            {v.ownerCallsign ?? 'OWNER'}
+          </Link>
+          {' / '}
+          <span style={{ color: colors.text }}>{title}</span>
+        </div>
+
+        {/* Hero photo (if exists) */}
+        {v.heroUrl ? (
+          <div
+            style={{
+              width: '100%',
+              aspectRatio: '16 / 9',
+              background: colors.bgElevated,
+              border: `0.5px solid ${colors.border}`,
+              marginBottom: 24,
+              overflow: 'hidden',
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={v.heroUrl}
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </div>
-          <h1 style={{ fontSize: 42, margin: 0, letterSpacing: '0.02em', fontWeight: 700 }}>
-            {v.year} {v.make} {v.model}
-          </h1>
-          {v.trim && (
-            <div style={{ fontSize: 16, color: colors.textMuted, marginTop: 4, fontFamily: fonts.mono }}>
-              {v.trim}
+        ) : null}
+
+        {/* Title + RACE THIS button */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+            marginBottom: 8,
+            flexWrap: 'wrap',
+            gap: 16,
+          }}
+        >
+          <div>
+            <h1
+              style={{
+                fontSize: 32,
+                margin: '0 0 4px',
+                letterSpacing: '0.05em',
+                color: colors.text,
+              }}
+            >
+              {title}
+            </h1>
+            <div style={{ fontSize: 13, color: colors.textMuted }}>
+              Owned by{' '}
+              <CallsignWithBadge
+                callsign={v.ownerCallsign ?? '—'}
+                isModerator={!!v.ownerIsModerator}
+                size="sm"
+              />
             </div>
+          </div>
+
+          {!isOwner && (
+            <Link
+              href={`/race?opponent=${v.id}`}
+              style={{
+                padding: '12px 22px',
+                background: colors.accent,
+                color: '#0a0a0a',
+                fontFamily: fonts.mono,
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '0.3em',
+                textDecoration: 'none',
+              }}
+            >
+              RACE THIS CAR
+            </Link>
           )}
         </div>
 
-        {/* Action bar */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 32 }}>
-          <Link
-            href={`/race?opponent=${v.id}`}
+        {/* Spec sheet */}
+        <section style={{ marginTop: 32 }}>
+          <h2
             style={{
-              ...styles.buttonPrimary,
-              textDecoration: 'none',
-              padding: '14px 24px',
+              fontSize: 11,
+              letterSpacing: '0.4em',
+              color: colors.textMuted,
+              fontFamily: fonts.mono,
+              fontWeight: 700,
+              margin: '0 0 16px',
+              textTransform: 'uppercase',
+            }}
+          >
+            Spec Sheet
+          </h2>
+          <div
+            style={{
+              background: colors.bgElevated,
+              border: `0.5px solid ${colors.border}`,
+              fontFamily: fonts.mono,
               fontSize: 12,
             }}
           >
-            🏁 RACE THIS CAR
-          </Link>
-        </div>
-
-        {/* Spec sheet */}
-        <Section title="STOCK + CURRENT">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
-            <Stat label="Power" stock={v.stockHp ? `${v.stockHp} hp` : null} current={currentHp ? `${currentHp} hp` : null} />
-            <Stat label="Torque" stock={v.stockTorque ? `${v.stockTorque} lb-ft` : null} current={currentTorque ? `${currentTorque} lb-ft` : null} />
-            <Stat label="Weight" stock={v.curbWeight ? `${v.curbWeight.toLocaleString()} lb` : null} current={currentWeight ? `${currentWeight.toLocaleString()} lb` : null} />
-            <Stat label="Drivetrain" stock={v.drivetrain} current={drivetrain} />
-            <Stat label="Trans" stock={v.transmission} current={transmission} />
-            {v.engine && <Stat label="Engine" stock={v.engine} current={v.engine} />}
-            {v.tireType && <Stat label="Tires" stock={null} current={v.tireType} />}
+            <SpecRow label="HP (CURRENT)" value={currentHp ? `${currentHp}` : '—'} stockHint={v.stockHp ? `stock ${v.stockHp}` : null} highlight />
+            <SpecRow label="TORQUE" value={currentTorque ? `${currentTorque} lb-ft` : '—'} stockHint={v.stockTorque ? `stock ${v.stockTorque}` : null} />
+            <SpecRow label="WEIGHT" value={currentWeight ? `${currentWeight} lb` : '—'} stockHint={v.curbWeight ? `stock ${v.curbWeight}` : null} />
+            <SpecRow label="DRIVETRAIN" value={drivetrainDisplay} />
+            <SpecRow label="TRANSMISSION" value={transmissionDisplay} />
+            <SpecRow label="ENGINE" value={v.engine ?? '—'} />
+            <SpecRow label="MOD GAIN" value={totalModHp > 0 ? `+${totalModHp} hp` : `${totalModHp} hp`} />
           </div>
-        </Section>
+        </section>
 
-        {v.stockZeroToSixty || v.stockQuarterMile ? (
-          <Section title="STOCK NUMBERS">
-            <div style={{ display: 'flex', gap: 32, fontFamily: fonts.mono }}>
-              {v.stockZeroToSixty && (
-                <div>
-                  <div style={{ fontSize: 9, letterSpacing: '0.3em', color: colors.textDim }}>0–60</div>
-                  <div style={{ fontSize: 24, fontWeight: 700 }}>{v.stockZeroToSixty.toFixed(1)}<span style={{ fontSize: 12, color: colors.textMuted, marginLeft: 4 }}>s</span></div>
-                </div>
-              )}
-              {v.stockQuarterMile && (
-                <div>
-                  <div style={{ fontSize: 9, letterSpacing: '0.3em', color: colors.textDim }}>1/4 MILE</div>
-                  <div style={{ fontSize: 24, fontWeight: 700 }}>{v.stockQuarterMile.toFixed(2)}<span style={{ fontSize: 12, color: colors.textMuted, marginLeft: 4 }}>s</span></div>
-                </div>
-              )}
-            </div>
-          </Section>
-        ) : null}
-
-        {mods.length > 0 && (
-          <Section title={`MODS (${mods.length})`}>
-            <div style={{ display: 'grid', gap: 8 }}>
-              {mods.map((m) => (
-                <div
-                  key={m.id}
-                  style={{
-                    padding: 12,
-                    background: '#111',
-                    border: `0.5px solid ${colors.border}`,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    fontFamily: fonts.mono,
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 700 }}>{m.customName ?? m.category}</div>
-                    <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>{m.category}</div>
+        {/* OWNER MODE — photos + mods manager */}
+        {isOwner ? (
+          <VehicleOwnerPanel
+            vehicleId={v.id}
+            primaryPhotoId={v.primaryPhotoId ?? null}
+            photos={vehiclePhotos}
+            mods={mods}
+          />
+        ) : (
+          // Read-only mods list for non-owners
+          <section style={{ marginTop: 32 }}>
+            <h2
+              style={{
+                fontSize: 11,
+                letterSpacing: '0.4em',
+                color: colors.textMuted,
+                fontFamily: fonts.mono,
+                fontWeight: 700,
+                margin: '0 0 16px',
+                textTransform: 'uppercase',
+              }}
+            >
+              Modifications
+            </h2>
+            {mods.length === 0 ? (
+              <div
+                style={{
+                  background: colors.bgElevated,
+                  border: `0.5px dashed ${colors.border}`,
+                  padding: 24,
+                  textAlign: 'center',
+                  color: colors.textMuted,
+                  fontSize: 13,
+                }}
+              >
+                Bone stock.
+              </div>
+            ) : (
+              <div
+                style={{
+                  background: colors.bgElevated,
+                  border: `0.5px solid ${colors.border}`,
+                }}
+              >
+                {mods.map((m, i) => (
+                  <div
+                    key={m.id}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'auto 1fr auto',
+                      gap: 16,
+                      padding: '12px 16px',
+                      borderTop: i === 0 ? 'none' : `0.5px solid ${colors.border}`,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: fonts.mono,
+                        fontSize: 9,
+                        letterSpacing: '0.3em',
+                        color: colors.textMuted,
+                        fontWeight: 700,
+                        minWidth: 80,
+                      }}
+                    >
+                      {m.category?.toUpperCase() ?? 'OTHER'}
+                    </span>
+                    <span style={{ fontSize: 13, color: colors.text }}>
+                      {m.brand ? <strong>{m.brand}</strong> : null} {m.name}
+                      {m.notes ? (
+                        <span style={{ color: colors.textMuted }}> — {m.notes}</span>
+                      ) : null}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: fonts.mono,
+                        fontSize: 11,
+                        color:
+                          m.hpDelta && m.hpDelta > 0
+                            ? colors.accent
+                            : colors.textDim,
+                      }}
+                    >
+                      {m.hpDelta != null
+                        ? `${m.hpDelta > 0 ? '+' : ''}${m.hpDelta} hp`
+                        : ''}
+                    </span>
                   </div>
-                  <div style={{ display: 'flex', gap: 16, fontSize: 11, color: colors.textMuted }}>
-                    {(m.hpGain ?? 0) > 0 && <span style={{ color: colors.accent }}>+{m.hpGain} hp</span>}
-                    {(m.torqueGain ?? 0) > 0 && <span style={{ color: colors.accent }}>+{m.torqueGain} tq</span>}
-                    {m.verified && <span style={{ color: colors.success }}>✓ DYNO'D</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Section>
+                ))}
+              </div>
+            )}
+          </section>
         )}
       </div>
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function SpecRow({
+  label,
+  value,
+  stockHint,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  stockHint?: string | null;
+  highlight?: boolean;
+}) {
   return (
-    <div style={{ marginBottom: 32 }}>
-      <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 12, fontFamily: fonts.mono, fontWeight: 700 }}>
-        {title}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function Stat({ label, stock, current }: { label: string; stock: string | null; current: string | null }) {
-  const changed = stock !== current && stock !== null && current !== null;
-  return (
-    <div style={{ padding: 12, background: '#111', border: `0.5px solid ${colors.border}`, fontFamily: fonts.mono }}>
-      <div style={{ fontSize: 9, letterSpacing: '0.3em', color: colors.textDim, marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 16, fontWeight: 700, color: changed ? colors.accent : colors.text }}>
-        {current ?? stock ?? '—'}
-      </div>
-      {changed && stock && (
-        <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2, textDecoration: 'line-through' }}>
-          {stock}
-        </div>
-      )}
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 16,
+        padding: '10px 16px',
+        borderTop: `0.5px solid ${colors.border}`,
+      }}
+    >
+      <span
+        style={{
+          color: colors.textMuted,
+          letterSpacing: '0.3em',
+          fontSize: 9,
+          fontWeight: 700,
+        }}
+      >
+        {label}
+      </span>
+      <span
+        style={{
+          color: highlight ? colors.accent : colors.text,
+          textAlign: 'right',
+        }}
+      >
+        {value}
+        {stockHint ? (
+          <span
+            style={{
+              color: colors.textDim,
+              fontSize: 10,
+              marginLeft: 8,
+              letterSpacing: '0.1em',
+            }}
+          >
+            ({stockHint})
+          </span>
+        ) : null}
+      </span>
     </div>
   );
 }
