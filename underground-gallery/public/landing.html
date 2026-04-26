@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>Underground Gallery</title>
+<title>Underground Gallery · Access Restricted</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="description" content="A members-only gallery for the work most people never see. Invite only. Est. MMXXVI."/>
+<meta name="description" content="Members-only. Invitation required."/>
+<meta name="robots" content="noindex,nofollow"/>
 <meta property="og:title" content="Underground Gallery"/>
-<meta property="og:description" content="A members-only gallery for the work most people never see. Invite only."/>
+<meta property="og:description" content="Members-only. Invitation required."/>
 <meta property="og:image" content="/og.png"/>
 <meta property="og:url" content="https://undergroundgallery.ai"/>
 <meta name="twitter:card" content="summary_large_image"/>
@@ -17,134 +18,454 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-  /* Root scroll behavior — explicit so iOS Safari can't get confused */
   html { overflow-x: hidden; overflow-y: auto; -webkit-text-size-adjust: 100%; }
   body {
     margin: 0; padding: 0;
     background: #05060a; color: #f5f6f7;
     font-family: 'Inter Tight', system-ui, -apple-system, sans-serif;
-    min-height: 100vh;
+    min-height: 100vh; min-height: 100dvh;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
   * { box-sizing: border-box; }
+
   @keyframes ugBlink { 50% { opacity: 0.3; } }
   @keyframes ugScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
   @keyframes ugFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes ugCountTick { 0%, 100% { color: #ff2a2a; } 50% { color: #fff; } }
-  .ug-fade-1 { animation: ugFadeUp 0.8s ease-out 0.1s both; }
-  .ug-fade-2 { animation: ugFadeUp 0.8s ease-out 0.3s both; }
-  .ug-fade-3 { animation: ugFadeUp 0.8s ease-out 0.5s both; }
-  .ug-fade-4 { animation: ugFadeUp 0.8s ease-out 0.7s both; }
-  .ug-fade-5 { animation: ugFadeUp 0.8s ease-out 0.9s both; }
+  @keyframes ugFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes ugRingSpin { to { transform: rotate(360deg); } }
+  @keyframes ugScanSweep { 0% { transform: translateY(-8px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(94px); opacity: 0; } }
+
+  /* ─── Boot intro ─────────────────────────────────────────────── */
+  /* Reality-glitch flicker — total ~4.5s.
+     Each element runs its OWN flicker timeline, intentionally desynced
+     so nothing pulses in unison. The container fades the whole scene
+     in and out, but inside it everything has its own rhythm. */
+
+  /* Master container — softer envelope, just bringing the scene in/out */
+  @keyframes ugBootEnvelope {
+      0%   { opacity: 0;    }
+      6%   { opacity: 1;    }
+     90%   { opacity: 1;    }
+    100%   { opacity: 0;    }
+  }
+
+  /* Logo: the "main bulb" — sputters on, holds, dies hard */
+  @keyframes ugBootLogo {
+      0%   { opacity: 0;    }
+      4%   { opacity: 0.85; }
+      6%   { opacity: 0.1;  }
+      9%   { opacity: 0.95; }
+     11%   { opacity: 0.2;  }
+     14%   { opacity: 1;    }
+     17%   { opacity: 0.7;  }
+     20%   { opacity: 1;    }
+     /* hold — but with TWO mid-show micro-dips */
+     45%   { opacity: 1;    }
+     46%   { opacity: 0.4;  }   /* tiny flicker mid-hold */
+     47%   { opacity: 1;    }
+     65%   { opacity: 1;    }
+     66%   { opacity: 0.2;  }   /* second mid-hold flicker */
+     68%   { opacity: 1;    }
+     /* dying */
+     80%   { opacity: 0.3;  }
+     82%   { opacity: 0.95; }
+     85%   { opacity: 0.1;  }
+     88%   { opacity: 0.7;  }
+     91%   { opacity: 0;    }
+     94%   { opacity: 0.5;  }
+    100%   { opacity: 0;    }
+  }
+
+  /* Wordmark: lags behind — comes on AFTER logo stabilizes,
+     and dies BEFORE logo dies (different rhythm entirely) */
+  @keyframes ugBootWordmark {
+      0%   { opacity: 0;    }
+     12%   { opacity: 0;    }   /* still dark while logo flickers */
+     15%   { opacity: 0.6;  }   /* fades in during logo's recovery */
+     17%   { opacity: 0.1;  }   /* but immediately glitches */
+     21%   { opacity: 0.9;  }
+     24%   { opacity: 0.3;  }
+     27%   { opacity: 1;    }
+     /* mid-show dropouts that don't match the logo's */
+     38%   { opacity: 1;    }
+     39%   { opacity: 0;    }   /* drops while logo is solid */
+     41%   { opacity: 1;    }
+     58%   { opacity: 1;    }
+     60%   { opacity: 0.2;  }
+     61%   { opacity: 1;    }
+     /* dying first */
+     74%   { opacity: 1;    }
+     76%   { opacity: 0.1;  }
+     78%   { opacity: 0.6;  }
+     81%   { opacity: 0;    }
+     85%   { opacity: 0.3;  }
+     88%   { opacity: 0;    }
+    100%   { opacity: 0;    }
+  }
+
+  /* ACCESS RESTRICTED line: shortest run, most erratic.
+     Appears LAST on the way in, dies FIRST on the way out. */
+  @keyframes ugBootStatus {
+      0%   { opacity: 0;    }
+     22%   { opacity: 0;    }   /* nothing yet */
+     26%   { opacity: 1;    }   /* snap on */
+     28%   { opacity: 0;    }   /* snap off */
+     31%   { opacity: 0.8;  }
+     33%   { opacity: 0.2;  }
+     36%   { opacity: 1;    }   /* finally locks */
+     /* mid-show jitter on its own clock */
+     50%   { opacity: 1;    }
+     51%   { opacity: 0;    }
+     52%   { opacity: 1;    }
+     70%   { opacity: 1;    }
+     72%   { opacity: 0.3;  }
+     74%   { opacity: 0;    }   /* dies first */
+     76%   { opacity: 0.5;  }
+     78%   { opacity: 0;    }
+    100%   { opacity: 0;    }
+  }
+
+  /* Subtle horizontal glitch bar that sweeps during the flicker.
+     Phase-shifted so it appears during the chaos, hides during the hold. */
+  @keyframes ugBootGlitch {
+      0%   { opacity: 0; transform: translateY(-100%); }
+      8%   { opacity: 0.6; transform: translateY(20vh); }
+     16%   { opacity: 0; transform: translateY(60vh); }
+     /* dark hold — bar invisible during steady-state */
+     74%   { opacity: 0; transform: translateY(60vh); }
+     78%   { opacity: 0.7; transform: translateY(30vh); }
+     86%   { opacity: 0.3; transform: translateY(80vh); }
+     92%   { opacity: 0.8; transform: translateY(50vh); }
+    100%   { opacity: 0; transform: translateY(110vh); }
+  }
+
+  /* Logo's slow physical pulse — kept smooth so it grounds the chaos */
+  @keyframes ugBootLogoPulse {
+      0%   { transform: scale(0.94); }
+     20%   { transform: scale(1.01); }
+     50%   { transform: scale(1);    }
+     85%   { transform: scale(0.99); }
+    100%   { transform: scale(0.97); }
+  }
+  @keyframes ugRevealStage { from { opacity: 0; } to { opacity: 1; } }
+
+  #ug-boot {
+    position: fixed; inset: 0; z-index: 100;
+    background: #000;
+    display: flex; align-items: center; justify-content: center;
+    animation: ugBootEnvelope 4.5s ease-in-out forwards;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .ug-boot-inner {
+    display: flex; flex-direction: column; align-items: center; gap: 28px;
+    text-align: center;
+    position: relative; z-index: 2;
+  }
+  .ug-boot-logo {
+    animation:
+      ugBootLogo 4.5s steps(45, end) forwards,
+      ugBootLogoPulse 4.5s ease-in-out forwards;
+    filter: drop-shadow(0 0 16px rgba(255, 42, 42, 0.5));
+    will-change: opacity, transform;
+  }
+  .ug-boot-wordmark {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: clamp(14px, 3.2vw, 20px);
+    letter-spacing: 0.22em;
+    color: #f5f6f7;
+    animation: ugBootWordmark 4.5s steps(40, end) forwards;
+    will-change: opacity;
+  }
+  .ug-boot-line {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.4em; font-weight: 700;
+    color: #ff2a2a;
+    text-transform: uppercase;
+    animation: ugBootStatus 4.5s steps(40, end) forwards;
+    will-change: opacity;
+  }
+
+  /* Glitch sweep bar — sits behind the boot content, sweeps vertically */
+  .ug-boot-glitch {
+    position: absolute; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,42,42,0.8), rgba(255,255,255,0.6), rgba(255,42,42,0.8), transparent);
+    box-shadow: 0 0 24px rgba(255,42,42,0.6);
+    animation: ugBootGlitch 4.5s steps(50, end) forwards;
+    pointer-events: none;
+    z-index: 1;
+    will-change: opacity, transform;
+  }
+
+  /* Stage stays invisible until the boot is dismissed */
+  .ug-stage-hidden { opacity: 0; }
+  .ug-stage-revealed { animation: ugRevealStage 0.6s ease-out 0s forwards; }
+
+  /* Honor user's reduced-motion preference — skip the show entirely */
+  @media (prefers-reduced-motion: reduce) {
+    #ug-boot { display: none !important; animation: none !important; }
+    .ug-stage-hidden { opacity: 1 !important; }
+  }
+  .ug-fade-1 { animation: ugFadeUp 0.7s ease-out 0.05s both; }
+  .ug-fade-2 { animation: ugFadeUp 0.7s ease-out 0.20s both; }
+  .ug-fade-3 { animation: ugFadeUp 0.7s ease-out 0.35s both; }
+  .ug-fade-4 { animation: ugFadeUp 0.7s ease-out 0.50s both; }
+  .ug-fade-5 { animation: ugFadeUp 0.7s ease-out 0.65s both; }
   .ug-blink { animation: ugBlink 1.4s infinite; }
-  .ug-pulse { animation: ugCountTick 4s infinite; }
-  input, textarea { font-family: inherit; font-size: 16px; /* iOS: prevents zoom-on-focus */ }
-  input:focus, textarea:focus { outline: none; border-color: #ff2a2a !important; box-shadow: 0 0 0 1px #ff2a2a, 0 0 18px rgba(255,42,42,0.18); }
+  .ug-fade-in { animation: ugFade 0.4s ease-out both; }
+
+  input { font-family: inherit; font-size: 16px; }
+  input:focus { outline: none; border-color: #ff2a2a !important; box-shadow: 0 0 0 1px #ff2a2a, 0 0 18px rgba(255,42,42,0.18); }
   button { cursor: pointer; font-family: inherit; }
   ::selection { background: #ff2a2a; color: #05060a; }
 
-  /* Layout containers — use classes so media queries can target them cleanly */
-  .ug-main {
+  .ug-stage {
     position: relative; z-index: 2;
-    max-width: 1280px; margin: 0 auto;
-    padding: 32px 48px 80px;
-    min-height: 100vh;
+    min-height: 100vh; min-height: 100dvh;
     display: flex; flex-direction: column;
+    max-width: 720px; margin: 0 auto;
+    padding: 32px 32px 48px;
   }
-  .ug-header {
-    display: flex; align-items: center; justify-content: space-between;
+  .ug-topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
     padding-bottom: 24px;
     border-bottom: 0.5px solid rgba(255,255,255,0.08);
-    gap: 16px;
   }
-  .ug-hero {
-    display: grid; grid-template-columns: 1.4fr 1fr;
-    gap: 80px; align-items: center;
-    flex: 1; padding-top: 80px;
+  .ug-content {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 48px 0 32px;
+    gap: 32px;
   }
-  .ug-hero-mark { width: 360px; height: 360px; }
-  .ug-hero-mark svg { width: 360px; height: 360px; }
-  .ug-pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
-  .ug-cta-row { display: flex; gap: 16px; flex-wrap: wrap; }
-  .ug-stats { display: flex; gap: 0; padding: 20px 0; border-top: 0.5px solid rgba(255,255,255,0.08); border-bottom: 0.5px solid rgba(255,255,255,0.08); margin-bottom: 40px; }
-  .ug-footer { margin-top: 80px; padding-top: 32px; border-top: 0.5px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-  .ug-footer-links { display: flex; gap: 24px; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; }
 
-  /* ─── Mobile (≤720px) ──────────────────────────────────────────── */
+  .ug-mark { width: 200px; height: 200px; position: relative; }
+  .ring { transform-origin: 60px 60px; animation: ugRingSpin 18s linear infinite; }
+  .scan { animation: ugScanSweep 4.2s ease-in-out infinite; }
+
+  .ug-restricted-strip {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 10px 18px;
+    background: rgba(255,42,42,0.06);
+    border: 0.5px solid rgba(255,42,42,0.4);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.4em; color: #ff2a2a;
+    text-transform: uppercase; font-weight: 700;
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
+  }
+  /* Granted state — flipped from red restricted to green granted.
+     The transition animates color + bg + border so the change feels
+     like a real unlock, not a swap. */
+  .ug-restricted-strip.granted {
+    background: rgba(80,200,120,0.08);
+    border-color: rgba(80,200,120,0.6);
+    color: rgb(120,220,150);
+    animation: ugGrantedPulse 0.6s ease-out;
+  }
+  .ug-restricted-strip.granted .ug-loading-dot {
+    background: rgb(120,220,150);
+    box-shadow: 0 0 10px rgb(120,220,150);
+  }
+  @keyframes ugGrantedPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(80,200,120,0); }
+     30% { transform: scale(1.05); box-shadow: 0 0 24px rgba(80,200,120,0.6); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(80,200,120,0); }
+  }
+
+  .ug-title {
+    font-size: clamp(36px, 7vw, 72px);
+    font-weight: 800; letter-spacing: -0.035em; line-height: 0.95;
+    margin: 0;
+  }
+  .ug-subtitle {
+    font-size: 15px; color: rgba(201,204,209,0.7);
+    line-height: 1.6; max-width: 420px; margin: 0;
+  }
+
+  .ug-actions {
+    width: 100%; max-width: 460px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .ug-action-btn {
+    width: 100%;
+    padding: 18px 24px;
+    background: rgba(255,255,255,0.02);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    color: #f5f6f7;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
+    text-align: left;
+    display: flex; align-items: center; justify-content: space-between;
+    text-decoration: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ug-action-btn:hover, .ug-action-btn:active {
+    border-color: #ff2a2a;
+    background: rgba(255,42,42,0.04);
+  }
+  .ug-action-btn .arrow { color: #ff2a2a; font-size: 16px; font-weight: 900; }
+
+  .ug-enter-btn {
+    width: 100%; max-width: 360px;
+    padding: 20px 32px;
+    background: #ff2a2a; color: #05060a;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 800; letter-spacing: 0.4em; text-transform: uppercase;
+    box-shadow: 0 0 32px rgba(255,42,42,0.35);
+    text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+    transition: transform 0.1s, box-shadow 0.15s;
+  }
+  .ug-enter-btn:hover { box-shadow: 0 0 40px rgba(255,42,42,0.55); }
+  .ug-enter-btn:active { transform: scale(0.98); }
+
+  .ug-panel {
+    width: 100%; max-width: 460px;
+    background: rgba(255,255,255,0.02);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    padding: 28px;
+    text-align: left;
+  }
+  .ug-panel-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.3em; color: rgba(201,204,209,0.7);
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .ug-input {
+    width: 100%; padding: 14px 16px;
+    background: rgba(0,0,0,0.4);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    color: #f5f6f7;
+    font-size: 16px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .ug-panel-row { display: flex; gap: 8px; margin-top: 12px; }
+  .ug-panel-submit {
+    flex-shrink: 0;
+    padding: 0 20px;
+    background: #ff2a2a; color: #05060a;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
+    transition: opacity 0.15s;
+  }
+  .ug-panel-submit:disabled { opacity: 0.5; cursor: wait; }
+  .ug-panel-back {
+    margin-top: 16px;
+    background: transparent; border: none;
+    color: rgba(201,204,209,0.5);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+    padding: 0;
+  }
+  .ug-panel-back:hover { color: #f5f6f7; }
+
+  .ug-panel-msg {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em;
+    padding: 10px 12px;
+    border: 0.5px solid;
+    display: none;
+  }
+  .ug-panel-msg.error { border-color: #ff2a2a; background: rgba(255,42,42,0.08); color: #ff2a2a; }
+  .ug-panel-msg.success { border-color: rgba(80,200,120,0.6); background: rgba(80,200,120,0.06); color: rgb(120,220,150); }
+
+  .ug-scan-camera {
+    flex-shrink: 0;
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.04);
+    border: 0.5px solid rgba(255,255,255,0.18);
+    color: #ff2a2a;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ug-scan-camera:hover { border-color: #ff2a2a; background: rgba(255,42,42,0.06); }
+  .ug-scan-camera[hidden] { display: none; }
+
+  .ug-scan-video {
+    margin-top: 14px;
+    width: 100%; max-width: 320px;
+    aspect-ratio: 1 / 1;
+    border: 0.5px solid rgba(255,42,42,0.5);
+    background: #000;
+    object-fit: cover;
+    display: block;
+    margin-left: auto; margin-right: auto;
+  }
+
+  .ug-loading-dot {
+    display: inline-block; width: 6px; height: 6px;
+    background: #ff2a2a; border-radius: 50%;
+    box-shadow: 0 0 6px #ff2a2a;
+  }
+
+  .ug-footer {
+    padding-top: 24px;
+    border-top: 0.5px solid rgba(255,255,255,0.08);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: rgba(201,204,209,0.4);
+  }
+  .ug-footer a { color: rgba(201,204,209,0.6); text-decoration: none; }
+
   @media (max-width: 720px) {
-    .ug-main {
-      padding: 20px 20px 60px;
-    }
-    .ug-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 14px;
-    }
-    .ug-hero {
-      grid-template-columns: 1fr;
-      gap: 40px;
-      padding-top: 48px;
-    }
-    /* Move the hero mark above the text on mobile so the headline is the
-       first thing under the logo */
-    .ug-hero > .ug-hero-mark-wrap {
-      order: -1;
-      justify-self: center;
-    }
-    .ug-hero-mark { width: 220px; height: 220px; }
-    .ug-hero-mark svg { width: 220px; height: 220px; }
-    .ug-pillars {
-      grid-template-columns: 1fr;
-      gap: 28px;
-    }
-    .ug-stats { padding: 16px 0; }
-    .ug-stats > div { padding-right: 16px !important; }
-    .ug-cta-row a { width: 100%; justify-content: center; }
-    section#apply { padding: 60px 0 40px !important; }
-    section#about { padding: 80px 0 40px !important; }
-    form#apply-form { padding: 24px !important; }
-    .ug-footer {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-    }
-  }
-
-  /* Very small phones (≤380px) */
-  @media (max-width: 380px) {
-    .ug-main { padding: 16px 16px 48px; }
-    .ug-stats > div { padding-right: 10px !important; }
-    .ug-stats .ug-pulse { font-size: 18px !important; }
+    .ug-stage { padding: 20px 20px 32px; }
+    .ug-topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .ug-content { padding: 32px 0 24px; gap: 26px; }
+    .ug-mark { width: 160px; height: 160px; }
+    .ug-panel { padding: 20px; }
+    .ug-panel-row { flex-direction: column; }
+    .ug-panel-submit { padding: 14px; }
+    .ug-footer { flex-direction: column; align-items: flex-start; }
   }
 </style>
 </head>
 <body>
 
-<!-- Carbon-fiber backdrop -->
+<!-- ─── Boot intro overlay ──────────────────────────────────────────
+     Plays once per browser session. Tap anywhere to skip.
+     Hidden entirely if user prefers reduced motion. -->
+<div id="ug-boot" aria-hidden="true">
+  <div class="ug-boot-glitch"></div>
+  <div class="ug-boot-inner">
+    <svg class="ug-boot-logo" width="120" height="120" viewBox="0 0 40 40" fill="none">
+      <rect x="3" y="3" width="34" height="34" stroke="#ff2a2a" stroke-width="1.5" fill="none" stroke-opacity="0.4"/>
+      <path d="M3 3 L7 3 M37 3 L33 3 M3 37 L7 37 M37 37 L33 37" stroke="#ff2a2a" stroke-width="2" stroke-linecap="square"/>
+      <path d="M8 8 L8 32 L32 32 L32 8" stroke="#ff2a2a" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+      <path d="M25 15 L15 15 L15 27 L25 27 L25 22 L20 22" stroke="#ff2a2a" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+    </svg>
+    <div class="ug-boot-wordmark">
+      UNDERGROUND<span style="color: #ff2a2a; font-weight: 900; padding: 0 6px;">∕∕</span>GALLERY
+    </div>
+    <div class="ug-boot-line">
+      <span class="ug-loading-dot ug-blink"></span>
+      <span>ACCESS RESTRICTED</span>
+    </div>
+  </div>
+</div>
+
 <div style="position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.6;
-            background-color: #05060a;
-            background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px), repeating-linear-gradient(-45deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px);
-            "></div>
-
-<!-- Vignette glow -->
+            background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px), repeating-linear-gradient(-45deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px);"></div>
 <div style="position: fixed; inset: 0; pointer-events: none; z-index: 0;
-            background: radial-gradient(ellipse at top, rgba(255,42,42,0.08), transparent 60%);
-            "></div>
-
-<!-- Scan line -->
+            background: radial-gradient(ellipse at center, rgba(255,42,42,0.12), transparent 60%);"></div>
 <div style="position: fixed; left: 0; right: 0; height: 1px; pointer-events: none; z-index: 1;
             background: linear-gradient(90deg, transparent, rgba(255,42,42,0.6), transparent);
             box-shadow: 0 0 12px rgba(255,42,42,0.4);
-            animation: ugScan 8s linear infinite;
-            "></div>
+            animation: ugScan 8s linear infinite;"></div>
 
-<main class="ug-main">
+<div class="ug-stage ug-stage-hidden" id="ug-stage">
 
-  <!-- Top bar -->
-  <header class="ug-header">
+  <header class="ug-topbar">
     <div style="display: flex; align-items: center; gap: 12px;">
-      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+      <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
         <rect x="3" y="3" width="34" height="34" stroke="#ff2a2a" stroke-width="1.5" fill="none" stroke-opacity="0.4"/>
         <path d="M3 3 L7 3 M37 3 L33 3 M3 37 L7 37 M37 37 L33 37" stroke="#ff2a2a" stroke-width="2" stroke-linecap="square"/>
         <path d="M8 8 L8 32 L32 32 L32 8" stroke="#ff2a2a" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
@@ -156,281 +477,393 @@
       </div>
     </div>
     <div style="display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.3em; color: rgba(201,204,209,0.6); text-transform: uppercase;">
-      <span style="display: inline-block; width: 6px; height: 6px; background: #ff2a2a; border-radius: 50%; box-shadow: 0 0 6px #ff2a2a;" class="ug-blink"></span>
-      <span>ACCEPTING APPLICATIONS</span>
+      <span class="ug-loading-dot ug-blink"></span>
+      <span>SECURED</span>
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="ug-hero">
+  <main class="ug-content">
 
-    <!-- Left: Manifesto -->
-    <div>
-      <div class="ug-fade-1" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.4em; font-weight: 700; margin-bottom: 24px;">
-        ∕∕ INVITATION REQUIRED · SEASON 01
-      </div>
-
-      <h1 class="ug-fade-2" style="font-size: clamp(40px, 7vw, 96px); font-weight: 800; letter-spacing: -0.035em; line-height: 0.95; margin: 0 0 32px;">
-        The work<br/>
-        most people<br/>
-        <span style="color: #ff2a2a;">never see.</span>
-      </h1>
-
-      <p class="ug-fade-3" style="font-size: 17px; color: rgba(201,204,209,0.75); line-height: 1.65; max-width: 520px; margin: 0 0 40px;">
-        Underground Gallery is a private, members-only home for the builders, fabricators, painters, and the cars they make.
-        Doors open four times a year. Membership is by invitation. There is no public feed.
-      </p>
-
-      <!-- Numbers strip -->
-      <div class="ug-fade-4 ug-stats">
-        <Stat label="ON THE LIST" value="" id="ug-counter" placeholder="114"/>
-        <Stat label="SEASON" value="01"/>
-        <Stat label="EST." value="MMXXVI"/>
-      </div>
-
-      <div class="ug-fade-5 ug-cta-row">
-        <a href="#apply" style="display: inline-flex; align-items: center; gap: 10px; padding: 16px 28px; background: #ff2a2a; color: #05060a; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-decoration: none; text-transform: uppercase; box-shadow: 0 0 24px rgba(255,42,42,0.25);">
-          REQUEST INVITATION <span style="font-size: 14px;">→</span>
-        </a>
-        <a href="#about" style="display: inline-flex; align-items: center; padding: 16px 28px; border: 0.5px solid rgba(255,255,255,0.2); color: rgba(201,204,209,0.85); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-decoration: none; text-transform: uppercase;">
-          WHAT'S INSIDE
-        </a>
-      </div>
+    <div class="ug-mark ug-fade-1">
+      <svg width="100%" height="100%" viewBox="0 0 120 120" fill="none">
+        <g stroke="#ff2a2a" stroke-width="1" opacity="0.4">
+          <path d="M2 6 L10 6 M6 2 L6 10"/>
+          <path d="M118 6 L110 6 M114 2 L114 10"/>
+          <path d="M2 114 L10 114 M6 110 L6 118"/>
+          <path d="M118 114 L110 114 M114 110 L114 118"/>
+        </g>
+        <rect x="14" y="14" width="92" height="92" stroke="#ff2a2a" stroke-width="1.5" fill="none" stroke-opacity="0.35"/>
+        <path d="M14 14 L26 14 M106 14 L94 14 M14 106 L26 106 M106 106 L94 106" stroke="#ff2a2a" stroke-width="3" stroke-linecap="square"/>
+        <clipPath id="ug-clip"><rect x="14" y="14" width="92" height="92"/></clipPath>
+        <g clip-path="url(#ug-clip)">
+          <line class="scan" x1="18" y1="18" x2="102" y2="18" stroke="#ff2a2a" stroke-width="1" opacity="0.7" style="filter: drop-shadow(0 0 4px #ff2a2a);"/>
+        </g>
+        <path d="M28 24 L28 92 L92 92 L92 24" stroke="#ff2a2a" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+        <path d="M80 44 L42 44 L42 80 L80 80 L80 64 L60 64" stroke="#ff2a2a" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+        <g class="ring">
+          <circle cx="60" cy="60" r="56" stroke="#ff2a2a" stroke-width="0.5" stroke-opacity="0.25" stroke-dasharray="2 4"/>
+        </g>
+      </svg>
     </div>
 
-    <!-- Right: Hero mark -->
-    <div class="ug-fade-3 ug-hero-mark-wrap" style="display: flex; align-items: center; justify-content: center; position: relative;">
-      <div class="ug-hero-mark" style="position: relative;">
-        <svg viewBox="0 0 120 120" fill="none" style="position: absolute; inset: 0;">
-          <style>
-            @keyframes ugRingSpin { to { transform: rotate(360deg); } }
-            @keyframes ugScanSweep { 0% { transform: translateY(-8px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(94px); opacity: 0; } }
-            .ring { transform-origin: 60px 60px; animation: ugRingSpin 18s linear infinite; }
-            .scan { animation: ugScanSweep 4.2s ease-in-out infinite; }
-          </style>
-          <g stroke="#ff2a2a" stroke-width="1" opacity="0.4">
-            <path d="M2 6 L10 6 M6 2 L6 10"/>
-            <path d="M118 6 L110 6 M114 2 L114 10"/>
-            <path d="M2 114 L10 114 M6 110 L6 118"/>
-            <path d="M118 114 L110 114 M114 110 L114 118"/>
-          </g>
-          <rect x="14" y="14" width="92" height="92" stroke="#ff2a2a" stroke-width="1.5" fill="none" stroke-opacity="0.35"/>
-          <path d="M14 14 L26 14 M106 14 L94 14 M14 106 L26 106 M106 106 L94 106" stroke="#ff2a2a" stroke-width="3" stroke-linecap="square"/>
-          <clipPath id="ug-clip"><rect x="14" y="14" width="92" height="92"/></clipPath>
-          <g clip-path="url(#ug-clip)">
-            <line class="scan" x1="18" y1="18" x2="102" y2="18" stroke="#ff2a2a" stroke-width="1" opacity="0.7" style="filter: drop-shadow(0 0 4px #ff2a2a);"/>
-          </g>
-          <path d="M28 24 L28 92 L92 92 L92 24" stroke="#ff2a2a" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
-          <path d="M80 44 L42 44 L42 80 L80 80 L80 64 L60 64" stroke="#ff2a2a" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
-          <g class="ring">
-            <circle cx="60" cy="60" r="56" stroke="#ff2a2a" stroke-width="0.5" stroke-opacity="0.25" stroke-dasharray="2 4"/>
-          </g>
-        </svg>
-      </div>
+    <div id="ug-status-strip" class="ug-restricted-strip ug-fade-2">
+      <span class="ug-loading-dot ug-blink"></span>
+      <span id="ug-status-text">ACCESS RESTRICTED</span>
     </div>
-  </section>
 
-  <!-- About anchor -->
-  <section id="about" style="padding: 120px 0 80px; max-width: 880px;">
-    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.4em; margin-bottom: 24px;">∕∕ WHAT'S INSIDE</div>
-    <div class="ug-pillars">
-      <Pillar n="01" title="Private feed" body="No public profile, no algorithm. Members see members. The work, the process, the parts list, the people."/>
-      <Pillar n="02" title="Seasonal drops" body="Four times a year we open the doors for new members. Each season has a theme, a juror, and a hard cap."/>
-      <Pillar n="03" title="Off-site meets" body="Coordinates released the morning of. Location dies after. Bring the car, leave with the photos."/>
-      <Pillar n="04" title="Member store" body="Limited drops curated by members for members. Made-to-order parts, prints, garments. No restocks."/>
-    </div>
-  </section>
-
-  <!-- Apply form -->
-  <section id="apply" style="padding: 80px 0; max-width: 720px; margin: 0 auto; width: 100%;">
-    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.4em; margin-bottom: 16px; text-align: center;">∕∕ REQUEST INVITATION</div>
-    <h2 style="font-size: clamp(28px, 4vw, 56px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; margin: 0 0 16px; text-align: center;">
-      The doors open <span style="color: #ff2a2a;">once a season.</span>
-    </h2>
-    <p style="font-size: 15px; color: rgba(201,204,209,0.6); line-height: 1.6; text-align: center; max-width: 540px; margin: 0 auto 48px;">
-      We review every application by hand. Tell us who you are and what you build. The more specific, the better.
+    <h1 class="ug-title ug-fade-3">
+      Members <span style="color: #ff2a2a;">only.</span>
+    </h1>
+    <p class="ug-subtitle ug-fade-3">
+      Access by invitation.
     </p>
 
-    <form id="apply-form" autocomplete="off" novalidate style="background: rgba(255,255,255,0.02); border: 0.5px solid rgba(255,255,255,0.08); padding: 40px;">
+    <div id="ug-state" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px;">
 
-      <Field label="EMAIL" name="email" type="email" required placeholder="name@domain.com"/>
-      <Field label="CALLSIGN / NAME" name="callsign" placeholder="What people call you in the garage"/>
-      <Field label="REGION" name="region" placeholder="LA · NYC · Tokyo · etc."/>
-      <Field label="WHAT YOU DRIVE" name="drive" placeholder="Year · make · model · what you've done to it"/>
-      <Field label="INSTAGRAM (OPTIONAL)" name="instagram" placeholder="@yourhandle"/>
-      <Field label="WHO INVITED YOU? (OPTIONAL)" name="invitedBy" placeholder="If someone sent you a link, their callsign"/>
-
-      <div style="margin-bottom: 28px;">
-        <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.7); letter-spacing: 0.25em; margin-bottom: 10px;">WHY YOU?</label>
-        <textarea name="message" rows="4" placeholder="One paragraph. What makes you not boring." style="width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.4); border: 0.5px solid rgba(255,255,255,0.12); color: #f5f6f7; font-size: 16px; line-height: 1.6; resize: vertical; transition: border-color 0.15s, box-shadow 0.15s;"></textarea>
+      <div id="state-loading" class="ug-fade-4" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(201,204,209,0.4); letter-spacing: 0.3em; text-transform: uppercase;">
+        <span class="ug-loading-dot ug-blink"></span> CHECKING CREDENTIALS…
       </div>
 
-      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-        <button type="submit" id="apply-submit" style="padding: 16px 32px; background: #ff2a2a; color: #05060a; border: none; font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; box-shadow: 0 0 24px rgba(255,42,42,0.25); transition: transform 0.1s, box-shadow 0.15s;">
-          SUBMIT APPLICATION →
+      <div id="state-signedin" hidden class="ug-fade-in" style="display: none; flex-direction: column; align-items: center; gap: 14px; width: 100%;">
+        <a id="enter-link" href="/garage" class="ug-enter-btn">
+          ENTER <span style="font-size: 18px;">→</span>
+        </a>
+        <p id="signedin-as" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.4); letter-spacing: 0.25em; text-transform: uppercase; margin: 0;">
+          SIGNED IN
+        </p>
+        <button id="signout-btn" class="ug-panel-back" type="button">SIGN OUT</button>
+      </div>
+
+      <div id="state-actions" hidden class="ug-actions ug-fade-in" style="display: none;">
+        <button class="ug-action-btn" data-action="signin" type="button">
+          <span>SIGN IN</span><span class="arrow">→</span>
         </button>
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.4); letter-spacing: 0.18em; text-transform: uppercase;">
-          By submitting, you agree to our <a href="/terms" style="color: rgba(201,204,209,0.7);">terms</a> & <a href="/privacy" style="color: rgba(201,204,209,0.7);">privacy</a>.
-        </span>
+        <button class="ug-action-btn" data-action="scan" type="button">
+          <span>SCAN INVITE CODE</span><span class="arrow">→</span>
+        </button>
+        <button class="ug-action-btn" data-action="apply" type="button">
+          <span>REQUEST ACCESS</span><span class="arrow">→</span>
+        </button>
       </div>
 
-      <div id="apply-error" style="display: none; margin-top: 20px; padding: 14px; border: 0.5px solid #ff2a2a; background: rgba(255,42,42,0.08); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.1em;"></div>
-    </form>
+      <div id="panel-signin" hidden class="ug-panel ug-fade-in" style="display: none;">
+        <div class="ug-panel-label">∕∕ SIGN IN — MAGIC LINK</div>
+        <form id="signin-form" autocomplete="off" novalidate>
+          <input type="email" name="email" id="signin-email" class="ug-input" placeholder="name@domain.com" required/>
+          <div class="ug-panel-row">
+            <button type="submit" id="signin-submit" class="ug-panel-submit">SEND LINK →</button>
+          </div>
+          <div id="signin-msg" class="ug-panel-msg"></div>
+        </form>
+        <button class="ug-panel-back" data-action="back" type="button">← BACK</button>
+      </div>
 
-    <!-- Confirmation state (hidden until success) -->
-    <div id="apply-success" style="display: none; padding: 48px 40px; background: rgba(255,42,42,0.04); border: 0.5px solid rgba(255,42,42,0.4); margin-top: 24px; text-align: center;">
-      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.4em; margin-bottom: 16px;">∕∕ APPLICATION RECEIVED</div>
-      <h3 style="font-size: 32px; font-weight: 800; margin: 0 0 16px; letter-spacing: -0.02em;">You're on the list.</h3>
-      <p style="font-size: 14px; color: rgba(201,204,209,0.7); line-height: 1.7; max-width: 480px; margin: 0 auto;">
-        Confirmation sent to <span id="apply-success-email" style="color: #f5f6f7; font-family: 'JetBrains Mono', monospace; font-size: 13px;"></span>.<br/>
-        We review every application by hand. When the next door opens, you'll hear from us — not before.
-      </p>
-      <p style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.4); letter-spacing: 0.3em; margin: 24px 0 0;">
-        ∕∕ STATUS: PENDING REVIEW
-      </p>
+      <div id="panel-scan" hidden class="ug-panel ug-fade-in" style="display: none;">
+        <div class="ug-panel-label">∕∕ INVITE CODE</div>
+        <form id="scan-form" autocomplete="off" novalidate>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" name="code" id="scan-code" class="ug-input" placeholder="XXXX-XXXX-XXXX" required style="text-transform: uppercase; letter-spacing: 0.15em;"/>
+            <button type="button" id="scan-camera-btn" class="ug-scan-camera" title="Scan with camera" hidden>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M3 7 L3 19 L21 19 L21 7 L16 7 L14 4 L10 4 L8 7 Z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </button>
+          </div>
+          <div class="ug-panel-row">
+            <button type="submit" id="scan-submit" class="ug-panel-submit">REDEEM →</button>
+          </div>
+          <div id="scan-msg" class="ug-panel-msg"></div>
+          <video id="scan-video" class="ug-scan-video" hidden playsinline muted></video>
+        </form>
+        <button class="ug-panel-back" data-action="back" type="button">← BACK</button>
+      </div>
     </div>
-  </section>
+  </main>
 
-  <!-- Footer -->
   <footer class="ug-footer">
-    <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.4); letter-spacing: 0.3em; text-transform: uppercase;">
-      © MMXXVI · UNDERGROUND GALLERY · ALL ACCESS REVOKED
-    </div>
-    <div class="ug-footer-links">
-      <a href="/privacy" style="color: rgba(201,204,209,0.6); text-decoration: none;">PRIVACY</a>
-      <a href="/terms" style="color: rgba(201,204,209,0.6); text-decoration: none;">TERMS</a>
-      <a href="mailto:info@undergroundgallery.ai" style="color: rgba(201,204,209,0.6); text-decoration: none;">CONTACT</a>
-      <a href="https://instagram.com/undergroundgalleryai" target="_blank" rel="noopener" style="color: rgba(201,204,209,0.6); text-decoration: none;">@UNDERGROUNDGALLERYAI</a>
+    <div>© MMXXVI · UNDERGROUND GALLERY</div>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+      <a href="/privacy">PRIVACY</a>
+      <a href="/terms">TERMS</a>
+      <a href="mailto:info@undergroundgallery.ai">CONTACT</a>
     </div>
   </footer>
 
-</main>
+</div>
 
-<!--
-  Light template helpers below — written as inline custom elements so the page
-  needs zero build step. The dev gets a single static landing page that talks
-  to /api/apply via fetch.
--->
 <script>
-// ─── Tiny "components" — replace <Stat>, <Field>, <Pillar> with real markup ──
 (function () {
-  // <Stat label="..." value="..."> → renders a labeled number.
-  document.querySelectorAll('Stat').forEach(el => {
-    const label = el.getAttribute('label') || '';
-    const value = el.getAttribute('value') || '';
-    const id = el.getAttribute('id') || '';
-    const placeholder = el.getAttribute('placeholder') || '';
-    const node = document.createElement('div');
-    node.style.cssText = 'flex: 1; padding-right: 32px; border-right: 0.5px solid rgba(255,255,255,0.08);';
-    node.innerHTML = `
-      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.3em;color:rgba(201,204,209,0.4);margin-bottom:8px;">${label}</div>
-      <div ${id ? `id="${id}"` : ''} class="ug-pulse" style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;letter-spacing:0.04em;color:#fff;">${value || placeholder}</div>
-    `;
-    el.replaceWith(node);
-  });
-  // strip last border
-  const stats = document.querySelectorAll('.ug-pulse');
-  if (stats.length) {
-    const lastWrap = stats[stats.length - 1].parentElement;
-    if (lastWrap) lastWrap.style.borderRight = 'none';
+  // ─── Boot intro orchestration ────────────────────────────────────
+  // Plays once per browser tab session. Skips on tap, on reduced-motion,
+  // or for visitors who've already seen it this session.
+  const boot = document.getElementById('ug-boot');
+  const stage = document.getElementById('ug-stage');
+  const BOOT_FLAG = 'ug_boot_seen_v3';
+  const reducedMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const alreadySeen =
+    (() => { try { return sessionStorage.getItem(BOOT_FLAG) === '1'; } catch (_) { return false; } })();
+
+  function dismissBoot() {
+    if (!boot) return;
+    boot.style.display = 'none';
+    boot.setAttribute('aria-hidden', 'true');
+    if (stage) {
+      stage.classList.remove('ug-stage-hidden');
+      stage.classList.add('ug-stage-revealed');
+    }
+    try { sessionStorage.setItem(BOOT_FLAG, '1'); } catch (_) {}
   }
 
-  // <Field label name type required placeholder>
-  document.querySelectorAll('Field').forEach(el => {
-    const label = el.getAttribute('label') || '';
-    const name = el.getAttribute('name') || '';
-    const type = el.getAttribute('type') || 'text';
-    const required = el.hasAttribute('required');
-    const placeholder = el.getAttribute('placeholder') || '';
-    const node = document.createElement('div');
-    node.style.marginBottom = '20px';
-    node.innerHTML = `
-      <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(201,204,209,0.7);letter-spacing:0.25em;margin-bottom:10px;">${label}${required ? ' <span style="color:#ff2a2a;">*</span>' : ''}</label>
-      <input type="${type}" name="${name}" ${required ? 'required' : ''} placeholder="${placeholder.replace(/"/g, '&quot;')}" style="width:100%;padding:14px 16px;background:rgba(0,0,0,0.4);border:0.5px solid rgba(255,255,255,0.12);color:#f5f6f7;font-size:16px;transition:border-color 0.15s, box-shadow 0.15s;"/>
-    `;
-    el.replaceWith(node);
-  });
-
-  // <Pillar n title body>
-  document.querySelectorAll('Pillar').forEach(el => {
-    const n = el.getAttribute('n') || '';
-    const title = el.getAttribute('title') || '';
-    const body = el.getAttribute('body') || '';
-    const node = document.createElement('div');
-    node.innerHTML = `
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#ff2a2a;letter-spacing:0.3em;margin-bottom:8px;">${n}</div>
-      <h3 style="font-size:22px;font-weight:700;margin:0 0 10px;letter-spacing:-0.01em;">${title}</h3>
-      <p style="font-size:14px;line-height:1.65;color:rgba(201,204,209,0.65);margin:0;">${body}</p>
-    `;
-    el.replaceWith(node);
-  });
-})();
-
-// ─── Live waitlist counter ────────────────────────────────────────────────
-fetch('/api/waitlist')
-  .then(r => r.ok ? r.json() : null)
-  .then(d => {
-    if (!d) return;
-    const el = document.getElementById('ug-counter');
-    if (el) el.textContent = d.count.toLocaleString();
-  })
-  .catch(() => { /* leave placeholder */ });
-
-// ─── Form submit ──────────────────────────────────────────────────────────
-const form = document.getElementById('apply-form');
-const errorBox = document.getElementById('apply-error');
-const successBox = document.getElementById('apply-success');
-const submitBtn = document.getElementById('apply-submit');
-
-function showError(msg) {
-  errorBox.textContent = '∕∕ ERROR · ' + msg;
-  errorBox.style.display = 'block';
-}
-
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  errorBox.style.display = 'none';
-  const data = Object.fromEntries(new FormData(form).entries());
-  if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    showError('VALID EMAIL REQUIRED');
-    return;
+  if (reducedMotion || alreadySeen) {
+    // Skip the cinematic; reveal the gate immediately.
+    dismissBoot();
+  } else {
+    // Tap anywhere to skip ahead to the gate.
+    boot.addEventListener('click', dismissBoot, { once: true });
+    boot.addEventListener('touchstart', dismissBoot, { once: true, passive: true });
+    // Auto-dismiss after the CSS animation completes.
+    setTimeout(dismissBoot, 4500);
   }
 
-  submitBtn.disabled = true;
-  const original = submitBtn.textContent;
-  submitBtn.textContent = 'TRANSMITTING…';
-  submitBtn.style.opacity = '0.6';
+  const state = {
+    loading: document.getElementById('state-loading'),
+    signedin: document.getElementById('state-signedin'),
+    actions: document.getElementById('state-actions'),
+    panelSignin: document.getElementById('panel-signin'),
+    panelScan: document.getElementById('panel-scan'),
+  };
 
-  try {
-    const res = await fetch('/api/apply', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+  function showOnly(el) {
+    Object.values(state).forEach(s => { s.style.display = 'none'; s.hidden = true; });
+    if (el) {
+      el.hidden = false;
+      if (el === state.actions || el === state.signedin) el.style.display = 'flex';
+      else el.style.display = 'block';
+    }
+  }
+
+  // Session check (Auth.js v5 default endpoint)
+  fetch('/api/auth/session', { credentials: 'include', cache: 'no-store' })
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (data && data.user && (data.user.email || data.user.id)) {
+        const label = document.getElementById('signedin-as');
+        if (data.user.email) label.textContent = 'SIGNED IN · ' + data.user.email;
+        showOnly(state.signedin);
+      } else {
+        showOnly(state.actions);
+      }
+    })
+    .catch(() => { showOnly(state.actions); });
+
+  // Action button routing
+  state.actions.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+    if (action === 'signin') {
+      showOnly(state.panelSignin);
+      setTimeout(() => document.getElementById('signin-email').focus(), 50);
+    } else if (action === 'scan') {
+      showOnly(state.panelScan);
+      setTimeout(() => document.getElementById('scan-code').focus(), 50);
+    } else if (action === 'apply') {
+      window.location.href = '/apply';
+    }
+  });
+
+  // ── ENTER button: play the unlock animation, THEN navigate ──────
+  // Subsequent taps skip the animation (impatient users go straight through).
+  const enterLink = document.getElementById('enter-link');
+  let enterTaps = 0;
+  if (enterLink) {
+    enterLink.addEventListener('click', (e) => {
+      enterTaps += 1;
+      const dest = enterLink.getAttribute('href') || '/garage';
+      // Second tap or later: just go.
+      if (enterTaps >= 2) return; // let the default <a> navigation happen
+      e.preventDefault();
+      // Flip the strip to granted/green
+      const strip = document.getElementById('ug-status-strip');
+      const text = document.getElementById('ug-status-text');
+      if (strip) strip.classList.add('granted');
+      if (text) text.textContent = 'ACCESS GRANTED';
+      // Hold the moment, then navigate.
+      setTimeout(() => { window.location.href = dest; }, 1200);
     });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      showError(json.error || 'TRANSMISSION FAILED · TRY AGAIN');
-      submitBtn.disabled = false;
-      submitBtn.textContent = original;
-      submitBtn.style.opacity = '1';
+  }
+
+  document.querySelectorAll('[data-action="back"]').forEach(b => {
+    b.addEventListener('click', () => { stopCamera(); showOnly(state.actions); });
+  });
+
+  // Sign out
+  document.getElementById('signout-btn').addEventListener('click', async () => {
+    try {
+      const csrfRes = await fetch('/api/auth/csrf', { credentials: 'include' });
+      const csrf = csrfRes.ok ? (await csrfRes.json()).csrfToken : '';
+      await fetch('/api/auth/signout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ csrfToken: csrf, callbackUrl: '/' }).toString(),
+      });
+    } catch (_) { /* noop */ }
+    location.reload();
+  });
+
+  // Sign-in form
+  const signinForm = document.getElementById('signin-form');
+  const signinMsg = document.getElementById('signin-msg');
+  const signinSubmit = document.getElementById('signin-submit');
+
+  function showMsg(el, kind, text) {
+    el.className = 'ug-panel-msg ' + kind;
+    el.textContent = (kind === 'error' ? '∕∕ ERROR · ' : '∕∕ ') + text;
+    el.style.display = 'block';
+  }
+  function clearMsg(el) {
+    el.style.display = 'none';
+    el.className = 'ug-panel-msg';
+    el.textContent = '';
+  }
+
+  signinForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg(signinMsg);
+    const email = document.getElementById('signin-email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showMsg(signinMsg, 'error', 'VALID EMAIL REQUIRED');
       return;
     }
-    // Success
-    document.getElementById('apply-success-email').textContent = data.email;
-    form.style.display = 'none';
-    successBox.style.display = 'block';
-    successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  } catch (err) {
-    showError('NETWORK ERROR · TRY AGAIN');
-    submitBtn.disabled = false;
-    submitBtn.textContent = original;
-    submitBtn.style.opacity = '1';
-  }
-});
+    signinSubmit.disabled = true;
+    signinSubmit.textContent = 'SENDING…';
+    try {
+      const csrfRes = await fetch('/api/auth/csrf', { credentials: 'include' });
+      const csrf = csrfRes.ok ? (await csrfRes.json()).csrfToken : '';
+      const res = await fetch('/api/auth/signin/resend', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          email,
+          csrfToken: csrf,
+          callbackUrl: '/garage',
+          json: 'true',
+        }).toString(),
+      });
+      if (res.ok || res.status === 302) {
+        showMsg(signinMsg, 'success', 'CHECK YOUR EMAIL FOR THE LINK');
+        document.getElementById('signin-email').value = '';
+      } else {
+        showMsg(signinMsg, 'error', 'COULD NOT SEND LINK · TRY AGAIN');
+      }
+    } catch (_) {
+      showMsg(signinMsg, 'error', 'NETWORK ERROR · TRY AGAIN');
+    } finally {
+      signinSubmit.disabled = false;
+      signinSubmit.textContent = 'SEND LINK →';
+    }
+  });
 
-// NOTE: Mobile redirect to /m intentionally removed — the responsive CSS above
-// makes this single landing page work on every viewport. Don't re-add it
-// without first deleting the rewrite from next.config.js too.
+  // Scan-code form
+  const scanForm = document.getElementById('scan-form');
+  const scanMsg = document.getElementById('scan-msg');
+  const scanSubmit = document.getElementById('scan-submit');
+  const scanInput = document.getElementById('scan-code');
+
+  function normalizeCode(raw) {
+    const trimmed = (raw || '').trim();
+    const urlMatch = trimmed.match(/\/invite\/([^/?#\s]+)/i);
+    if (urlMatch) return urlMatch[1].toUpperCase();
+    return trimmed.toUpperCase();
+  }
+
+  scanForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    clearMsg(scanMsg);
+    const code = normalizeCode(scanInput.value);
+    if (!code || code.length < 4) {
+      showMsg(scanMsg, 'error', 'ENTER A VALID CODE');
+      return;
+    }
+    scanSubmit.disabled = true;
+    scanSubmit.textContent = 'OPENING…';
+    window.location.href = '/invite/' + encodeURIComponent(code);
+  });
+
+  // Camera-based QR scanning (BarcodeDetector — Safari 17+, Chrome Android, Edge)
+  const scanCameraBtn = document.getElementById('scan-camera-btn');
+  const scanVideo = document.getElementById('scan-video');
+  let scanStream = null;
+  let scanRaf = null;
+  let scanDetector = null;
+
+  const cameraSupported =
+    typeof window !== 'undefined' &&
+    'BarcodeDetector' in window &&
+    navigator.mediaDevices &&
+    typeof navigator.mediaDevices.getUserMedia === 'function';
+
+  if (cameraSupported) {
+    scanCameraBtn.hidden = false;
+    scanCameraBtn.addEventListener('click', startCamera);
+  }
+
+  async function startCamera() {
+    clearMsg(scanMsg);
+    if (scanStream) { stopCamera(); return; }
+    try {
+      scanDetector = scanDetector || new window.BarcodeDetector({ formats: ['qr_code'] });
+      scanStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+        audio: false,
+      });
+      scanVideo.srcObject = scanStream;
+      scanVideo.hidden = false;
+      await scanVideo.play();
+      tickScan();
+    } catch (err) {
+      showMsg(scanMsg, 'error', 'CAMERA ACCESS DENIED');
+      stopCamera();
+    }
+  }
+
+  function stopCamera() {
+    if (scanRaf) cancelAnimationFrame(scanRaf);
+    scanRaf = null;
+    if (scanStream) {
+      scanStream.getTracks().forEach(t => t.stop());
+      scanStream = null;
+    }
+    if (scanVideo) {
+      scanVideo.srcObject = null;
+      scanVideo.hidden = true;
+    }
+  }
+
+  async function tickScan() {
+    if (!scanStream) return;
+    try {
+      const codes = await scanDetector.detect(scanVideo);
+      if (codes && codes.length > 0) {
+        const raw = codes[0].rawValue || '';
+        const code = normalizeCode(raw);
+        if (code && code.length >= 4) {
+          stopCamera();
+          showMsg(scanMsg, 'success', 'CODE DETECTED');
+          window.location.href = '/invite/' + encodeURIComponent(code);
+          return;
+        }
+      }
+    } catch (_) { /* keep scanning */ }
+    scanRaf = requestAnimationFrame(tickScan);
+  }
+
+  window.addEventListener('beforeunload', stopCamera);
+})();
 </script>
 
 </body>
