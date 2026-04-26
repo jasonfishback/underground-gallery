@@ -1,0 +1,171 @@
+// app/u/[callsign]/page.tsx
+//
+// Public-ish profile page (logged-in members only). Shows another user's
+// callsign, bio, vehicles, and a link to their race log.
+
+import { notFound, redirect } from 'next/navigation';
+import Link from 'next/link';
+import { eq, desc } from 'drizzle-orm';
+import { auth } from '@/auth';
+import { db } from '@/lib/db';
+import { users, vehicles, photos, vehicleSpecs } from '@/lib/db/schema';
+import { CallsignWithBadge } from '@/components/AdminBadge';
+import { colors, fonts } from '@/lib/design';
+
+export const dynamic = 'force-dynamic';
+
+export default async function ProfilePage({
+  params,
+}: {
+  params: Promise<{ callsign: string }>;
+}) {
+  const { callsign } = await params;
+  const session = await auth();
+  if (!session?.user?.id) redirect('/auth/signin');
+
+  const [profile] = await db
+    .select()
+    .from(users)
+    .where(eq(users.callsign, callsign))
+    .limit(1);
+  if (!profile) notFound();
+  if (profile.status !== 'active') notFound();
+
+  // Their vehicles
+  const cars = await db
+    .select({
+      id: vehicles.id,
+      year: vehicles.year,
+      make: vehicles.make,
+      model: vehicles.model,
+      trim: vehicles.trim,
+      isPrimary: vehicles.isPrimary,
+      thumbUrl: photos.urlThumb,
+      stockHp: vehicleSpecs.stockHp,
+      currentHpOverride: vehicles.currentHpOverride,
+      drivetrain: vehicleSpecs.drivetrain,
+    })
+    .from(vehicles)
+    .leftJoin(photos, eq(photos.id, vehicles.primaryPhotoId))
+    .leftJoin(vehicleSpecs, eq(vehicleSpecs.id, vehicles.vehicleSpecId))
+    .where(eq(vehicles.userId, profile.id))
+    .orderBy(desc(vehicles.isPrimary), desc(vehicles.createdAt));
+
+  const isMe = session.user.id === profile.id;
+
+  return (
+    <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
+        <header style={{ marginBottom: 40 }}>
+          <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
+            MEMBER PROFILE
+          </div>
+          <h1 style={{ fontSize: 36, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <CallsignWithBadge callsign={profile.callsign} isAdmin={profile.isModerator} size="lg" />
+            {isMe && (
+              <Link
+                href="/me"
+                style={{
+                  fontSize: 10,
+                  letterSpacing: '0.3em',
+                  color: colors.textMuted,
+                  textDecoration: 'none',
+                  border: `0.5px solid ${colors.border}`,
+                  padding: '4px 10px',
+                  fontFamily: fonts.mono,
+                }}
+              >
+                EDIT →
+              </Link>
+            )}
+          </h1>
+          {profile.regionLabel && (
+            <div style={{ fontSize: 13, color: colors.textMuted, fontFamily: fonts.mono }}>
+              {profile.regionLabel}
+            </div>
+          )}
+          {profile.bio && (
+            <p style={{ fontSize: 14, color: colors.text, marginTop: 16, maxWidth: 600, lineHeight: 1.6 }}>
+              {profile.bio}
+            </p>
+          )}
+          <div style={{ marginTop: 16 }}>
+            <Link
+              href={`/u/${profile.callsign}/races`}
+              style={{
+                fontSize: 11,
+                letterSpacing: '0.3em',
+                color: colors.textMuted,
+                textDecoration: 'none',
+                fontFamily: fonts.mono,
+              }}
+            >
+              VIEW RACE LOG →
+            </Link>
+          </div>
+        </header>
+
+        <div style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, marginBottom: 16, fontFamily: fonts.mono, fontWeight: 700 }}>
+          {cars.length} {cars.length === 1 ? 'VEHICLE' : 'VEHICLES'}
+        </div>
+
+        {cars.length === 0 ? (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: 64,
+              color: colors.textMuted,
+              fontSize: 13,
+              border: `0.5px solid ${colors.border}`,
+              background: '#111',
+            }}
+          >
+            No vehicles yet.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+            {cars.map((c) => {
+              const hp = c.currentHpOverride ?? c.stockHp;
+              return (
+                <Link
+                  key={c.id}
+                  href={`/v/${c.id}`}
+                  style={{
+                    background: '#111',
+                    border: `0.5px solid ${c.isPrimary ? colors.accent : colors.border}`,
+                    color: colors.text,
+                    textDecoration: 'none',
+                    overflow: 'hidden',
+                    display: 'block',
+                  }}
+                >
+                  <div
+                    style={{
+                      aspectRatio: '16 / 9',
+                      background: c.thumbUrl ? `url(${c.thumbUrl}) center/cover` : '#0d0d0d',
+                      borderBottom: `0.5px solid ${colors.border}`,
+                    }}
+                  />
+                  <div style={{ padding: 14 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700 }}>
+                      {c.year} {c.make} {c.model}
+                    </div>
+                    {c.trim && (
+                      <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2, fontFamily: fonts.mono }}>
+                        {c.trim}
+                      </div>
+                    )}
+                    <div style={{ marginTop: 10, display: 'flex', gap: 12, fontSize: 11, fontFamily: fonts.mono, color: colors.textMuted }}>
+                      {hp != null && <span style={{ color: colors.text }}>{hp} hp</span>}
+                      {c.drivetrain && <span>{c.drivetrain}</span>}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
