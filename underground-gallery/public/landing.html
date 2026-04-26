@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <title>Underground Gallery</title>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="description" content="A members-only gallery for the work most people never see. Invite only. Est. MMXXVI."/>
 <meta property="og:title" content="Underground Gallery"/>
 <meta property="og:description" content="A members-only gallery for the work most people never see. Invite only."/>
@@ -17,7 +17,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-  html, body { margin: 0; padding: 0; background: #05060a; color: #f5f6f7; font-family: 'Inter Tight', system-ui, -apple-system, sans-serif; min-height: 100vh; overflow-x: hidden; }
+  /* Root scroll behavior — explicit so iOS Safari can't get confused */
+  html { overflow-x: hidden; overflow-y: auto; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; padding: 0;
+    background: #05060a; color: #f5f6f7;
+    font-family: 'Inter Tight', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
   * { box-sizing: border-box; }
   @keyframes ugBlink { 50% { opacity: 0.3; } }
   @keyframes ugScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
@@ -30,10 +39,84 @@
   .ug-fade-5 { animation: ugFadeUp 0.8s ease-out 0.9s both; }
   .ug-blink { animation: ugBlink 1.4s infinite; }
   .ug-pulse { animation: ugCountTick 4s infinite; }
-  input, textarea { font-family: inherit; }
+  input, textarea { font-family: inherit; font-size: 16px; /* iOS: prevents zoom-on-focus */ }
   input:focus, textarea:focus { outline: none; border-color: #ff2a2a !important; box-shadow: 0 0 0 1px #ff2a2a, 0 0 18px rgba(255,42,42,0.18); }
   button { cursor: pointer; font-family: inherit; }
   ::selection { background: #ff2a2a; color: #05060a; }
+
+  /* Layout containers — use classes so media queries can target them cleanly */
+  .ug-main {
+    position: relative; z-index: 2;
+    max-width: 1280px; margin: 0 auto;
+    padding: 32px 48px 80px;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  .ug-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 24px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+    gap: 16px;
+  }
+  .ug-hero {
+    display: grid; grid-template-columns: 1.4fr 1fr;
+    gap: 80px; align-items: center;
+    flex: 1; padding-top: 80px;
+  }
+  .ug-hero-mark { width: 360px; height: 360px; }
+  .ug-hero-mark svg { width: 360px; height: 360px; }
+  .ug-pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  .ug-cta-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .ug-stats { display: flex; gap: 0; padding: 20px 0; border-top: 0.5px solid rgba(255,255,255,0.08); border-bottom: 0.5px solid rgba(255,255,255,0.08); margin-bottom: 40px; }
+  .ug-footer { margin-top: 80px; padding-top: 32px; border-top: 0.5px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .ug-footer-links { display: flex; gap: 24px; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; }
+
+  /* ─── Mobile (≤720px) ──────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    .ug-main {
+      padding: 20px 20px 60px;
+    }
+    .ug-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .ug-hero {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      padding-top: 48px;
+    }
+    /* Move the hero mark above the text on mobile so the headline is the
+       first thing under the logo */
+    .ug-hero > .ug-hero-mark-wrap {
+      order: -1;
+      justify-self: center;
+    }
+    .ug-hero-mark { width: 220px; height: 220px; }
+    .ug-hero-mark svg { width: 220px; height: 220px; }
+    .ug-pillars {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .ug-stats { padding: 16px 0; }
+    .ug-stats > div { padding-right: 16px !important; }
+    .ug-cta-row a { width: 100%; justify-content: center; }
+    section#apply { padding: 60px 0 40px !important; }
+    section#about { padding: 80px 0 40px !important; }
+    form#apply-form { padding: 24px !important; }
+    .ug-footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+  }
+
+  /* Very small phones (≤380px) */
+  @media (max-width: 380px) {
+    .ug-main { padding: 16px 16px 48px; }
+    .ug-stats > div { padding-right: 10px !important; }
+    .ug-stats .ug-pulse { font-size: 18px !important; }
+  }
 </style>
 </head>
 <body>
@@ -56,10 +139,10 @@
             animation: ugScan 8s linear infinite;
             "></div>
 
-<main style="position: relative; z-index: 2; max-width: 1280px; margin: 0 auto; padding: 32px 48px 80px; min-height: 100vh; display: flex; flex-direction: column;">
+<main class="ug-main">
 
   <!-- Top bar -->
-  <header style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 24px; border-bottom: 0.5px solid rgba(255,255,255,0.08);">
+  <header class="ug-header">
     <div style="display: flex; align-items: center; gap: 12px;">
       <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
         <rect x="3" y="3" width="34" height="34" stroke="#ff2a2a" stroke-width="1.5" fill="none" stroke-opacity="0.4"/>
@@ -79,7 +162,7 @@
   </header>
 
   <!-- Hero -->
-  <section style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 80px; align-items: center; flex: 1; padding-top: 80px;">
+  <section class="ug-hero">
 
     <!-- Left: Manifesto -->
     <div>
@@ -87,7 +170,7 @@
         ∕∕ INVITATION REQUIRED · SEASON 01
       </div>
 
-      <h1 class="ug-fade-2" style="font-size: clamp(56px, 7vw, 96px); font-weight: 800; letter-spacing: -0.035em; line-height: 0.95; margin: 0 0 32px;">
+      <h1 class="ug-fade-2" style="font-size: clamp(40px, 7vw, 96px); font-weight: 800; letter-spacing: -0.035em; line-height: 0.95; margin: 0 0 32px;">
         The work<br/>
         most people<br/>
         <span style="color: #ff2a2a;">never see.</span>
@@ -99,13 +182,13 @@
       </p>
 
       <!-- Numbers strip -->
-      <div class="ug-fade-4" style="display: flex; gap: 0; padding: 20px 0; border-top: 0.5px solid rgba(255,255,255,0.08); border-bottom: 0.5px solid rgba(255,255,255,0.08); margin-bottom: 40px;">
+      <div class="ug-fade-4 ug-stats">
         <Stat label="ON THE LIST" value="" id="ug-counter" placeholder="114"/>
         <Stat label="SEASON" value="01"/>
         <Stat label="EST." value="MMXXVI"/>
       </div>
 
-      <div class="ug-fade-5" style="display: flex; gap: 16px; flex-wrap: wrap;">
+      <div class="ug-fade-5 ug-cta-row">
         <a href="#apply" style="display: inline-flex; align-items: center; gap: 10px; padding: 16px 28px; background: #ff2a2a; color: #05060a; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-decoration: none; text-transform: uppercase; box-shadow: 0 0 24px rgba(255,42,42,0.25);">
           REQUEST INVITATION <span style="font-size: 14px;">→</span>
         </a>
@@ -116,9 +199,9 @@
     </div>
 
     <!-- Right: Hero mark -->
-    <div class="ug-fade-3" style="display: flex; align-items: center; justify-content: center; position: relative;">
-      <div style="position: relative; width: 360px; height: 360px;">
-        <svg width="360" height="360" viewBox="0 0 120 120" fill="none" style="position: absolute; inset: 0;">
+    <div class="ug-fade-3 ug-hero-mark-wrap" style="display: flex; align-items: center; justify-content: center; position: relative;">
+      <div class="ug-hero-mark" style="position: relative;">
+        <svg viewBox="0 0 120 120" fill="none" style="position: absolute; inset: 0;">
           <style>
             @keyframes ugRingSpin { to { transform: rotate(360deg); } }
             @keyframes ugScanSweep { 0% { transform: translateY(-8px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(94px); opacity: 0; } }
@@ -150,7 +233,7 @@
   <!-- About anchor -->
   <section id="about" style="padding: 120px 0 80px; max-width: 880px;">
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.4em; margin-bottom: 24px;">∕∕ WHAT'S INSIDE</div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px;">
+    <div class="ug-pillars">
       <Pillar n="01" title="Private feed" body="No public profile, no algorithm. Members see members. The work, the process, the parts list, the people."/>
       <Pillar n="02" title="Seasonal drops" body="Four times a year we open the doors for new members. Each season has a theme, a juror, and a hard cap."/>
       <Pillar n="03" title="Off-site meets" body="Coordinates released the morning of. Location dies after. Bring the car, leave with the photos."/>
@@ -161,7 +244,7 @@
   <!-- Apply form -->
   <section id="apply" style="padding: 80px 0; max-width: 720px; margin: 0 auto; width: 100%;">
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff2a2a; letter-spacing: 0.4em; margin-bottom: 16px; text-align: center;">∕∕ REQUEST INVITATION</div>
-    <h2 style="font-size: clamp(36px, 4vw, 56px); font-weight: 800; letter-spacing: -0.025em; line-height: 1; margin: 0 0 16px; text-align: center;">
+    <h2 style="font-size: clamp(28px, 4vw, 56px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; margin: 0 0 16px; text-align: center;">
       The doors open <span style="color: #ff2a2a;">once a season.</span>
     </h2>
     <p style="font-size: 15px; color: rgba(201,204,209,0.6); line-height: 1.6; text-align: center; max-width: 540px; margin: 0 auto 48px;">
@@ -179,7 +262,7 @@
 
       <div style="margin-bottom: 28px;">
         <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.7); letter-spacing: 0.25em; margin-bottom: 10px;">WHY YOU?</label>
-        <textarea name="message" rows="4" placeholder="One paragraph. What makes you not boring." style="width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.4); border: 0.5px solid rgba(255,255,255,0.12); color: #f5f6f7; font-size: 14px; line-height: 1.6; resize: vertical; transition: border-color 0.15s, box-shadow 0.15s;"></textarea>
+        <textarea name="message" rows="4" placeholder="One paragraph. What makes you not boring." style="width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.4); border: 0.5px solid rgba(255,255,255,0.12); color: #f5f6f7; font-size: 16px; line-height: 1.6; resize: vertical; transition: border-color 0.15s, box-shadow 0.15s;"></textarea>
       </div>
 
       <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
@@ -209,11 +292,11 @@
   </section>
 
   <!-- Footer -->
-  <footer style="margin-top: 80px; padding-top: 32px; border-top: 0.5px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+  <footer class="ug-footer">
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.4); letter-spacing: 0.3em; text-transform: uppercase;">
       © MMXXVI · UNDERGROUND GALLERY · ALL ACCESS REVOKED
     </div>
-    <div style="display: flex; gap: 24px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;">
+    <div class="ug-footer-links">
       <a href="/privacy" style="color: rgba(201,204,209,0.6); text-decoration: none;">PRIVACY</a>
       <a href="/terms" style="color: rgba(201,204,209,0.6); text-decoration: none;">TERMS</a>
       <a href="mailto:info@undergroundgallery.ai" style="color: rgba(201,204,209,0.6); text-decoration: none;">CONTACT</a>
@@ -243,7 +326,6 @@
       <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.3em;color:rgba(201,204,209,0.4);margin-bottom:8px;">${label}</div>
       <div ${id ? `id="${id}"` : ''} class="ug-pulse" style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;letter-spacing:0.04em;color:#fff;">${value || placeholder}</div>
     `;
-    // remove right border on last
     el.replaceWith(node);
   });
   // strip last border
@@ -264,7 +346,7 @@
     node.style.marginBottom = '20px';
     node.innerHTML = `
       <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(201,204,209,0.7);letter-spacing:0.25em;margin-bottom:10px;">${label}${required ? ' <span style="color:#ff2a2a;">*</span>' : ''}</label>
-      <input type="${type}" name="${name}" ${required ? 'required' : ''} placeholder="${placeholder.replace(/"/g, '&quot;')}" style="width:100%;padding:14px 16px;background:rgba(0,0,0,0.4);border:0.5px solid rgba(255,255,255,0.12);color:#f5f6f7;font-size:14px;transition:border-color 0.15s, box-shadow 0.15s;"/>
+      <input type="${type}" name="${name}" ${required ? 'required' : ''} placeholder="${placeholder.replace(/"/g, '&quot;')}" style="width:100%;padding:14px 16px;background:rgba(0,0,0,0.4);border:0.5px solid rgba(255,255,255,0.12);color:#f5f6f7;font-size:16px;transition:border-color 0.15s, box-shadow 0.15s;"/>
     `;
     el.replaceWith(node);
   });
@@ -346,10 +428,9 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// Mobile users — middleware should have routed them to /m. Belt-and-suspenders client check.
-if (window.matchMedia('(max-width: 720px)').matches && !location.search.includes('desktop')) {
-  location.replace('/m');
-}
+// NOTE: Mobile redirect to /m intentionally removed — the responsive CSS above
+// makes this single landing page work on every viewport. Don't re-add it
+// without first deleting the rewrite from next.config.js too.
 </script>
 
 </body>
