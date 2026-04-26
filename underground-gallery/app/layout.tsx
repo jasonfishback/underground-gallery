@@ -1,3 +1,6 @@
+import { getAuthContext } from '@/lib/auth/gates';
+import { getRecentNotifications } from '@/lib/notifications/fetch';
+import { NotificationBell } from '@/components/NotificationBell';
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/react';
 import { SiteHeader } from '@/components/SiteHeader';
