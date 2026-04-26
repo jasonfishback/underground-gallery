@@ -1,27 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-
   async rewrites() {
     return [
-      // Root → desktop landing
+      // Root → desktop landing (gated access screen)
       { source: '/', destination: '/landing.html' },
 
-      // Device-routed mobile experience
-      { source: '/m', destination: '/mobile.html' },
-
-      // Member experiences
+      // Invite share links — keep this; it's a real flow that hands a code to invite-share.html
       { source: '/invite/:slug', destination: '/invite-share.html' },
-      { source: '/share', destination: '/share.html' },
-      { source: '/garage', destination: '/invite.html' },
-      { source: '/moderator', destination: '/moderator.html' },
 
-      // Internal preview tools (noindex'd)
-      { source: '/flow', destination: '/flow.html' },
-      { source: '/mobile-boot', destination: '/mobile-boot.html' },
+      // ─── REMOVED rewrites — these were hijacking real Next.js routes ───
+      // /m, /share, /garage, /moderator, /flow, /mobile-boot were all pointing at
+      // demo HTML files in public/. Those demos are deleted now and these routes
+      // are either real Next.js pages (/garage) or unused.
     ];
   },
-
   async headers() {
     return [
       {
@@ -35,5 +28,4 @@ const nextConfig = {
     ];
   },
 };
-
 module.exports = nextConfig;

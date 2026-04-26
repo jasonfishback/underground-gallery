@@ -5,9 +5,11 @@
 //   1. User submits email on /auth/signin
 //   2. Auth.js creates a verification_token row, sends magic link via Resend
 //   3. User clicks link → Auth.js verifies token, creates user (if new) and session
-//   4. NEW users: created with status='pending'; moderator reviews later
-//   5. ACTIVE users: session created, can access members area
-//   6. REJECTED users: blocked from signing in (signIn callback returns false)
+//   4. NEW users: routed to /setup to choose callsign / region / garage
+//   5. POST-SETUP users: routed to /pending-approval until a moderator decides
+//   6. APPROVED users: full access
+//   7. REJECTED users: still allowed to sign in — they land on /pending-approval
+//      and see the rejection reason. Approval state lives on `applications.status`.
 //
 // Key gotchas baked in:
 //   - Database session strategy (NOT JWT) so we can read user.status on every request
