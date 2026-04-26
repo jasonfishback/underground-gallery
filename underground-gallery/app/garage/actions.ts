@@ -30,8 +30,6 @@ export type SpecSearchResult = {
 export async function searchVehicleSpecs(
   rawQuery: string,
 ): Promise<{ ok: true; results: SpecSearchResult[] } | { ok: false; error: string }> {
-  "use server";
-
   const query = (rawQuery ?? "").trim();
   if (query.length < 2) {
     return { ok: true, results: [] };
