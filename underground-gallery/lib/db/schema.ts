@@ -1,16 +1,18 @@
 // lib/db/schema.ts
-// Database schema for Underground Gallery.
 //
-// This file defines every table the app uses. Drizzle reads this and:
-//   1. Generates TypeScript types for queries (so `db.select().from(users)` is fully typed)
-//   2. Generates the SQL `CREATE TABLE` statements for migrations
+// Drizzle schema mirroring the live Underground Gallery database.
+// This is the single source of truth that TypeScript queries against.
 //
-// Tables match NextAuth.js's expected schema for the standard `users`, `accounts`,
-// `sessions`, and `verification_tokens` — with custom fields added on `users` for
-// our moderator approval workflow (status, callsign, region, etc).
-//
-// `applications` is custom: it stores the apply-form answers (what you drive, why you,
-// etc) tied to a user. We keep it separate so the core user record stays clean.
+// Tables (in dependency order):
+//   users                  — accounts + profile fields
+//   accounts               — NextAuth provider links
+//   sessions               — NextAuth sessions
+//   verification_tokens    — NextAuth magic-link tokens
+//   applications           — apply-form snapshots + approval state machine
+//   moderation_events      — audit log of approve/reject decisions
+//   vehicles               — one row per car, multiple per user
+//   photos                 — polymorphic: belongs to user (avatar) or vehicle (gallery)
+//   app_settings           — global k/v toggles for the admin dashboard
 
 import {
   pgTable,
@@ -21,46 +23,77 @@ import {
   boolean,
   uniqueIndex,
   index,
+  doublePrecision,
+  jsonb,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 
 // ─── users ────────────────────────────────────────────────────────────────
-// One row per person. NextAuth requires id/email/emailVerified/name/image —
-// we add UG-specific fields below. `status` is the moderator-approval state.
+// id is text (not uuid) because gen_random_uuid() returns it cast as text.
+// Includes everything from Stage 1A (auth+approval) and Stage 1B-iii (region
+// + setup_completed_at) and Stage 2 (bio + avatar_photo_id).
 
 export const users = pgTable(
   'users',
   {
     id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
     email: text('email').notNull(),
-    emailVerified: timestamp('email_verified', { mode: 'date' }),
+    emailVerified: timestamp('email_verified', { mode: 'date', withTimezone: true }),
     name: text('name'),
     image: text('image'),
 
-    // UG-specific fields
+    // Approval state machine
     status: text('status', { enum: ['pending', 'active', 'rejected'] })
       .notNull()
       .default('pending'),
+
+    // Profile
     callsign: text('callsign'),
     region: text('region'),
+    bio: text('bio'),
+    // Avatar pointer — typed as `: AnyPgColumn` to break the circular reference
+    // (users → photos.id and photos → users.id)
+    avatarPhotoId: text('avatar_photo_id').references(
+      (): AnyPgColumn => photos.id,
+      { onDelete: 'set null' },
+    ),
+
+    // Region (Google Places)
+    regionPlaceId: text('region_place_id'),
+    regionLabel: text('region_label'),
+    regionLat: doublePrecision('region_lat'),
+    regionLng: doublePrecision('region_lng'),
+    regionCountry: text('region_country'),
+    regionAdmin1: text('region_admin1'),
+
+    // Roles
     isModerator: boolean('is_moderator').notNull().default(false),
 
-    appliedAt: timestamp('applied_at', { mode: 'date' }).notNull().defaultNow(),
-    approvedAt: timestamp('approved_at', { mode: 'date' }),
-    rejectedAt: timestamp('rejected_at', { mode: 'date' }),
-
-    createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
-    updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),
+    // Timestamps
+    appliedAt: timestamp('applied_at', { mode: 'date', withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    approvedAt: timestamp('approved_at', { mode: 'date', withTimezone: true }),
+    rejectedAt: timestamp('rejected_at', { mode: 'date', withTimezone: true }),
+    setupCompletedAt: timestamp('setup_completed_at', {
+      mode: 'date',
+      withTimezone: true,
+    }),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (t) => ({
     emailIdx: uniqueIndex('users_email_idx').on(t.email),
     callsignIdx: uniqueIndex('users_callsign_idx').on(t.callsign),
     statusIdx: index('users_status_idx').on(t.status),
-  })
+  }),
 );
 
 // ─── accounts ─────────────────────────────────────────────────────────────
-// NextAuth: links a user to an external auth provider (email, oauth, etc).
-// For magic-link email auth, we store one row with provider='email'.
 
 export const accounts = pgTable(
   'accounts',
@@ -68,7 +101,7 @@ export const accounts = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    type: text('type').notNull(), // 'email' | 'oauth' | 'oidc'
+    type: text('type').notNull(),
     provider: text('provider').notNull(),
     providerAccountId: text('provider_account_id').notNull(),
     refresh_token: text('refresh_token'),
@@ -81,42 +114,36 @@ export const accounts = pgTable(
   },
   (t) => ({
     pk: primaryKey({ columns: [t.provider, t.providerAccountId] }),
-  })
+  }),
 );
 
 // ─── sessions ─────────────────────────────────────────────────────────────
-// NextAuth: one row per active browser session.
 
 export const sessions = pgTable('sessions', {
   sessionToken: text('session_token').primaryKey(),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  expires: timestamp('expires', { mode: 'date' }).notNull(),
+  expires: timestamp('expires', { mode: 'date', withTimezone: true }).notNull(),
 });
 
 // ─── verification_tokens ──────────────────────────────────────────────────
-// NextAuth: one-time tokens for magic-link emails.
-// When a user clicks the link in their email, NextAuth looks up the token here
-// and (if valid) creates a session.
 
 export const verificationTokens = pgTable(
   'verification_tokens',
   {
-    identifier: text('identifier').notNull(), // usually the email address
+    identifier: text('identifier').notNull(),
     token: text('token').notNull(),
-    expires: timestamp('expires', { mode: 'date' }).notNull(),
+    expires: timestamp('expires', { mode: 'date', withTimezone: true }).notNull(),
   },
   (t) => ({
     pk: primaryKey({ columns: [t.identifier, t.token] }),
-  })
+  }),
 );
 
 // ─── applications ─────────────────────────────────────────────────────────
-// Stores the application answers (what you drive, why you, etc).
-// One row per user (latest submission wins). Kept separate from `users` so
-// the user record stays clean for the dozens of profile/build queries we'll
-// run later — applications are mostly only read by moderators.
+// Holds the apply-form snapshot AND the approval state. Status enum is
+// enforced by a CHECK constraint in the DB; we mirror it here for type safety.
 
 export const applications = pgTable(
   'applications',
@@ -126,6 +153,7 @@ export const applications = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
 
+    // Form snapshot
     callsign: text('callsign'),
     region: text('region'),
     drive: text('drive'),
@@ -133,19 +161,155 @@ export const applications = pgTable(
     invitedBy: text('invited_by'),
     message: text('message'),
 
-    submittedAt: timestamp('submitted_at', { mode: 'date' })
+    // Approval state machine
+    status: text('status', { enum: ['pending', 'approved', 'rejected'] })
+      .notNull()
+      .default('pending'),
+    submittedAt: timestamp('submitted_at', { mode: 'date', withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    decidedAt: timestamp('decided_at', { mode: 'date', withTimezone: true }),
+    decidedBy: text('decided_by').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    rejectReason: text('reject_reason'),
+
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
       .notNull()
       .defaultNow(),
   },
   (t) => ({
     userIdx: index('applications_user_id_idx').on(t.userId),
-  })
+  }),
 );
 
+// ─── moderation_events ────────────────────────────────────────────────────
+// Audit log: one row per moderator decision (approve | reject).
+
+export const moderationEvents = pgTable('moderation_events', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  applicationId: text('application_id')
+    .notNull()
+    .references(() => applications.id, { onDelete: 'cascade' }),
+  actorId: text('actor_id').references(() => users.id, { onDelete: 'set null' }),
+  action: text('action', { enum: ['approve', 'reject'] }).notNull(),
+  reason: text('reason'),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ─── vehicles ─────────────────────────────────────────────────────────────
+// One row per car. Build sections live here (per-vehicle, not per-user).
+
+export const vehicles = pgTable(
+  'vehicles',
+  {
+    id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    year: integer('year').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    trim: text('trim'),
+    notes: text('notes'),
+    isPrimary: boolean('is_primary').notNull().default(false),
+
+    // Hero photo for /v/[id] and member directory cards
+    primaryPhotoId: text('primary_photo_id').references(
+      (): AnyPgColumn => photos.id,
+      { onDelete: 'set null' },
+    ),
+
+    // Build sections — free text, all optional
+    buildExterior: text('build_exterior'),
+    buildInterior: text('build_interior'),
+    buildEngine: text('build_engine'),
+    buildSuspension: text('build_suspension'),
+    buildWheelsTires: text('build_wheels_tires'),
+
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    userIdx: index('vehicles_user_id_idx').on(t.userId),
+  }),
+);
+
+// ─── photos ───────────────────────────────────────────────────────────────
+// Polymorphic photo store. (subject_type, subject_id) tells you whether a
+// photo belongs to a user (their avatar) or a vehicle (a gallery image).
+
+export const photos = pgTable(
+  'photos',
+  {
+    id: text('id').primaryKey(),
+    uploaderId: text('uploader_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    subjectType: text('subject_type', { enum: ['user', 'vehicle'] }).notNull(),
+    subjectId: text('subject_id').notNull(),
+
+    urlFull: text('url_full').notNull(),
+    urlThumb: text('url_thumb').notNull(),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+
+    // EXIF preserved for admin viewing only — public URLs strip it
+    exifJson: jsonb('exif_json'),
+
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    subjectIdx: index('photos_subject_idx').on(
+      t.subjectType,
+      t.subjectId,
+      t.sortOrder,
+    ),
+    uploaderIdx: index('photos_uploader_idx').on(t.uploaderId),
+  }),
+);
+
+// ─── app_settings ─────────────────────────────────────────────────────────
+// Global k/v store for admin-toggleable settings.
+// Seed values: require_profile_photo=false, require_vehicle_photos=false
+
+export const appSettings = pgTable('app_settings', {
+  key: text('key').primaryKey(),
+  value: jsonb('value').notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedBy: text('updated_by').references(() => users.id, {
+    onDelete: 'set null',
+  }),
+});
+
 // ─── Type exports ─────────────────────────────────────────────────────────
-// Convenience types for use across the app.
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+
 export type Application = typeof applications.$inferSelect;
 export type NewApplication = typeof applications.$inferInsert;
+
+export type Vehicle = typeof vehicles.$inferSelect;
+export type NewVehicle = typeof vehicles.$inferInsert;
+
+export type Photo = typeof photos.$inferSelect;
+export type NewPhoto = typeof photos.$inferInsert;
+
+export type ModerationEvent = typeof moderationEvents.$inferSelect;
+export type NewModerationEvent = typeof moderationEvents.$inferInsert;
+
+export type AppSetting = typeof appSettings.$inferSelect;
+export type NewAppSetting = typeof appSettings.$inferInsert;
