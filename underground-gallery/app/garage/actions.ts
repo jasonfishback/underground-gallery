@@ -1,6 +1,6 @@
-// ============================================================================
+﻿// ============================================================================
 // PATCH for app/garage/actions.ts
-// Add this server action. Don't replace the whole file — just append this
+// Add this server action. Don't replace the whole file â€” just append this
 // inside the existing "use server" block, alongside addCarFromSpec etc.
 // ============================================================================
 
