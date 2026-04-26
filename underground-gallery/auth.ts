@@ -131,3 +131,84 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .set({ isModerator: true, status: 'active', approvedAt: new Date() })
           .where(eq(users.id, user.id));
       }
+    },
+  },
+
+  trustHost: true,
+});
+
+// ─── Email templates ──────────────────────────────────────────────────────
+
+function buildEmail({ url, host }: { url: string; host: string }) {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Sign in to Underground Gallery</title>
+</head>
+<body style="margin:0;padding:0;background:#05060a;color:#f5f6f7;font-family:system-ui,-apple-system,Segoe UI,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#05060a;padding:48px 24px;">
+    <tr>
+      <td align="center">
+        <table width="520" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background:#0a0b10;border:1px solid rgba(255,42,42,0.18);">
+          <tr>
+            <td style="padding:40px 32px 32px;">
+
+              <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:#ff2a2a;letter-spacing:0.4em;font-weight:700;margin-bottom:20px;">
+                ∕∕ ACCESS RESTRICTED
+              </div>
+
+              <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.02em;color:#f5f6f7;margin:0 0 16px;line-height:1.1;">
+                Your sign-in link
+              </h1>
+
+              <p style="font-size:15px;color:rgba(201,204,209,0.75);line-height:1.6;margin:0 0 32px;">
+                Click the button below to sign in to ${host}. This link expires in 24 hours and can only be used once.
+              </p>
+
+              <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+                <tr>
+                  <td>
+                    <a href="${url}" style="display:inline-block;padding:16px 32px;background:#ff2a2a;color:#05060a;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0.3em;text-decoration:none;text-transform:uppercase;">
+                      SIGN IN →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-size:12px;color:rgba(201,204,209,0.4);line-height:1.6;margin:32px 0 0;">
+                If the button doesn't work, paste this URL into your browser:<br/>
+                <span style="color:rgba(201,204,209,0.6);word-break:break-all;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;">${url}</span>
+              </p>
+
+              <div style="margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.08);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;color:rgba(201,204,209,0.4);letter-spacing:0.24em;">
+                If you didn't request this, ignore the email. No account will be created.
+              </div>
+
+            </td>
+          </tr>
+        </table>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:9px;color:rgba(201,204,209,0.3);letter-spacing:0.3em;margin-top:24px;text-transform:uppercase;">
+          © MMXXVI · UNDERGROUND GALLERY
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function buildEmailText({ url, host }: { url: string; host: string }) {
+  return `// ACCESS RESTRICTED
+
+Sign in to ${host}.
+
+${url}
+
+This link expires in 24 hours and can only be used once.
+
+If you didn't request this, ignore the email. No account will be created.
+
+— Underground Gallery`;
+}
