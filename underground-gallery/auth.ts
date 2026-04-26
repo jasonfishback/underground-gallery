@@ -43,7 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   }),
 
   // Database sessions so we can read user.status server-side every request.
-  session: { strategy: 'database' },
+session: { strategy: 'database', maxAge: 90 * 24 * 60 * 60 },
 
   // Custom pages
   pages: {
