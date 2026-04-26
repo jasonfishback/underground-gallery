@@ -234,4 +234,22 @@ function SignInForm() {
 function mapAuthError(code: string): string {
   switch (code) {
     case 'AccessDenied':
-      return 'ACCESS DENIED · YOU
+      return 'ACCESS DENIED · YOUR ACCOUNT WAS NOT APPROVED';
+    case 'Verification':
+      return 'LINK EXPIRED OR ALREADY USED · REQUEST A NEW ONE';
+    case 'EmailSignin':
+      return 'COULD NOT SEND SIGN-IN EMAIL · TRY AGAIN';
+    case 'Configuration':
+      return 'SERVER CONFIGURATION ERROR · CONTACT ADMIN';
+    default:
+      return 'AUTHENTICATION FAILED · TRY AGAIN';
+  }
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div style={{ background: '#05060a', minHeight: '100vh' }} />}>
+      <SignInForm />
+    </Suspense>
+  );
+}
