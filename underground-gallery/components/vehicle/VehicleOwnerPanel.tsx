@@ -60,6 +60,7 @@ export default function VehicleOwnerPanel({
 
     try {
       for (const original of Array.from(files)) {
+        const file = await resizeImage(original);
         const fd = new FormData();
         fd.append("vehicleId", vehicleId);
         fd.append("file", file);
