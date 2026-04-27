@@ -2,6 +2,7 @@
 // Public landing page reached via QR scan or share link.
 
 import { redirect } from "next/navigation";
+import InviteSignupForm from "@/components/invites/InviteSignupForm";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { inviteCodes, users } from "@/lib/db/schema";
