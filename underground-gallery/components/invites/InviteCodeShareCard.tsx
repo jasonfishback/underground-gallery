@@ -115,8 +115,8 @@ export default function InviteCodeShareCard({ code, shareLink, createdAt }: Prop
         border: `0.5px solid ${colors.border}`,
         padding: 24,
         display: "grid",
-        gridTemplateColumns: "minmax(0, 1fr) auto",
-        gap: 32,
+        gridTemplateColumns: "minmax(0, 1fr)",
+        gap: 24,
         alignItems: "center",
       }}
     >
@@ -136,12 +136,14 @@ export default function InviteCodeShareCard({ code, shareLink, createdAt }: Prop
         <div
           style={{
             fontFamily: fonts.mono,
-            fontSize: 36,
+            fontSize: 28,
             fontWeight: 700,
             letterSpacing: "0.15em",
             color: colors.accent,
             marginBottom: 16,
-            wordBreak: "break-all",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
           {code}
@@ -159,14 +161,16 @@ export default function InviteCodeShareCard({ code, shareLink, createdAt }: Prop
         </div>
         <div
           style={{
-            fontSize: 12,
+            fontSize: 11,
             color: colors.textMuted,
             marginBottom: 16,
             fontFamily: fonts.mono,
-            wordBreak: "break-all",
+            wordBreak: "break-word",
+            overflowWrap: "anywhere",
             background: colors.bg,
             padding: "8px 10px",
             border: `0.5px solid ${colors.border}`,
+            lineHeight: 1.5,
           }}
         >
           {shareLink}
