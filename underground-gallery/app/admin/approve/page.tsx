@@ -30,14 +30,14 @@ async function approveByEmail(formData: FormData) {
       id: newId(),
       userId: target.id,
       callsign: target.callsign ?? email.split('@')[0],
-      status: 'active',
+      status: 'approved',
       submittedAt: new Date(),
       decidedAt: new Date(),
       decidedBy: session.user.id,
     } as any);
   } else {
     await db.update(applications).set({
-      status: 'active',
+      status: 'approved',
       decidedAt: new Date(),
       decidedBy: session.user.id,
     }).where(eq(applications.userId, target.id));
