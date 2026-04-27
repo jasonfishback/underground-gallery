@@ -48,113 +48,82 @@ export function MeView({ cars, modCounts }: Props) {
             ...styles.buttonPrimary,
             padding: '12px 24px',
             fontSize: 11,
+            letterSpacing: '0.3em',
           }}
         >
           + ADD VEHICLE
         </button>
       </div>
 
+      {/* Car list */}
       {cars.length === 0 ? (
-        <div style={{ ...styles.panel, textAlign: 'center', padding: 64 }}>
-          <div style={{ fontSize: 14, color: colors.textMuted, marginBottom: 16 }}>
-            No vehicles yet. Add your first car to start racing.
-          </div>
-          <button onClick={() => setWizardOpen(true)} style={styles.buttonPrimary}>
-            + ADD YOUR FIRST CAR
-          </button>
+        <div style={{
+          padding: 48,
+          border: `1px dashed ${colors.border}`,
+          textAlign: 'center',
+          color: colors.textMuted,
+          fontFamily: fonts.mono,
+          fontSize: 12,
+          letterSpacing: '0.1em',
+        }}>
+          NO VEHICLES YET. ADD ONE TO START RACING.
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
-          {cars.map((c) => (
-            <CarCard key={c.id} car={c} modCount={modCounts[c.id] ?? 0} />
-          ))}
+        <div style={{ display: 'grid', gap: 16 }}>
+          {cars.map((c) => {
+            const label = `${c.year} ${c.make} ${c.model}${c.trim ? ' ' + c.trim : ''}`;
+            const modCount = modCounts[c.id] ?? 0;
+            return (
+              <Link
+                key={c.id}
+                href={`/v/${c.id}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16,
+                  padding: 16,
+                  border: `1px solid ${colors.border}`,
+                  background: colors.bgElevated,
+                  textDecoration: 'none',
+                  color: colors.text,
+                }}
+              >
+                <div style={{
+                  width: 80,
+                  height: 80,
+                  background: colors.bgSubtle,
+                  border: `1px solid ${colors.border}`,
+                  flexShrink: 0,
+                  backgroundImage: c.thumbUrl ? `url(${c.thumbUrl})` : undefined,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: fonts.mono, fontSize: 13, fontWeight: 700, letterSpacing: '0.05em', marginBottom: 4 }}>
+                    {label.toUpperCase()}
+                  </div>
+                  <div style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted, letterSpacing: '0.15em' }}>
+                    {c.stockHp ? `${c.stockHp} HP` : ''}{c.drivetrain ? ` • ${c.drivetrain}` : ''}{modCount > 0 ? ` • ${modCount} MOD${modCount === 1 ? '' : 'S'}` : ''}
+                  </div>
+                </div>
+                {c.isPrimary && (
+                  <div style={{
+                    fontSize: 9,
+                    letterSpacing: '0.25em',
+                    color: colors.accent,
+                    fontFamily: fonts.mono,
+                    fontWeight: 700,
+                  }}>
+                    ★ PRIMARY
+                  </div>
+                )}
+              </Link>
+            );
+          })}
         </div>
       )}
 
-      {wizardOpen && (
-        <AddCarWizard open={true} onClose={() => setWizardOpen(false)}
-          }
-        />
-      )}
+      <AddCarWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
     </div>
-  );
-}
-
-function CarCard({ car, modCount }: { car: Car; modCount: number }) {
-  const currentHp = car.currentHpOverride ?? car.stockHp;
-  const hasMods = modCount > 0 || car.currentHpOverride !== null;
-
-  return (
-    <Link
-      href={`/v/${car.id}`}
-      style={{
-        position: 'relative',
-        background: '#111',
-        border: `0.5px solid ${car.isPrimary ? colors.accent : colors.border}`,
-        textDecoration: 'none',
-        color: colors.text,
-        display: 'block',
-        overflow: 'hidden',
-      }}
-    >
-      {car.isPrimary && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
-            zIndex: 1,
-            fontSize: 8,
-            letterSpacing: '0.3em',
-            color: colors.accent,
-            border: `0.5px solid ${colors.accent}`,
-            padding: '2px 8px',
-            fontFamily: fonts.mono,
-            fontWeight: 700,
-            background: 'rgba(10,10,10,0.8)',
-          }}
-        >
-          PRIMARY
-        </div>
-      )}
-
-      {/* Photo or placeholder */}
-      <div
-        style={{
-          aspectRatio: '16 / 9',
-          background: car.thumbUrl ? `url(${car.thumbUrl}) center/cover` : '#0d0d0d',
-          borderBottom: `0.5px solid ${colors.border}`,
-        }}
-      />
-
-      <div style={{ padding: 16 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: '0.02em', marginBottom: 4 }}>
-          {car.year} {car.make} {car.model}
-        </div>
-        {car.trim && (
-          <div style={{ fontSize: 11, color: colors.textMuted, marginBottom: 12, fontFamily: fonts.mono }}>
-            {car.trim}
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 11, fontFamily: fonts.mono, color: colors.textMuted }}>
-          {currentHp != null && (
-            <div>
-              <span style={{ color: hasMods ? colors.accent : colors.text, fontSize: 14, fontWeight: 700 }}>
-                {currentHp}
-              </span>
-              <span style={{ marginLeft: 2 }}>hp</span>
-            </div>
-          )}
-          {car.drivetrain && <div>{car.drivetrain}</div>}
-          {car.transmission && <div>{car.transmission}</div>}
-          {modCount > 0 && (
-            <div style={{ marginLeft: 'auto', color: colors.accent }}>
-              {modCount} {modCount === 1 ? 'MOD' : 'MODS'}
-            </div>
-          )}
-        </div>
-      </div>
-    </Link>
   );
 }
