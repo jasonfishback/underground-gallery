@@ -1,82 +1,25 @@
 "use client";
-
 import { useEffect, useState } from "react";
-
 export default function BootIntro({ children }: { children: React.ReactNode }) {
   const [bootDone, setBootDone] = useState(false);
-
   useEffect(() => {
     const t = setTimeout(() => setBootDone(true), 1800);
     return () => clearTimeout(t);
   }, []);
-
   return (
     <>
       <style>{`
-        @keyframes ugInviteBootFade {
-          0%, 70% { opacity: 1; }
-          100% { opacity: 0; visibility: hidden; }
-        }
-        @keyframes ugInviteLogoIn {
-          from { opacity: 0; transform: scale(0.92); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes ugInviteContentIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes ugInviteBlink {
-          0%, 60% { opacity: 1; }
-          80%, 100% { opacity: 0.2; }
-        }
-        #ug-invite-boot {
-          position: fixed;
-          inset: 0;
-          z-index: 100;
-          background: #000;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          animation: ugInviteBootFade 1.8s ease-in-out forwards;
-          pointer-events: none;
-        }
-        .ug-invite-boot-inner {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 20px;
-          animation: ugInviteLogoIn 0.6s ease-out;
-        }
-        .ug-invite-boot-wordmark {
-          font-family: 'JetBrains Mono', ui-monospace, monospace;
-          font-weight: 700;
-          font-size: 14px;
-          letter-spacing: 0.3em;
-          color: #f5f6f7;
-        }
-        .ug-invite-boot-line {
-          font-family: 'JetBrains Mono', ui-monospace, monospace;
-          font-size: 9px;
-          letter-spacing: 0.3em;
-          color: rgba(255, 42, 42, 0.8);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .ug-invite-boot-dot {
-          display: inline-block;
-          width: 6px;
-          height: 6px;
-          background: #ff2a2a;
-          border-radius: 50%;
-          animation: ugInviteBlink 0.7s ease-in-out infinite;
-        }
-        .ug-invite-content-wrap {
-          opacity: 0;
-          animation: ugInviteContentIn 0.5s ease-out 1.4s forwards;
-        }
+        @keyframes ugInviteBootFade { 0%, 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        @keyframes ugInviteLogoIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        @keyframes ugInviteContentIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes ugInviteBlink { 0%, 60% { opacity: 1; } 80%, 100% { opacity: 0.2; } }
+        #ug-invite-boot { position: fixed; inset: 0; z-index: 100; background: #000; display: flex; align-items: center; justify-content: center; animation: ugInviteBootFade 1.8s ease-in-out forwards; pointer-events: none; }
+        .ug-invite-boot-inner { display: flex; flex-direction: column; align-items: center; gap: 20px; animation: ugInviteLogoIn 0.6s ease-out; }
+        .ug-invite-boot-wordmark { font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 700; font-size: 14px; letter-spacing: 0.3em; color: #f5f6f7; }
+        .ug-invite-boot-line { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: 0.3em; color: rgba(255, 42, 42, 0.8); display: flex; align-items: center; gap: 8px; }
+        .ug-invite-boot-dot { display: inline-block; width: 6px; height: 6px; background: #ff2a2a; border-radius: 50%; animation: ugInviteBlink 0.7s ease-in-out infinite; }
+        .ug-invite-content-wrap { opacity: 0; animation: ugInviteContentIn 0.5s ease-out 1.4s forwards; }
       `}</style>
-
       {!bootDone && (
         <div id="ug-invite-boot" aria-hidden="true">
           <div className="ug-invite-boot-inner">
@@ -94,10 +37,7 @@ export default function BootIntro({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
-
-      <div className="ug-invite-content-wrap">
-        {children}
-      </div>
+      <div className="ug-invite-content-wrap">{children}</div>
     </>
   );
 }
