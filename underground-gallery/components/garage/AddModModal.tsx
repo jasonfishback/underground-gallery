@@ -26,6 +26,7 @@ type Props = {
   vehicleId: string;
   open: boolean;
   onClose: () => void;
+  existingCatalogIds?: string[];
 };
 
 const CATEGORIES = [
