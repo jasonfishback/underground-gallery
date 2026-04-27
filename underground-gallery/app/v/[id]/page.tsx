@@ -13,6 +13,7 @@ import {
   photos,
   vehicleSpecs,
   userCarMods,
+  modCatalog,
 } from '@/lib/db/schema';
 import { CallsignWithBadge } from '@/components/AdminBadge';
 import { colors, fonts } from '@/lib/design';
@@ -69,17 +70,30 @@ export default async function VehicleDetailPage({ params }: Params) {
   const isOwner = v.userId === session.user.id;
 
   // ---- Mods (used by both owner panel and read-only display) ----
-  const mods = await db
+  const modsRaw = await db
     .select({
       id: userCarMods.id,
-      name: userCarMods.customName,
+      customName: userCarMods.customName,
+      catalogName: modCatalog.name,
       category: userCarMods.category,
-      brand: userCarMods.modCatalogId,
-      hpDelta: userCarMods.hpGain,
+      modCatalogId: userCarMods.modCatalogId,
+      hpGain: userCarMods.hpGain,
+      catalogHp: modCatalog.defaultHpGain,
       notes: userCarMods.notes,
     })
     .from(userCarMods)
+    .leftJoin(modCatalog, eq(userCarMods.modCatalogId, modCatalog.id))
     .where(eq(userCarMods.vehicleId, v.id));
+
+  const mods = modsRaw.map((m) => ({
+    id: m.id,
+    name: m.customName ?? m.catalogName ?? "Mod",
+    category: m.category,
+    brand: null as string | null,
+    hpDelta: m.hpGain ?? m.catalogHp ?? 0,
+    notes: m.notes,
+    modCatalogId: m.modCatalogId,
+  }));
 
   // ---- Photos (used by owner panel) ----
   const vehiclePhotos = isOwner

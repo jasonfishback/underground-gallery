@@ -66,6 +66,24 @@ export default async function MePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
+      <Link
+        href="/invites"
+        style={{
+          display: 'block',
+          background: '#ff2a2a',
+          color: '#0a0a0a',
+          padding: '14px 20px',
+          fontFamily: 'JetBrains Mono, monospace',
+          fontSize: 12,
+          fontWeight: 700,
+          letterSpacing: '0.3em',
+          textDecoration: 'none',
+          textAlign: 'center',
+          margin: '0 0 16px',
+        }}
+      >
+        + INVITE A FRIEND →
+      </Link>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
         <header style={{ marginBottom: 40 }}>
           <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>

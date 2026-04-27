@@ -1,9 +1,4 @@
 // components/SiteHeader.tsx
-//
-// Shared header rendered on every authenticated page via app/layout.tsx.
-// Server component — fetches the user's recent notifications and renders
-// the notification bell. If the user isn't logged in, this renders nothing
-// (the gated landing page handles its own header).
 
 import Link from 'next/link';
 import { getAuthContext } from '@/lib/auth/gates';
@@ -13,7 +8,6 @@ import { colors, fonts } from '@/lib/design';
 
 export async function SiteHeader() {
   const ctx = await getAuthContext();
-  // Not logged in or pending — let individual pages handle their own header
   if (!ctx || ctx.status !== 'active') return null;
 
   const notifs = await getRecentNotifications(ctx.userId, 20);
@@ -28,35 +22,82 @@ export async function SiteHeader() {
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         borderBottom: `0.5px solid ${colors.border}`,
-        padding: '14px 24px',
+        padding: '12px 16px',
         display: 'flex',
+        flexWrap: 'wrap',
         alignItems: 'center',
         justifyContent: 'space-between',
+        gap: 12,
         fontFamily: fonts.sans,
+        maxWidth: '100vw',
+        boxSizing: 'border-box',
       }}
     >
       <Link
         href="/me"
         style={{
           fontSize: 11,
-          letterSpacing: '0.4em',
+          letterSpacing: '0.3em',
           color: colors.accent,
           textDecoration: 'none',
           fontWeight: 700,
           fontFamily: fonts.mono,
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
         }}
       >
         UNDERGROUND GALLERY
       </Link>
 
-      <nav style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+      <nav
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          overflowX: 'auto',
+          flexWrap: 'nowrap',
+          WebkitOverflowScrolling: 'touch',
+          maxWidth: '100%',
+        }}
+      >
         <NavLink href="/me">GARAGE</NavLink>
         <NavLink href="/race">RACE</NavLink>
         <NavLink href="/members">MEMBERS</NavLink>
-        <NavLink href="/invites">INVITES</NavLink>
+        <Link
+          href="/invites"
+          style={{
+            background: colors.accent,
+            color: '#0a0a0a',
+            padding: '6px 12px',
+            fontFamily: fonts.mono,
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: '0.25em',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            border: 'none',
+          }}
+        >
+          + INVITE
+        </Link>
         {ctx.isModerator && <NavLink href="/admin">ADMIN</NavLink>}
         <NotificationBell notifications={notifs} />
-        <Link href="/profile" style={{ color: 'inherit', textDecoration: 'none', fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', whiteSpace: 'nowrap', flexShrink: 0 }}>PROFILE</Link>
+        <Link
+          href="/profile"
+          style={{
+            color: colors.textMuted,
+            textDecoration: 'none',
+            fontFamily: fonts.mono,
+            fontSize: 10,
+            letterSpacing: '0.2em',
+            fontWeight: 700,
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+          }}
+        >
+          PROFILE
+        </Link>
       </nav>
     </header>
   );
