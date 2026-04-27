@@ -100,9 +100,9 @@ export async function POST(req: NextRequest) {
       subjectType: "vehicle",
       subjectId: vehicleId,
       urlFull: url,
-      urlThumb: url, // no separate thumb pipeline yet Ã¢â‚¬â€ same URL for now
-      width: null,
-      height: null,
+      urlThumb: url, // no separate thumb pipeline yet
+      width: 0,
+      height: 0,
       exifJson: null,
       sortOrder: 0,
     } as any);
