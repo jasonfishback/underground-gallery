@@ -100,12 +100,12 @@ export async function POST(req: NextRequest) {
       subjectType: "vehicle",
       subjectId: vehicleId,
       urlFull: url,
-      urlThumb: url, // no separate thumb pipeline yet â€” same URL for now
+      urlThumb: url, // no separate thumb pipeline yet Ã¢â‚¬â€ same URL for now
       width: null,
       height: null,
       exifJson: null,
       sortOrder: 0,
-    });
+    } as any);
 
     // If vehicle has no hero photo yet, set this one as the hero.
     if (!vehicle.primaryPhotoId) {
