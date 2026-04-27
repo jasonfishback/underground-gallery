@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 // ============================================================================
 // components/garage/AddCarWizard.tsx
-// FULL REWRITE — replaces the broken year/make/model dropdown chain with a
+// FULL REWRITE â€” replaces the broken year/make/model dropdown chain with a
 // single typeahead. User types "2015 bmw m3" and picks a match.
 //
 // Flow:
@@ -242,7 +242,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
             className="text-neutral-500 hover:text-neutral-200"
             aria-label="Close"
           >
-            ✕
+            âœ•
           </button>
         </div>
 
@@ -267,7 +267,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   NHTSA's full database.
                 </p>
               ) : searching ? (
-                <p className="text-sm text-neutral-500">Searching…</p>
+                <p className="text-sm text-neutral-500">Searchingâ€¦</p>
               ) : hits.length === 0 ? (
                 <div>
                   <p className="text-sm text-neutral-500">
@@ -292,7 +292,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                         <span className="text-neutral-100">{hit.label}</span>
                         <span className="text-xs uppercase tracking-wider text-neutral-500">
                           {hit.kind === "catalog"
-                            ? `catalog${hit.hpStock ? ` · ${hit.hpStock}hp` : ""}`
+                            ? `catalog${hit.hpStock ? ` Â· ${hit.hpStock}hp` : ""}`
                             : "nhtsa"}
                         </span>
                       </button>
@@ -348,14 +348,14 @@ export default function AddCarWizard({ open, onClose }: Props) {
                 disabled={submitting}
                 className="text-sm text-neutral-400 hover:text-neutral-200"
               >
-                ← Back
+                â† Back
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
                 className="rounded bg-red-600 px-5 py-2 font-semibold tracking-wide text-white hover:bg-red-500 disabled:opacity-50"
               >
-                {submitting ? "Adding…" : "ADD TO GARAGE"}
+                {submitting ? "Addingâ€¦" : "ADD TO GARAGE"}
               </button>
             </div>
           </div>
@@ -430,14 +430,14 @@ export default function AddCarWizard({ open, onClose }: Props) {
                 disabled={submitting}
                 className="text-sm text-neutral-400 hover:text-neutral-200"
               >
-                ← Back to search
+                â† Back to search
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
                 className="rounded bg-red-600 px-5 py-2 font-semibold tracking-wide text-white hover:bg-red-500 disabled:opacity-50"
               >
-                {submitting ? "Adding…" : "ADD TO GARAGE"}
+                {submitting ? "Addingâ€¦" : "ADD TO GARAGE"}
               </button>
             </div>
           </div>
@@ -463,5 +463,3 @@ function Field({
     </label>
   );
 }
-
-export { AddCarWizard as default };

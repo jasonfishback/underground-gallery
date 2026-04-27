@@ -1,9 +1,9 @@
-// components/me/MeView.tsx
+﻿// components/me/MeView.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { AddCarWizard } from '@/components/garage/AddCarWizard';
+import AddCarWizard from '@/components/garage/AddCarWizard';
 import { styles, colors, fonts } from '@/lib/design';
 
 type Car = {
