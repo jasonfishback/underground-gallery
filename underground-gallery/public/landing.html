@@ -443,7 +443,7 @@
       <path d="M25 15 L15 15 L15 27 L25 27 L25 22 L20 22" stroke="#ff2a2a" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
     </svg>
     <div class="ug-boot-wordmark">
-      UNDERGROUND<span style="color: #ff2a2a; font-weight: 900; padding: 0 6px;">âˆ•âˆ•</span>GALLERY
+      UNDERGROUND<span style="color: #ff2a2a; font-weight: 900; padding: 0 6px;">&middot;&middot;</span>GALLERY
     </div>
     <div class="ug-boot-line">
       <span class="ug-loading-dot ug-blink"></span>
@@ -472,7 +472,7 @@
         <path d="M25 15 L15 15 L15 27 L25 27 L25 22 L20 22" stroke="#ff2a2a" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
       </svg>
       <div style="display: flex; flex-direction: column; gap: 2px;">
-        <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; letter-spacing: 0.18em;">UNDERGROUND<span style="color: #ff2a2a; padding: 0 4px; font-weight: 900;">âˆ•âˆ•</span>GALLERY</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; letter-spacing: 0.18em;">UNDERGROUND<span style="color: #ff2a2a; padding: 0 4px; font-weight: 900;">&middot;&middot;</span>GALLERY</div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.3em; color: rgba(201,204,209,0.4); text-transform: uppercase;">MEMBERS // EST. MMXXVI</div>
       </div>
     </div>
@@ -547,7 +547,7 @@
       </div>
 
       <div id="panel-signin" hidden class="ug-panel ug-fade-in" style="display: none;">
-        <div class="ug-panel-label">âˆ•âˆ• SIGN IN - MAGIC LINK</div>
+        <div class="ug-panel-label">&middot;&middot; SIGN IN - MAGIC LINK</div>
         <form id="signin-form" autocomplete="off" novalidate>
           <input type="email" name="email" id="signin-email" class="ug-input" placeholder="name@domain.com" required/>
           <div class="ug-panel-row">
@@ -559,7 +559,7 @@
       </div>
 
       <div id="panel-scan" hidden class="ug-panel ug-fade-in" style="display: none;">
-        <div class="ug-panel-label">âˆ•âˆ• INVITE CODE</div>
+        <div class="ug-panel-label">&middot;&middot; INVITE CODE</div>
         <form id="scan-form" autocomplete="off" novalidate>
           <div style="display: flex; gap: 8px;">
             <input type="text" name="code" id="scan-code" class="ug-input" placeholder="XXXX-XXXX-XXXX" required style="text-transform: uppercase; letter-spacing: 0.15em;"/>
@@ -722,7 +722,7 @@
 
   function showMsg(el, kind, text) {
     el.className = 'ug-panel-msg ' + kind;
-    el.textContent = (kind === 'error' ? 'âˆ•âˆ• ERROR - ' : 'âˆ•âˆ• ') + text;
+    el.textContent = (kind === 'error' ? '&middot;&middot; ERROR - ' : '&middot;&middot; ') + text;
     el.style.display = 'block';
   }
   function clearMsg(el) {
