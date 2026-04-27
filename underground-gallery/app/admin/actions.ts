@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
-import { randomUUID } from "crypto";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { users, applications, moderationEvents } from "@/lib/db/schema";
@@ -40,11 +39,9 @@ export async function approveApplication(applicationId: string) {
       .set({ status: "active", approvedAt: new Date() })
       .where(eq(users.id, app.userId));
 
-    await tx.insert(moderationEvents).values({
-      id: randomUUID(),
-      applicationId,
+    await tx.insert(moderationEvents).values({ applicationId,
       actorId: me.id,
-      action: "approve_application",
+      action: "approve",
       reason: null,
     });
   });
@@ -82,11 +79,9 @@ export async function rejectApplication(
       .set({ status: "rejected", rejectedAt: new Date() })
       .where(eq(users.id, app.userId));
 
-    await tx.insert(moderationEvents).values({
-      id: randomUUID(),
-      applicationId,
+    await tx.insert(moderationEvents).values({ applicationId,
       actorId: me.id,
-      action: "reject_application",
+      action: "reject",
       reason,
     });
   });
