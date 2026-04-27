@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -722,7 +722,7 @@
 
   function showMsg(el, kind, text) {
     el.className = 'ug-panel-msg ' + kind;
-    el.textContent = (kind === 'error' ? '&middot;&middot; ERROR - ' : '&middot;&middot; ') + text;
+    el.textContent = (kind === 'error' ? '** ERROR - ' : '** ') + text;
     el.style.display = 'block';
   }
   function clearMsg(el) {
