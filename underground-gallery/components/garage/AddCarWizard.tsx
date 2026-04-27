@@ -1,4 +1,4 @@
-﻿﻿"use client";
+﻿"use client";
 
 // ============================================================================
 // components/garage/AddCarWizard.tsx
@@ -232,7 +232,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-xl sm:rounded-lg border-0 sm:border sm:border-neutral-800 bg-neutral-950 p-4 sm:p-6 text-neutral-100 shadow-2xl min-h-screen sm:min-h-0 sm:max-h-[90vh] overflow-y-auto"
+        className="w-full sm:max-w-xl sm:rounded-lg border-0 sm:border sm:border-neutral-800 bg-neutral-950 p-5 sm:p-6 text-neutral-100 shadow-2xl min-h-screen sm:min-h-0 sm:max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
@@ -257,7 +257,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="e.g. 2015 bmw m3"
-              className="w-full rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-base text-neutral-100 placeholder-neutral-500 outline-none focus:border-red-500"
+              className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 placeholder-neutral-500 outline-none focus:border-red-500"
             />
 
             <div className="mt-4 min-h-[200px]">
@@ -287,7 +287,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                     <li key={`${hit.kind}-${i}-${hit.label}`}>
                       <button
                         onClick={() => handlePick(hit)}
-                        className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left hover:bg-neutral-900 active:bg-neutral-800"
+                        className="flex w-full items-center justify-between gap-3 px-5 py-5 text-left hover:bg-neutral-900 active:bg-neutral-800"
                       >
                         <span className="text-neutral-100">{hit.label}</span>
                         <span className="text-xs uppercase tracking-wider text-neutral-500">
@@ -335,7 +335,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
               onChange={(e) => setCarName(e.target.value)}
               placeholder="e.g. Daily, Track Rat, Project E36"
               maxLength={40}
-              className="w-full rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-base text-neutral-100 placeholder-neutral-500 outline-none focus:border-red-500"
+              className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 placeholder-neutral-500 outline-none focus:border-red-500"
             />
 
             {submitErr && (
@@ -353,7 +353,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full sm:w-auto rounded bg-red-600 px-6 py-3 text-base font-semibold tracking-wide text-white hover:bg-red-500 disabled:opacity-50"
+                className="w-full sm:w-auto rounded bg-red-600 px-6 py-4 text-lg font-semibold tracking-wide text-white hover:bg-red-500 disabled:opacity-50"
               >
                 {submitting ? "Adding..." : "ADD TO GARAGE"}
               </button>
@@ -377,7 +377,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   placeholder="2015"
                   min={1900}
                   max={2100}
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-base text-neutral-100 outline-none focus:border-red-500"
+                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
                 />
               </Field>
               <Field label="Make">
@@ -386,7 +386,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   value={mMake}
                   onChange={(e) => setMMake(e.target.value)}
                   placeholder="BMW"
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-base text-neutral-100 outline-none focus:border-red-500"
+                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
                 />
               </Field>
               <Field label="Model">
@@ -395,7 +395,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   value={mModel}
                   onChange={(e) => setMModel(e.target.value)}
                   placeholder="M3"
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-base text-neutral-100 outline-none focus:border-red-500"
+                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
                 />
               </Field>
               <Field label="Trim (optional)">
@@ -404,7 +404,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   value={mTrim}
                   onChange={(e) => setMTrim(e.target.value)}
                   placeholder="Competition"
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-base text-neutral-100 outline-none focus:border-red-500"
+                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
                 />
               </Field>
             </div>
@@ -417,7 +417,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   onChange={(e) => setCarName(e.target.value)}
                   placeholder="e.g. Daily, Track Rat"
                   maxLength={40}
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-base text-neutral-100 outline-none focus:border-red-500"
+                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
                 />
               </Field>
             </div>
@@ -435,7 +435,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full sm:w-auto rounded bg-red-600 px-6 py-3 text-base font-semibold tracking-wide text-white hover:bg-red-500 disabled:opacity-50"
+                className="w-full sm:w-auto rounded bg-red-600 px-6 py-4 text-lg font-semibold tracking-wide text-white hover:bg-red-500 disabled:opacity-50"
               >
                 {submitting ? "Adding..." : "ADD TO GARAGE"}
               </button>
