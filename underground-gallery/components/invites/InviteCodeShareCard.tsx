@@ -24,12 +24,11 @@ function smsUri(body: string): string {
 
 function buildMessageBody(code: string, shareLink: string): string {
   return [
-    "You're invited to Underground Gallery.",
+    "you're invited to underground gallery.",
     "",
-    "Members-only spot for serious car people.",
-    "Tap to apply: " + shareLink,
+    "invite only — undergroundgallery.ai",
     "",
-    "Or use code: " + code,
+    "accept: " + shareLink,
   ].join("\n");
 }
 
@@ -174,16 +173,16 @@ export default function InviteCodeShareCard({ code, shareLink, createdAt }: Prop
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-          <PrimaryBtn onClick={textInvite}>📱 TEXT INVITE</PrimaryBtn>
-          <ActionBtn onClick={nativeShare}>SHARE…</ActionBtn>
+          <PrimaryBtn onClick={textInvite}>TEXT INVITE</PrimaryBtn>
+          <ActionBtn onClick={nativeShare}>SHARE</ActionBtn>
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <ActionBtn onClick={() => copy(code, "code")}>
-            {copied === "code" ? "✓ COPIED" : "COPY CODE"}
+            {copied === "code" ? "COPIED" : "COPY CODE"}
           </ActionBtn>
           <ActionBtn onClick={() => copy(shareLink, "link")}>
-            {copied === "link" ? "✓ COPIED" : "COPY LINK"}
+            {copied === "link" ? "COPIED" : "COPY LINK"}
           </ActionBtn>
           <ActionBtn onClick={downloadQr}>SAVE QR</ActionBtn>
         </div>
