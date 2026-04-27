@@ -16,10 +16,7 @@ export default async function InvitesPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin?next=/invites");
 
-  const me = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
-    columns: { id: true, callsign: true, status: true },
-  });
+  const me = await (async () => { const [_u] = await db.select().from(users).where(eq(users.id, session.user.id)).limit(1); return _u ?? null; })();
 
   if (!me) redirect("/auth/signin");
   if (me.status !== "active") redirect("/pending");
@@ -227,7 +224,7 @@ export default async function InvitesPage() {
                   letterSpacing: "0.3em",
                 }}
               >
-                ADVANCED ▸
+                ADVANCED â–¸
               </summary>
               <div
                 style={{

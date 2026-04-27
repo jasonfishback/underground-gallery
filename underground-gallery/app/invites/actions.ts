@@ -27,17 +27,14 @@ function newCodeString(): string {
 async function requireActiveUser() {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Not signed in.");
-  const me = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
-    columns: { id: true, status: true },
-  });
+  const me = await (async () => { const [_u] = await db.select().from(users).where(eq(users.id, session.user.id)).limit(1); return _u ?? null; })();
   if (!me || me.status !== "active") throw new Error("Active members only.");
   return me;
 }
 
 /**
  * Ensure the current user has at least one active invite code.
- * Idempotent — safe to call on every page load.
+ * Idempotent â€” safe to call on every page load.
  */
 export async function ensureMyCode() {
   const me = await requireActiveUser();

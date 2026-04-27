@@ -1,8 +1,8 @@
-﻿// app/garage/actions.ts
+// app/garage/actions.ts
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or, sql, ilike } from 'drizzle-orm';
 import { customAlphabet } from 'nanoid';
 import { db } from '@/lib/db';
 import {
@@ -533,7 +533,7 @@ export async function searchVehicleSpecs(
         model: vehicleSpecs.model,
         trim: vehicleSpecs.trim,
         bodyStyle: vehicleSpecs.bodyStyle,
-        hpStock: vehicleSpecs.hpStock,
+        hpStock: vehicleSpecs.stockHp,
       })
       .from(vehicleSpecs)
       .where(and(...tokenConditions))

@@ -61,10 +61,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Ownership check
-    const vehicle = await db.query.vehicles.findFirst({
-      where: eq(vehicles.id, vehicleId),
-      columns: { id: true, userId: true, primaryPhotoId: true },
-    });
+    const [v_row] = await db.select({ id: vehicles.id, userId: vehicles.userId, primaryPhotoId: vehicles.primaryPhotoId }).from(vehicles).where(eq(vehicles.id, vehicleId)).limit(1);
+    const vehicle = v_row;
     if (!vehicle) {
       return NextResponse.json(
         { ok: false, error: "Vehicle not found." },
@@ -102,7 +100,7 @@ export async function POST(req: NextRequest) {
       subjectType: "vehicle",
       subjectId: vehicleId,
       urlFull: url,
-      urlThumb: url, // no separate thumb pipeline yet — same URL for now
+      urlThumb: url, // no separate thumb pipeline yet â€” same URL for now
       width: null,
       height: null,
       exifJson: null,

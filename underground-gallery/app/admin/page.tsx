@@ -22,10 +22,7 @@ export default async function AdminPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin?next=/admin");
 
-  const me = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
-    columns: { id: true, callsign: true, isModerator: true },
-  });
+  const me = await (async () => { const [_u] = await db.select().from(users).where(eq(users.id, session.user.id)).limit(1); return _u ?? null; })();
   if (!me?.isModerator) redirect("/me");
 
   const pendingApps = await db
@@ -279,7 +276,7 @@ export default async function AdminPage() {
                       fontSize: 10,
                     }}
                   >
-                    {r.hasCode ? "●" : "—"}
+                    {r.hasCode ? "â—" : "â€”"}
                   </span>
                 </div>
               ))}
@@ -329,7 +326,7 @@ export default async function AdminPage() {
                   </span>
                   <span style={{ color: colors.textMuted, fontSize: 11 }}>{m.email}</span>
                   <span style={{ color: colors.textDim, fontSize: 11 }}>
-                    {m.approvedAt ? new Date(m.approvedAt).toLocaleDateString() : "—"}
+                    {m.approvedAt ? new Date(m.approvedAt).toLocaleDateString() : "â€”"}
                   </span>
                   <Link
                     href={m.callsign ? `/u/${m.callsign}` : "#"}
@@ -340,7 +337,7 @@ export default async function AdminPage() {
                       textDecoration: "none",
                     }}
                   >
-                    VIEW →
+                    VIEW â†’
                   </Link>
                 </div>
               ))}
@@ -390,9 +387,9 @@ export default async function AdminPage() {
         <section>
           <SectionTitle>Quick Actions</SectionTitle>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <AdminLink href="/members">All Members →</AdminLink>
-            <AdminLink href="/race/history">Race History →</AdminLink>
-            <AdminLink href="/admin/init-db">DB Migrations →</AdminLink>
+            <AdminLink href="/members">All Members â†’</AdminLink>
+            <AdminLink href="/race/history">Race History â†’</AdminLink>
+            <AdminLink href="/admin/init-db">DB Migrations â†’</AdminLink>
           </div>
         </section>
       </div>
@@ -547,7 +544,7 @@ function ApplicationRow({
 
       {app.invitedBy && (
         <AnswerBlock label="INVITED BY">
-          {inviterCallsign ?? `(user ${app.invitedBy.substring(0, 8)}…)`}
+          {inviterCallsign ?? `(user ${app.invitedBy.substring(0, 8)}â€¦)`}
         </AnswerBlock>
       )}
       {app.drive && <AnswerBlock label="DRIVES">{app.drive}</AnswerBlock>}

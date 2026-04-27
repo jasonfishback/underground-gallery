@@ -1,4 +1,4 @@
-﻿// components/me/MeView.tsx
+// components/me/MeView.tsx
 'use client';
 
 import { useState } from 'react';
@@ -72,12 +72,8 @@ export function MeView({ cars, modCounts }: Props) {
       )}
 
       {wizardOpen && (
-        <AddCarWizard
-          onClose={() => setWizardOpen(false)}
-          onCreated={() => {
-            setWizardOpen(false);
-            window.location.reload();
-          }}
+        <AddCarWizard open={true} onClose={() => setWizardOpen(false)}
+          }
         />
       )}
     </div>

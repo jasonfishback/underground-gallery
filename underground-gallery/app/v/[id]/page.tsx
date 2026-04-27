@@ -49,9 +49,9 @@ export default async function VehicleDetailPage({ params }: Params) {
       ownerIsModerator: users.isModerator,
       ownerId: users.id,
       heroUrl: photos.urlFull,
-      stockHp: vehicleSpecs.hpStock,
-      stockTorque: vehicleSpecs.torqueStock,
-      curbWeight: vehicleSpecs.weightStock,
+      stockHp: vehicleSpecs.stockHp,
+      stockTorque: vehicleSpecs.stockTorque,
+      curbWeight: vehicleSpecs.curbWeight,
       drivetrain: vehicleSpecs.drivetrain,
       transmission: vehicleSpecs.transmission,
       engine: vehicleSpecs.engine,
@@ -72,10 +72,10 @@ export default async function VehicleDetailPage({ params }: Params) {
   const mods = await db
     .select({
       id: userCarMods.id,
-      name: userCarMods.name,
+      name: userCarMods.customName,
       category: userCarMods.category,
-      brand: userCarMods.brand,
-      hpDelta: userCarMods.hpDelta,
+      brand: userCarMods.modCatalogId,
+      hpDelta: userCarMods.hpGain,
       notes: userCarMods.notes,
     })
     .from(userCarMods)
@@ -190,7 +190,7 @@ export default async function VehicleDetailPage({ params }: Params) {
               Owned by{' '}
               <CallsignWithBadge
                 callsign={v.ownerCallsign ?? '—'}
-                isModerator={!!v.ownerIsModerator}
+                isAdmin={!!v.ownerIsModerator}
                 size="sm"
               />
             </div>

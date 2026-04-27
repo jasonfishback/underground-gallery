@@ -1,6 +1,4 @@
-// app/api/mod-catalog/route.ts
-// Returns the seeded mod_catalog as JSON for the AddModModal.
-
+﻿// app/api/mod-catalog/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { modCatalog } from "@/lib/db/schema";
@@ -14,9 +12,8 @@ export async function GET() {
       .select({
         id: modCatalog.id,
         category: modCatalog.category,
-        brand: modCatalog.brand,
         name: modCatalog.name,
-        hpDelta: modCatalog.hpDelta,
+        hpDelta: modCatalog.defaultHpGain,
         description: modCatalog.description,
       })
       .from(modCatalog);
