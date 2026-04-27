@@ -56,7 +56,7 @@ export async function SiteHeader() {
         <NavLink href="/invites">INVITES</NavLink>
         {ctx.isModerator && <NavLink href="/admin">ADMIN</NavLink>}
         <NotificationBell notifications={notifs} />
-        <Link href="/profile" style={{ color: 'inherit', textDecoration: 'none', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}>PROFILE</Link>
+        <Link href="/profile" style={{ color: 'inherit', textDecoration: 'none', fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', whiteSpace: 'nowrap', flexShrink: 0 }}>PROFILE</Link>
       </nav>
     </header>
   );
@@ -68,8 +68,10 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
       href={href}
       style={{
         fontSize: 10,
-        letterSpacing: '0.3em',
+        letterSpacing: '0.2em',
         color: colors.textMuted,
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
         textDecoration: 'none',
         fontFamily: fonts.mono,
         fontWeight: 700,
