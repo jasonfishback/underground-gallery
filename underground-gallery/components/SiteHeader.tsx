@@ -56,6 +56,7 @@ export async function SiteHeader() {
         <NavLink href="/invites">INVITES</NavLink>
         {ctx.isModerator && <NavLink href="/admin">ADMIN</NavLink>}
         <NotificationBell notifications={notifs} />
+        <Link href="/profile" style={{ color: 'inherit', textDecoration: 'none', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}>PROFILE</Link>
       </nav>
     </header>
   );
