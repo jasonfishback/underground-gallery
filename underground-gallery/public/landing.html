@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>Underground Gallery Â· Access Restricted</title>
+<title>Underground Gallery - Access Restricted</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="description" content="Members-only. Invitation required."/>
 <meta name="robots" content="noindex,nofollow"/>
@@ -37,12 +37,12 @@
   @keyframes ugScanSweep { 0% { transform: translateY(-8px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(94px); opacity: 0; } }
 
   /* â”€â”€â”€ Boot intro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-  /* Reality-glitch flicker â€” total ~4.5s.
+  /* Reality-glitch flicker - total ~4.5s.
      Each element runs its OWN flicker timeline, intentionally desynced
      so nothing pulses in unison. The container fades the whole scene
      in and out, but inside it everything has its own rhythm. */
 
-  /* Master container â€” softer envelope, just bringing the scene in/out */
+  /* Master container - softer envelope, just bringing the scene in/out */
   @keyframes ugBootEnvelope {
       0%   { opacity: 0;    }
       6%   { opacity: 1;    }
@@ -50,7 +50,7 @@
     100%   { opacity: 0;    }
   }
 
-  /* Logo: the "main bulb" â€” sputters on, holds, dies hard */
+  /* Logo: the "main bulb" - sputters on, holds, dies hard */
   @keyframes ugBootLogo {
       0%   { opacity: 0;    }
       4%   { opacity: 0.85; }
@@ -60,7 +60,7 @@
      14%   { opacity: 1;    }
      17%   { opacity: 0.7;  }
      20%   { opacity: 1;    }
-     /* hold â€” but with TWO mid-show micro-dips */
+     /* hold - but with TWO mid-show micro-dips */
      45%   { opacity: 1;    }
      46%   { opacity: 0.4;  }   /* tiny flicker mid-hold */
      47%   { opacity: 1;    }
@@ -77,7 +77,7 @@
     100%   { opacity: 0;    }
   }
 
-  /* Wordmark: lags behind â€” comes on AFTER logo stabilizes,
+  /* Wordmark: lags behind - comes on AFTER logo stabilizes,
      and dies BEFORE logo dies (different rhythm entirely) */
   @keyframes ugBootWordmark {
       0%   { opacity: 0;    }
@@ -132,7 +132,7 @@
       0%   { opacity: 0; transform: translateY(-100%); }
       8%   { opacity: 0.6; transform: translateY(20vh); }
      16%   { opacity: 0; transform: translateY(60vh); }
-     /* dark hold â€” bar invisible during steady-state */
+     /* dark hold - bar invisible during steady-state */
      74%   { opacity: 0; transform: translateY(60vh); }
      78%   { opacity: 0.7; transform: translateY(30vh); }
      86%   { opacity: 0.3; transform: translateY(80vh); }
@@ -140,7 +140,7 @@
     100%   { opacity: 0; transform: translateY(110vh); }
   }
 
-  /* Logo's slow physical pulse â€” kept smooth so it grounds the chaos */
+  /* Logo's slow physical pulse - kept smooth so it grounds the chaos */
   @keyframes ugBootLogoPulse {
       0%   { transform: scale(0.94); }
      20%   { transform: scale(1.01); }
@@ -189,7 +189,7 @@
     will-change: opacity;
   }
 
-  /* Glitch sweep bar â€” sits behind the boot content, sweeps vertically */
+  /* Glitch sweep bar - sits behind the boot content, sweeps vertically */
   .ug-boot-glitch {
     position: absolute; left: 0; right: 0;
     height: 2px;
@@ -205,7 +205,7 @@
   .ug-stage-hidden { opacity: 0; }
   .ug-stage-revealed { animation: ugRevealStage 0.6s ease-out 0s forwards; }
 
-  /* Honor user's reduced-motion preference â€” skip the show entirely */
+  /* Honor user's reduced-motion preference - skip the show entirely */
   @media (prefers-reduced-motion: reduce) {
     #ug-boot { display: none !important; animation: none !important; }
     .ug-stage-hidden { opacity: 1 !important; }
@@ -257,7 +257,7 @@
     text-transform: uppercase; font-weight: 700;
     transition: background 0.3s, border-color 0.3s, color 0.3s;
   }
-  /* Granted state â€” flipped from red restricted to green granted.
+  /* Granted state - flipped from red restricted to green granted.
      The transition animates color + bg + border so the change feels
      like a real unlock, not a swap. */
   .ug-restricted-strip.granted {
@@ -526,7 +526,7 @@
 
       <div id="state-signedin" hidden class="ug-fade-in" style="display: none; flex-direction: column; align-items: center; gap: 14px; width: 100%;">
         <a id="enter-link" href="/garage" class="ug-enter-btn">
-          ENTER <span style="font-size: 18px;">â†’</span>
+          ENTER <span style="font-size: 18px;">></span>
         </a>
         <p id="signedin-as" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(201,204,209,0.4); letter-spacing: 0.25em; text-transform: uppercase; margin: 0;">
           SIGNED IN
@@ -536,22 +536,22 @@
 
       <div id="state-actions" hidden class="ug-actions ug-fade-in" style="display: none;">
         <button class="ug-action-btn" data-action="signin" type="button">
-          <span>SIGN IN</span><span class="arrow">â†’</span>
+          <span>SIGN IN</span><span class="arrow">></span>
         </button>
         <button class="ug-action-btn" data-action="scan" type="button">
-          <span>SCAN INVITE CODE</span><span class="arrow">â†’</span>
+          <span>SCAN INVITE CODE</span><span class="arrow">></span>
         </button>
         <button class="ug-action-btn" data-action="apply" type="button">
-          <span>REQUEST ACCESS</span><span class="arrow">â†’</span>
+          <span>REQUEST ACCESS</span><span class="arrow">></span>
         </button>
       </div>
 
       <div id="panel-signin" hidden class="ug-panel ug-fade-in" style="display: none;">
-        <div class="ug-panel-label">âˆ•âˆ• SIGN IN â€” MAGIC LINK</div>
+        <div class="ug-panel-label">âˆ•âˆ• SIGN IN - MAGIC LINK</div>
         <form id="signin-form" autocomplete="off" novalidate>
           <input type="email" name="email" id="signin-email" class="ug-input" placeholder="name@domain.com" required/>
           <div class="ug-panel-row">
-            <button type="submit" id="signin-submit" class="ug-panel-submit">SEND LINK â†’</button>
+            <button type="submit" id="signin-submit" class="ug-panel-submit">SEND LINK ></button>
           </div>
           <div id="signin-msg" class="ug-panel-msg"></div>
         </form>
@@ -571,7 +571,7 @@
             </button>
           </div>
           <div class="ug-panel-row">
-            <button type="submit" id="scan-submit" class="ug-panel-submit">REDEEM â†’</button>
+            <button type="submit" id="scan-submit" class="ug-panel-submit">REDEEM ></button>
           </div>
           <div id="scan-msg" class="ug-panel-msg"></div>
           <video id="scan-video" class="ug-scan-video" hidden playsinline muted></video>
@@ -583,7 +583,7 @@
   </main>
 
   <footer class="ug-footer">
-    <div>Â© MMXXVI Â· UNDERGROUND GALLERY</div>
+    <div>Â© MMXXVI - UNDERGROUND GALLERY</div>
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
       <a href="/privacy">PRIVACY</a>
       <a href="/terms">TERMS</a>
@@ -651,7 +651,7 @@
     .then(data => {
       if (data && data.user && (data.user.email || data.user.id)) {
         const label = document.getElementById('signedin-as');
-        if (data.user.email) label.textContent = 'SIGNED IN Â· ' + data.user.email;
+        if (data.user.email) label.textContent = 'SIGNED IN - ' + data.user.email;
         showOnly(state.signedin);
       } else {
         showOnly(state.actions);
@@ -722,7 +722,7 @@
 
   function showMsg(el, kind, text) {
     el.className = 'ug-panel-msg ' + kind;
-    el.textContent = (kind === 'error' ? 'âˆ•âˆ• ERROR Â· ' : 'âˆ•âˆ• ') + text;
+    el.textContent = (kind === 'error' ? 'âˆ•âˆ• ERROR - ' : 'âˆ•âˆ• ') + text;
     el.style.display = 'block';
   }
   function clearMsg(el) {
@@ -759,13 +759,13 @@
         showMsg(signinMsg, 'success', 'CHECK YOUR EMAIL FOR THE LINK');
         document.getElementById('signin-email').value = '';
       } else {
-        showMsg(signinMsg, 'error', 'COULD NOT SEND LINK Â· TRY AGAIN');
+        showMsg(signinMsg, 'error', 'COULD NOT SEND LINK - TRY AGAIN');
       }
     } catch (_) {
-      showMsg(signinMsg, 'error', 'NETWORK ERROR Â· TRY AGAIN');
+      showMsg(signinMsg, 'error', 'NETWORK ERROR - TRY AGAIN');
     } finally {
       signinSubmit.disabled = false;
-      signinSubmit.textContent = 'SEND LINK â†’';
+      signinSubmit.textContent = 'SEND LINK >';
     }
   });
 
@@ -795,7 +795,7 @@
     window.location.href = '/invite/' + encodeURIComponent(code);
   });
 
-  // Camera-based QR scanning (BarcodeDetector â€” Safari 17+, Chrome Android, Edge)
+  // Camera-based QR scanning (BarcodeDetector - Safari 17+, Chrome Android, Edge)
   const scanCameraBtn = document.getElementById('scan-camera-btn');
   const scanVideo = document.getElementById('scan-video');
   let scanStream = null;
