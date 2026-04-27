@@ -1,7 +1,7 @@
 import { getAuthContext } from '@/lib/auth/gates';
 import { getRecentNotifications } from '@/lib/notifications/fetch';
 import { NotificationBell } from '@/components/NotificationBell';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/react';
 import { SiteHeader } from '@/components/SiteHeader';
 import './globals.css';
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, maximumScale: 1, userScalable: false };
   return (
     <html lang="en">
       <body>
