@@ -40,7 +40,7 @@ async function sendApprovalEmail(toEmail: string, callsign: string | null) {
   }
 }
 
-async function approveById(formData: FormData) {
+async function approveUser(formData: FormData) {
   'use server';
   const session = await auth();
   if (!session?.user?.id) return;
@@ -48,17 +48,20 @@ async function approveById(formData: FormData) {
   if (!me?.isModerator) return;
 
   const userId = String(formData.get('userId') || '').trim();
+  const customCallsign = String(formData.get('callsign') || '').trim();
   if (!userId) return;
 
   const [target] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   if (!target || !target.email) return;
+
+  const finalCallsign = customCallsign || target.callsign || target.email.split('@')[0];
 
   const existingApp = await db.select().from(applications).where(eq(applications.userId, target.id)).limit(1);
   if (existingApp.length === 0) {
     await db.insert(applications).values({
       id: newId(),
       userId: target.id,
-      callsign: target.callsign ?? target.email.split('@')[0],
+      callsign: finalCallsign,
       status: 'approved',
       submittedAt: new Date(),
       decidedAt: new Date(),
@@ -67,54 +70,34 @@ async function approveById(formData: FormData) {
   } else {
     await db.update(applications).set({
       status: 'approved',
+      callsign: finalCallsign,
       decidedAt: new Date(),
       decidedBy: session.user.id,
     }).where(eq(applications.userId, target.id));
   }
 
-  await db.update(users).set({ status: 'active', approvedAt: new Date() }).where(eq(users.id, target.id));
-  await sendApprovalEmail(target.email, target.callsign);
+  await db.update(users).set({ status: 'active', callsign: finalCallsign, approvedAt: new Date() }).where(eq(users.id, target.id));
+  await sendApprovalEmail(target.email, finalCallsign);
   redirect('/admin/approve?ok=' + encodeURIComponent(target.email));
 }
 
-async function approveByEmail(formData: FormData) {
+async function setCallsignOnly(formData: FormData) {
   'use server';
   const session = await auth();
   if (!session?.user?.id) return;
   const [me] = await db.select({ isModerator: users.isModerator }).from(users).where(eq(users.id, session.user.id)).limit(1);
   if (!me?.isModerator) return;
 
-  const email = String(formData.get('email') || '').trim().toLowerCase();
-  if (!email) return;
+  const userId = String(formData.get('userId') || '').trim();
+  const callsign = String(formData.get('callsign') || '').trim();
+  if (!userId || !callsign) return;
 
-  const [target] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  if (!target) return;
-
-  const existingApp = await db.select().from(applications).where(eq(applications.userId, target.id)).limit(1);
-  if (existingApp.length === 0) {
-    await db.insert(applications).values({
-      id: newId(),
-      userId: target.id,
-      callsign: target.callsign ?? email.split('@')[0],
-      status: 'approved',
-      submittedAt: new Date(),
-      decidedAt: new Date(),
-      decidedBy: session.user.id,
-    } as any);
-  } else {
-    await db.update(applications).set({
-      status: 'approved',
-      decidedAt: new Date(),
-      decidedBy: session.user.id,
-    }).where(eq(applications.userId, target.id));
-  }
-
-  await db.update(users).set({ status: 'active', approvedAt: new Date() }).where(eq(users.id, target.id));
-  await sendApprovalEmail(email, target.callsign);
-  redirect('/admin/approve?ok=' + encodeURIComponent(email));
+  await db.update(users).set({ callsign }).where(eq(users.id, userId));
+  await db.update(applications).set({ callsign }).where(eq(applications.userId, userId));
+  redirect('/admin/approve?cs=' + encodeURIComponent(callsign));
 }
 
-export default async function QuickApprovePage({ searchParams }: { searchParams: Promise<{ ok?: string }> }) {
+export default async function QuickApprovePage({ searchParams }: { searchParams: Promise<{ ok?: string; cs?: string }> }) {
   const session = await auth();
   if (!session?.user?.id) redirect('/');
   const [me] = await db.select({ isModerator: users.isModerator }).from(users).where(eq(users.id, session.user.id)).limit(1);
@@ -122,6 +105,7 @@ export default async function QuickApprovePage({ searchParams }: { searchParams:
 
   const sp = await searchParams;
   const ok = sp?.ok;
+  const cs = sp?.cs;
 
   const allUsers = await db.select({
     id: users.id,
@@ -142,26 +126,51 @@ export default async function QuickApprovePage({ searchParams }: { searchParams:
           APPROVED + EMAIL SENT: {ok}
         </div>
       )}
+      {cs && (
+        <div style={{ padding: 16, background: 'rgba(120,220,150,0.1)', border: '0.5px solid rgb(120,220,150)', color: 'rgb(120,220,150)', marginBottom: 24, fontFamily: fonts.mono, fontSize: 12 }}>
+          CALLSIGN SET: {cs}
+        </div>
+      )}
 
       <div style={{ fontSize: 11, color: colors.textMuted, fontFamily: fonts.mono, letterSpacing: '0.2em', marginBottom: 12 }}>
-        TAP TO APPROVE
+        USERS
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {allUsers.map((u) => (
-          <div key={u.id} style={{ padding: 12, border: `0.5px solid ${colors.border}`, background: colors.bgElevated, fontFamily: fonts.mono, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.email}</div>
+          <div key={u.id} style={{ padding: 14, border: `0.5px solid ${colors.border}`, background: colors.bgElevated, fontFamily: fonts.mono, fontSize: 12 }}>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 600 }}>{u.email}</div>
               <div style={{ color: colors.textMuted, fontSize: 10, marginTop: 4 }}>
-                {u.callsign ?? '—'} · <span style={{ color: u.status === 'active' ? 'rgb(120,220,150)' : colors.accent }}>{u.status?.toUpperCase()}</span>
+                {u.callsign ? `@${u.callsign}` : 'no callsign'} · <span style={{ color: u.status === 'active' ? 'rgb(120,220,150)' : colors.accent }}>{u.status?.toUpperCase()}</span>
               </div>
             </div>
+
             {u.status === 'active' ? (
-              <span style={{ color: 'rgb(120,220,150)', fontWeight: 700, fontSize: 11 }}>✓ ACTIVE</span>
-            ) : (
-              <form action={approveById}>
+              <form action={setCallsignOnly} style={{ display: 'flex', gap: 8 }}>
                 <input type="hidden" name="userId" value={u.id} />
-                <button type="submit" style={{ padding: '8px 16px', background: colors.accent, color: '#0a0a0a', border: 'none', fontFamily: fonts.mono, fontSize: 10, fontWeight: 700, letterSpacing: '0.3em', cursor: 'pointer' }}>
+                <input
+                  name="callsign"
+                  defaultValue={u.callsign ?? ''}
+                  placeholder="callsign"
+                  autoCapitalize="characters"
+                  style={{ flex: 1, padding: 10, background: colors.bg, border: `0.5px solid ${colors.border}`, color: colors.text, fontSize: 13, fontFamily: fonts.mono, textTransform: 'uppercase' }}
+                />
+                <button type="submit" style={{ padding: '8px 14px', background: 'transparent', color: colors.text, border: `0.5px solid ${colors.border}`, fontFamily: fonts.mono, fontSize: 10, fontWeight: 700, letterSpacing: '0.3em', cursor: 'pointer' }}>
+                  SAVE
+                </button>
+              </form>
+            ) : (
+              <form action={approveUser} style={{ display: 'flex', gap: 8 }}>
+                <input type="hidden" name="userId" value={u.id} />
+                <input
+                  name="callsign"
+                  defaultValue={u.callsign ?? u.email.split('@')[0]}
+                  placeholder="callsign"
+                  autoCapitalize="characters"
+                  style={{ flex: 1, padding: 10, background: colors.bg, border: `0.5px solid ${colors.border}`, color: colors.text, fontSize: 13, fontFamily: fonts.mono, textTransform: 'uppercase' }}
+                />
+                <button type="submit" style={{ padding: '8px 14px', background: colors.accent, color: '#0a0a0a', border: 'none', fontFamily: fonts.mono, fontSize: 10, fontWeight: 700, letterSpacing: '0.3em', cursor: 'pointer' }}>
                   APPROVE
                 </button>
               </form>
@@ -169,22 +178,6 @@ export default async function QuickApprovePage({ searchParams }: { searchParams:
           </div>
         ))}
       </div>
-
-      <div style={{ fontSize: 11, color: colors.textMuted, fontFamily: fonts.mono, letterSpacing: '0.2em', marginBottom: 12 }}>
-        OR APPROVE BY EMAIL
-      </div>
-      <form action={approveByEmail}>
-        <input
-          type="email"
-          name="email"
-          placeholder="email to approve"
-          required
-          style={{ width: '100%', padding: 14, fontSize: 16, background: colors.bgElevated, border: `0.5px solid ${colors.border}`, color: colors.text, marginBottom: 12, boxSizing: 'border-box' }}
-        />
-        <button type="submit" style={{ padding: '12px 20px', background: colors.accent, color: '#0a0a0a', border: 'none', fontFamily: fonts.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.3em', cursor: 'pointer' }}>
-          APPROVE USER
-        </button>
-      </form>
     </main>
   );
 }
