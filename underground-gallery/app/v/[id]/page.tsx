@@ -254,7 +254,7 @@ export default async function VehicleDetailPage({ params }: Params) {
             vehicleId={v.id}
             primaryPhotoId={v.primaryPhotoId ?? null}
             photos={vehiclePhotos}
-            mods={mods}
+            mods={mods as any}
           />
         ) : (
           // Read-only mods list for non-owners
