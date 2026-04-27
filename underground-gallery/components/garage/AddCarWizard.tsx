@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // ============================================================================
 // components/garage/AddCarWizard.tsx
@@ -171,8 +171,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
       try {
         if (picked?.kind === "catalog") {
           const res = await addCarFromSpec({
-            specId: picked.specId,
-            name: carName.trim() || null,
+            vehicleSpecId: picked.specId,
           } as any);
           if (!(res as any)?.ok) {
             setSubmitErr((res as any)?.error ?? "Could not add car.");
