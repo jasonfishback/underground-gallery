@@ -468,3 +468,49 @@ function EmptyBox({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+// Resize image client-side to fit Vercel 4.5MB function body limit.
+// Targets max 2048px on the longest edge, JPEG quality 0.85.
+async function resizeImage(file: File): Promise<File> {
+  // If the file is already small and not HEIC, skip resize
+  if (file.size < 3_500_000 && file.type !== "image/heic" && file.type !== "image/heif") {
+    return file;
+  }
+
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = (e) => reject(e);
+      i.src = url;
+    });
+
+    const MAX = 2048;
+    let { width, height } = img;
+    if (width > MAX || height > MAX) {
+      const ratio = Math.min(MAX / width, MAX / height);
+      width = Math.round(width * ratio);
+      height = Math.round(height * ratio);
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.85),
+    );
+    if (!blob) return file;
+
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
