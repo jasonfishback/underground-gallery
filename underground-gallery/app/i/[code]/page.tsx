@@ -112,22 +112,7 @@ export default async function InviteLandingPage({ params }: Params) {
               {found[0].code}
             </div>
 
-            <a
-              href={continueHref}
-              style={{
-                display: "inline-block",
-                padding: "14px 28px",
-                background: colors.accent,
-                color: "#0a0a0a",
-                textDecoration: "none",
-                fontFamily: fonts.mono,
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "0.4em",
-              }}
-            >
-              CONTINUE →
-            </a>
+            <InviteSignupForm code={found[0].code} />
 
             <p
               style={{
