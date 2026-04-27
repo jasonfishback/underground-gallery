@@ -42,6 +42,12 @@ function SignInForm() {
         <form onSubmit={handleSubmit}>
           <input
             type="email"
+            name="email"
+            autoComplete="email"
+            inputMode="email"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="name@domain.com"
