@@ -35,6 +35,18 @@ type Props = {
   mods: Mod[];
 };
 
+
+function formatModName(raw: string | null | undefined): string {
+  if (!raw) return '';
+  // Remove leading "mod_" / "mod-", convert underscores/dashes to spaces, title case
+  return raw
+    .replace(/^mod[_-]/i, '')
+    .replace(/[_-]+/g, ' ')
+    .split(' ')
+    .map(w => w.length > 0 ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '')
+    .join(' ')
+    .trim();
+}
 export default function VehicleOwnerPanel({
   vehicleId,
   primaryPhotoId,
@@ -341,7 +353,7 @@ export default function VehicleOwnerPanel({
             border: `0.5px solid ${colors.border}`,
           }}
         >
-          {mods.map((m, i) => (
+          {initialMods.map((m, i) => (
             <div
               key={m.id}
               style={{
@@ -367,7 +379,7 @@ export default function VehicleOwnerPanel({
               </span>
               <span style={{ fontSize: 13, color: colors.text }}>
                 {m.brand ? <strong>{m.brand}</strong> : null}{" "}
-                {m.name}
+                {formatModName(m.name)}
                 {m.notes ? (
                   <span style={{ color: colors.textMuted }}> — {m.notes}</span>
                 ) : null}
