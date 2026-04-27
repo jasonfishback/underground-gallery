@@ -3,6 +3,7 @@
 
 import { redirect } from "next/navigation";
 import InviteSignupForm from "@/components/invites/InviteSignupForm";
+import BootIntro from "@/components/invites/BootIntro";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { inviteCodes, users } from "@/lib/db/schema";
