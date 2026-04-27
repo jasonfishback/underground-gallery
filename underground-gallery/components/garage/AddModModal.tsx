@@ -29,18 +29,22 @@ type Props = {
 };
 
 const CATEGORIES = [
-  "intake",
-  "exhaust",
-  "tune",
-  "suspension",
-  "wheels",
-  "tires",
-  "brakes",
-  "drivetrain",
-  "engine",
-  "interior",
-  "exterior",
-  "other",
+  "Tune",
+  "Turbo",
+  "Intake",
+  "Exhaust",
+  "Downpipes",
+  "Headers",
+  "Fuel",
+  "Intercooler",
+  "Transmission",
+  "Tires",
+  "Suspension",
+  "Brakes",
+  "WeightReduction",
+  "Aero",
+  "Drivetrain",
+  "Custom",
 ];
 
 export default function AddModModal({ vehicleId, open, onClose }: Props) {
@@ -57,7 +61,7 @@ export default function AddModModal({ vehicleId, open, onClose }: Props) {
   // ---- custom state ----
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
-  const [category, setCategory] = useState("intake");
+  const [category, setCategory] = useState("Intake");
   const [hpDelta, setHpDelta] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -84,7 +88,7 @@ export default function AddModModal({ vehicleId, open, onClose }: Props) {
       setErr(null);
       setName("");
       setBrand("");
-      setCategory("intake");
+      setCategory("Intake");
       setHpDelta("");
       setNotes("");
       setCatalogQuery("");
@@ -99,7 +103,7 @@ export default function AddModModal({ vehicleId, open, onClose }: Props) {
       try {
         const res = await addModFromCatalog({
           vehicleId,
-          catalogId: modId,
+          modCatalogId: modId,
         } as any);
         if ((res as any)?.ok === false) {
           setErr((res as any)?.error ?? "Could not add mod.");
@@ -129,11 +133,10 @@ export default function AddModModal({ vehicleId, open, onClose }: Props) {
       try {
         const res = await addCustomMod({
           vehicleId,
-          name: name.trim(),
-          brand: brand.trim() || null,
+          customName: name.trim(),
           category,
-          hpDelta: hp,
-          notes: notes.trim() || null,
+          hpGain: hp ?? 0,
+          notes: notes.trim() || undefined,
         } as any);
         if ((res as any)?.ok === false) {
           setErr((res as any)?.error ?? "Could not add mod.");
