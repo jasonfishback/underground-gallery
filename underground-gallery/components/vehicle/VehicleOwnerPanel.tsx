@@ -3,7 +3,7 @@
 // components/vehicle/VehicleOwnerPanel.tsx
 // Owner-only photo manager + mod manager for /v/[id].
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   setPrimaryVehiclePhoto,
@@ -59,7 +59,7 @@ export default function VehicleOwnerPanel({
     setUploading(true);
 
     try {
-      for (const file of Array.from(files)) {
+      for (const original of Array.from(files)) {
         const fd = new FormData();
         fd.append("vehicleId", vehicleId);
         fd.append("file", file);

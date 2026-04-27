@@ -47,7 +47,8 @@ const CATEGORIES = [
   "Custom",
 ];
 
-export default function AddModModal({ vehicleId, open, onClose }: Props) {
+export default function AddModModal({ vehicleId, open, onClose, existingCatalogIds = [] }: Props) {
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
   const router = useRouter();
   const [tab, setTab] = useState<"catalog" | "custom">("catalog");
   const [submitting, startSubmit] = useTransition();
@@ -109,8 +110,13 @@ export default function AddModModal({ vehicleId, open, onClose }: Props) {
           setErr((res as any)?.error ?? "Could not add mod.");
           return;
         }
+        setJustAddedId(modId);
         router.refresh();
-        onClose();
+        // Modal stays open so user can add more or see feedback. Auto-close after 1.5s.
+        setTimeout(() => {
+          setJustAddedId(null);
+          onClose();
+        }, 1200);
       } catch (e) {
         console.error(e);
         setErr("Could not add mod.");
@@ -291,18 +297,19 @@ export default function AddModModal({ vehicleId, open, onClose }: Props) {
                     <button
                       key={m.id}
                       onClick={() => handlePickCatalog(m.id)}
-                      disabled={submitting}
+                      disabled={submitting || existingCatalogIds.includes(m.id) || justAddedId === m.id}
                       style={{
                         display: "grid",
                         gridTemplateColumns: "auto 1fr auto",
                         gap: 12,
                         padding: "10px 12px",
-                        background: "transparent",
-                        border: `0.5px solid ${colors.border}`,
-                        color: colors.text,
+                        background: justAddedId === m.id ? "rgba(80,200,120,0.12)" : (existingCatalogIds.includes(m.id) ? "rgba(255,255,255,0.02)" : "transparent"),
+                        border: justAddedId === m.id ? `0.5px solid rgb(120,220,150)` : `0.5px solid ${colors.border}`,
+                        color: existingCatalogIds.includes(m.id) ? colors.textDim : colors.text,
                         textAlign: "left",
-                        cursor: submitting ? "wait" : "pointer",
+                        cursor: (submitting || existingCatalogIds.includes(m.id)) ? "not-allowed" : "pointer",
                         alignItems: "center",
+                        opacity: existingCatalogIds.includes(m.id) ? 0.5 : 1,
                       }}
                     >
                       <span
@@ -324,10 +331,20 @@ export default function AddModModal({ vehicleId, open, onClose }: Props) {
                         style={{
                           fontFamily: fonts.mono,
                           fontSize: 11,
-                          color: m.hpDelta && m.hpDelta > 0 ? colors.accent : colors.textDim,
+                          color: justAddedId === m.id
+                            ? "rgb(120,220,150)"
+                            : existingCatalogIds.includes(m.id)
+                              ? colors.textDim
+                              : (m.hpDelta && m.hpDelta > 0 ? colors.accent : colors.textDim),
+                          fontWeight: (justAddedId === m.id || existingCatalogIds.includes(m.id)) ? 700 : 400,
+                          letterSpacing: (justAddedId === m.id || existingCatalogIds.includes(m.id)) ? "0.2em" : "0",
                         }}
                       >
-                        {m.hpDelta != null ? `${m.hpDelta > 0 ? "+" : ""}${m.hpDelta} hp` : ""}
+                        {justAddedId === m.id
+                          ? "+ ADDED"
+                          : existingCatalogIds.includes(m.id)
+                            ? "ALREADY ADDED"
+                            : (m.hpDelta != null ? `${m.hpDelta > 0 ? "+" : ""}${m.hpDelta} hp` : "")}
                       </span>
                     </button>
                   ))}
