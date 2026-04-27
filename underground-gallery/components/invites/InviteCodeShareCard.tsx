@@ -26,7 +26,7 @@ function buildMessageBody(code: string, shareLink: string): string {
   return [
     "you're invited to underground gallery.",
     "",
-    "invite only — undergroundgallery.ai",
+    "invite only.",
     "",
     "accept: " + shareLink,
   ].join("\n");
