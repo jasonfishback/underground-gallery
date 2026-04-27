@@ -1,13 +1,4 @@
-// ============================================================================
-// app/admin/actions.ts — REVISED VERSION
-// Replaces previous batch's admin-actions.ts. Fixes wrong column names:
-//   - applications.decidedAt (was: reviewedAt)
-//   - applications.decidedBy (was: reviewedBy)
-//   - applications.rejectReason (used on reject)
-// Also reflects moderationEvents real columns (applicationId, actorId).
-// ============================================================================
-
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
@@ -19,10 +10,11 @@ import { users, applications, moderationEvents } from "@/lib/db/schema";
 async function requireAdmin() {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Not signed in.");
-  const me = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
-    columns: { id: true, isModerator: true },
-  });
+  const [me] = await db
+    .select({ id: users.id, isModerator: users.isModerator })
+    .from(users)
+    .where(eq(users.id, session.user.id))
+    .limit(1);
   if (!me?.isModerator) throw new Error("Admins only.");
   return me;
 }
@@ -30,9 +22,11 @@ async function requireAdmin() {
 export async function approveApplication(applicationId: string) {
   const me = await requireAdmin();
 
-  const app = await db.query.applications.findFirst({
-    where: eq(applications.id, applicationId),
-  });
+  const [app] = await db
+    .select()
+    .from(applications)
+    .where(eq(applications.id, applicationId))
+    .limit(1);
   if (!app) throw new Error("Application not found.");
 
   await db.transaction(async (tx) => {
@@ -65,9 +59,11 @@ export async function rejectApplication(
 ) {
   const me = await requireAdmin();
 
-  const app = await db.query.applications.findFirst({
-    where: eq(applications.id, applicationId),
-  });
+  const [app] = await db
+    .select()
+    .from(applications)
+    .where(eq(applications.id, applicationId))
+    .limit(1);
   if (!app) throw new Error("Application not found.");
 
   await db.transaction(async (tx) => {

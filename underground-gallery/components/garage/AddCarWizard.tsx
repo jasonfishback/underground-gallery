@@ -463,3 +463,5 @@ function Field({
     </label>
   );
 }
+
+export { AddCarWizard as default };
