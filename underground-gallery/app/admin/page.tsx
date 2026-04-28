@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, inArray } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import {
@@ -56,7 +56,7 @@ export default async function AdminPage() {
     const inviters = await db
       .select({ id: users.id, callsign: users.callsign })
       .from(users)
-      .where(sql`${users.id} = ANY(${inviterIds})`);
+      .where(inArray(users.id, inviterIds));
     for (const u of inviters) inviterMap.set(u.id, u.callsign);
   }
 
