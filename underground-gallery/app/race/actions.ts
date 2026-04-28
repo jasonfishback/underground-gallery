@@ -12,6 +12,7 @@ import {
   vehicles,
   vehicleSpecs,
   userCarMods,
+  modCatalog,
   raceResults,
   raceChallenges,
   notifications,
@@ -473,7 +474,25 @@ async function loadVehicleForRace(vehicleId: string) {
     .limit(1);
   if (!v) return null;
 
-  const mods = await db.select().from(userCarMods).where(eq(userCarMods.vehicleId, vehicleId));
+  const modsRaw = await db
+    .select({
+      id: userCarMods.id,
+      hpGain: userCarMods.hpGain,
+      torqueGain: userCarMods.torqueGain,
+      weightChange: userCarMods.weightChange,
+      tractionModifier: userCarMods.tractionModifier,
+      launchModifier: userCarMods.launchModifier,
+      catalogDefaultHp: modCatalog.defaultHpGain,
+    })
+    .from(userCarMods)
+    .leftJoin(modCatalog, eq(modCatalog.id, userCarMods.modCatalogId))
+    .where(eq(userCarMods.vehicleId, vehicleId));
+  const mods = modsRaw.map(m => {
+    const effectiveHp = m.hpGain ?? m.catalogDefaultHp ?? 0;
+    const explicitTq = m.torqueGain;
+    const effectiveTq = (explicitTq != null && explicitTq !== 0) ? explicitTq : Math.round(effectiveHp * 0.9);
+    return { id: m.id, hpGain: effectiveHp, torqueGain: effectiveTq, weightChange: m.weightChange ?? 0, tractionModifier: m.tractionModifier ?? 0, launchModifier: m.launchModifier ?? 0 };
+  });
 
   // Sum mod gains so trap speed/HP reflect the actual build, not just stock
   const totalHpGain = mods.reduce((s, m) => s + (m.hpGain ?? 0), 0);
