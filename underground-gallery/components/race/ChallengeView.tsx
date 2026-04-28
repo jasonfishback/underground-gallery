@@ -21,7 +21,8 @@ type Participant = {
   callsign: string | null;
   isModerator: boolean;
   vehicleLabel: string;
-  vehicleStockHp: number | null;
+  vehicleHp: number | null;
+  vehicleTorque: number | null;
   vehicleWeight: number | null;
   vehicleDrivetrain: string | null;
 };
@@ -250,7 +251,7 @@ function ParticipantCard({ p, role }: { p: Participant; role: string }) {
       </div>
       <div style={{ fontSize: 14, color: colors.text, marginBottom: 12 }}>{p.vehicleLabel}</div>
       <div style={{ display: 'flex', gap: 16, fontSize: 11, fontFamily: fonts.mono, color: colors.textMuted }}>
-        {p.vehicleStockHp != null && <span>{p.vehicleStockHp}hp stock</span>}
+        {p.vehicleHp != null && <span>{p.vehicleHp}hp</span>}{p.vehicleTorque != null && <span>{p.vehicleTorque}tq</span>}
         {p.vehicleWeight != null && <span>{p.vehicleWeight.toLocaleString()}lb</span>}
         {p.vehicleDrivetrain && <span>{p.vehicleDrivetrain}</span>}
       </div>

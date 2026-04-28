@@ -3,7 +3,7 @@
 import { redirect, notFound } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { raceChallenges, users, vehicles, vehicleSpecs } from '@/lib/db/schema';
+import { raceChallenges, users, vehicles, vehicleSpecs, userCarMods, modCatalog } from '@/lib/db/schema';
 import { getAuthContext } from '@/lib/auth/gates';
 import { ChallengeView } from '@/components/race/ChallengeView';
 import { colors, fonts } from '@/lib/design';
@@ -72,6 +72,7 @@ export default async function ChallengePage({
       model: vehicles.model,
       trim: vehicles.trim,
       stockHp: vehicleSpecs.stockHp,
+      stockTorque: vehicleSpecs.stockTorque,
       curbWeight: vehicleSpecs.curbWeight,
       drivetrain: vehicleSpecs.drivetrain,
     })
@@ -88,6 +89,7 @@ export default async function ChallengePage({
       model: vehicles.model,
       trim: vehicles.trim,
       stockHp: vehicleSpecs.stockHp,
+      stockTorque: vehicleSpecs.stockTorque,
       curbWeight: vehicleSpecs.curbWeight,
       drivetrain: vehicleSpecs.drivetrain,
     })
@@ -95,6 +97,38 @@ export default async function ChallengePage({
     .leftJoin(vehicleSpecs, eq(vehicleSpecs.id, vehicles.vehicleSpecId))
     .where(eq(vehicles.id, c.opponentVehicleId))
     .limit(1);
+
+  async function loadModGains(vehicleId: string) {
+    const rows = await db
+      .select({
+        hpGain: userCarMods.hpGain,
+        torqueGain: userCarMods.torqueGain,
+        catalogHp: modCatalog.defaultHpGain,
+      })
+      .from(userCarMods)
+      .leftJoin(modCatalog, eq(modCatalog.id, userCarMods.modCatalogId))
+      .where(eq(userCarMods.vehicleId, vehicleId));
+    let hp = 0, tq = 0;
+    for (const r of rows) {
+      const h = r.hpGain ?? r.catalogHp ?? 0;
+      const t = (r.torqueGain != null && r.torqueGain !== 0) ? r.torqueGain : Math.round(h * 0.9);
+      hp += h;
+      tq += t;
+    }
+    return { hp, tq };
+  }
+  const [chalGains, oppGains] = await Promise.all([
+    loadModGains(c.challengerVehicleId),
+    loadModGains(c.opponentVehicleId),
+  ]);
+  const chalHp = chalVehicle?.stockHp != null ? chalVehicle.stockHp + chalGains.hp : null;
+  const chalTorque = chalVehicle?.stockTorque != null
+    ? chalVehicle.stockTorque + chalGains.tq
+    : (chalVehicle?.stockHp != null ? Math.round(chalVehicle.stockHp * 0.9) + chalGains.tq : null);
+  const oppHp = oppVehicle?.stockHp != null ? oppVehicle.stockHp + oppGains.hp : null;
+  const oppTorque = oppVehicle?.stockTorque != null
+    ? oppVehicle.stockTorque + oppGains.tq
+    : (oppVehicle?.stockHp != null ? Math.round(oppVehicle.stockHp * 0.9) + oppGains.tq : null);
 
   const isMyChallenge = c.challengerUserId === ctx.userId;
   const isOpponent = c.opponentUserId === ctx.userId;
@@ -113,7 +147,8 @@ export default async function ChallengePage({
             callsign: chalUser?.callsign ?? null,
             isModerator: chalUser?.isModerator ?? false,
             vehicleLabel: chalVehicle ? `${chalVehicle.year} ${chalVehicle.make} ${chalVehicle.model}${chalVehicle.trim ? ' ' + chalVehicle.trim : ''}` : 'Unknown',
-            vehicleStockHp: chalVehicle?.stockHp ?? null,
+            vehicleHp: chalHp,
+            vehicleTorque: chalTorque,
             vehicleWeight: chalVehicle?.curbWeight ?? null,
             vehicleDrivetrain: chalVehicle?.drivetrain ?? null,
           }}
@@ -121,7 +156,8 @@ export default async function ChallengePage({
             callsign: oppUser?.callsign ?? null,
             isModerator: oppUser?.isModerator ?? false,
             vehicleLabel: oppVehicle ? `${oppVehicle.year} ${oppVehicle.make} ${oppVehicle.model}${oppVehicle.trim ? ' ' + oppVehicle.trim : ''}` : 'Unknown',
-            vehicleStockHp: oppVehicle?.stockHp ?? null,
+            vehicleHp: oppHp,
+            vehicleTorque: oppTorque,
             vehicleWeight: oppVehicle?.curbWeight ?? null,
             vehicleDrivetrain: oppVehicle?.drivetrain ?? null,
           }}
