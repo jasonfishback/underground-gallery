@@ -475,13 +475,24 @@ async function loadVehicleForRace(vehicleId: string) {
 
   const mods = await db.select().from(userCarMods).where(eq(userCarMods.vehicleId, vehicleId));
 
+  // Sum mod gains so trap speed/HP reflect the actual build, not just stock
+  const totalHpGain = mods.reduce((s, m) => s + (m.hpGain ?? 0), 0);
+  const totalTorqueGain = mods.reduce((s, m) => s + (m.torqueGain ?? 0), 0);
+  const totalWeightChange = mods.reduce((s, m) => s + (m.weightChange ?? 0), 0);
+  const stockHp = v.spec?.stockHp ?? null;
+  const stockTorque = v.spec?.stockTorque ?? null;
+  const stockWeight = v.spec?.curbWeight ?? null;
+  const builtHp = stockHp != null ? stockHp + totalHpGain : null;
+  const builtTorque = stockTorque != null ? stockTorque + totalTorqueGain : null;
+  const builtWeight = stockWeight != null ? stockWeight + totalWeightChange : null;
+
   return {
-    label: `${v.vehicle.year} ${v.vehicle.make} ${v.vehicle.model}${v.vehicle.trim ? ' ' + v.vehicle.trim : ''}`,
+    label: `  `,
     userId: v.vehicle.userId,
     stock: {
-      hp: v.spec?.stockHp ?? null,
-      torque: v.spec?.stockTorque ?? null,
-      weight: v.spec?.curbWeight ?? null,
+      hp: builtHp,
+      torque: builtTorque,
+      weight: builtWeight,
       drivetrain: v.spec?.drivetrain ?? null,
       transmission: v.spec?.transmission ?? null,
     },

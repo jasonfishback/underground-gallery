@@ -30,9 +30,10 @@ type Props = {
   userId: string;
   cars: Car[];
   modCounts: Record<string, number>;
+  modHpGains?: Record<string, number>;
 };
 
-export function MeView({ cars, modCounts }: Props) {
+export function MeView({ cars, modCounts, modHpGains }: Props) {
   const [wizardOpen, setWizardOpen] = useState(false);
 
   return (
@@ -103,7 +104,7 @@ export function MeView({ cars, modCounts }: Props) {
                     {label.toUpperCase()}
                   </div>
                   <div style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted, letterSpacing: '0.15em' }}>
-                    {c.stockHp ? `${c.stockHp} HP` : ''}{c.drivetrain ? ` • ${c.drivetrain}` : ''}{modCount > 0 ? ` • ${modCount} MOD${modCount === 1 ? '' : 'S'}` : ''}
+                    {c.stockHp ? `${c.stockHp + (modHpGains?.[c.id] ?? 0)} HP` : ''}{c.drivetrain ? ` • ${c.drivetrain}` : ''}{modCount > 0 ? ` • ${modCount} MOD${modCount === 1 ? '' : 'S'}` : ''}
                   </div>
                 </div>
                 {c.isPrimary && (

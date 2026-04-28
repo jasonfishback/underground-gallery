@@ -54,13 +54,15 @@ export default async function MePage() {
 
   // Mod counts per vehicle (parallel queries — fine for low car count)
   const modCounts: Record<string, number> = {};
+  const modHpGains: Record<string, number> = {};
   await Promise.all(
     myCars.map(async (c) => {
       const rows = await db
-        .select({ id: userCarMods.id })
+        .select({ id: userCarMods.id, hpGain: userCarMods.hpGain })
         .from(userCarMods)
         .where(eq(userCarMods.vehicleId, c.id));
       modCounts[c.id] = rows.length;
+      modHpGains[c.id] = rows.reduce((s, r) => s + (r.hpGain ?? 0), 0);
     }),
   );
 
@@ -112,7 +114,7 @@ export default async function MePage() {
           </div>
         </header>
 
-        <MeView userId={userId} cars={myCars} modCounts={modCounts} />
+        <MeView userId={userId} cars={myCars} modCounts={modCounts} modHpGains={modHpGains} />
       </div>
     </div>
   );
