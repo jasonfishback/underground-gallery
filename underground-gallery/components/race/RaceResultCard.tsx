@@ -4,6 +4,7 @@
 // viewing a saved result).
 
 import { styles, colors, fonts } from '@/lib/design';
+import { RaceTicket } from './RaceTicket';
 
 type Props = {
   challengerLabel: string;
@@ -158,6 +159,18 @@ function SideCard({
           </div>
         )}
       </div>
+    
+      <RaceTicket
+        challengerLabel={challengerLabel}
+        challengerCallsign={challengerCallsign}
+        opponentLabel={opponentLabel}
+        opponentCallsign={opponentCallsign}
+        challengerEt={challengerEt}
+        opponentEt={opponentEt}
+        challengerTrap={challengerTrap}
+        opponentTrap={opponentTrap}
+        raceType={raceType}
+      />
     </div>
   );
 }
