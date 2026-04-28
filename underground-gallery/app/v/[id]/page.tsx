@@ -78,6 +78,7 @@ export default async function VehicleDetailPage({ params }: Params) {
       category: userCarMods.category,
       modCatalogId: userCarMods.modCatalogId,
       hpGain: userCarMods.hpGain,
+      torqueGain: userCarMods.torqueGain,
       catalogHp: modCatalog.defaultHpGain,
       notes: userCarMods.notes,
     })
@@ -91,6 +92,7 @@ export default async function VehicleDetailPage({ params }: Params) {
     category: m.category,
     brand: null as string | null,
     hpDelta: m.hpGain ?? m.catalogHp ?? 0,
+    tqDelta: m.torqueGain,
     notes: m.notes,
     modCatalogId: m.modCatalogId,
   }));
@@ -115,13 +117,21 @@ export default async function VehicleDetailPage({ params }: Params) {
 
   // ---- Build display values ----
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(' ');
-  const currentHp = v.currentHpOverride ?? v.stockHp ?? null;
-  const currentTorque = v.currentTorqueOverride ?? v.stockTorque ?? null;
+  const totalModHp = mods.reduce((sum, m) => sum + (m.hpDelta ?? 0), 0);
+  const totalModTorque = mods.reduce((sum, m) => {
+    const hp = m.hpDelta ?? 0;
+    const tq = m.tqDelta != null && m.tqDelta !== 0 ? m.tqDelta : Math.round(hp * 0.9);
+    return sum + tq;
+  }, 0);
+
+  const builtHp = (v.stockHp ?? 0) + totalModHp;
+  const builtTorque = (v.stockTorque ?? 0) + totalModTorque;
+
+  const currentHp = v.currentHpOverride ?? (v.stockHp != null ? builtHp : null);
+  const currentTorque = v.currentTorqueOverride ?? (v.stockTorque != null ? builtTorque : null);
   const currentWeight = v.currentWeightOverride ?? v.curbWeight ?? null;
   const drivetrainDisplay = v.drivetrainOverride ?? v.drivetrain ?? '—';
   const transmissionDisplay = v.transmissionOverride ?? v.transmission ?? '—';
-
-  const totalModHp = mods.reduce((sum, m) => sum + (m.hpDelta ?? 0), 0);
 
   return (
     <div
