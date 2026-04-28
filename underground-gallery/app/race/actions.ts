@@ -491,7 +491,7 @@ async function loadVehicleForRace(vehicleId: string) {
     const effectiveHp = m.hpGain ?? m.catalogDefaultHp ?? 0;
     const explicitTq = m.torqueGain;
     const effectiveTq = (explicitTq != null && explicitTq !== 0) ? explicitTq : Math.round(effectiveHp * 0.9);
-    return { id: m.id, hpGain: effectiveHp, torqueGain: effectiveTq, weightChange: m.weightChange ?? 0, tractionModifier: m.tractionModifier ?? 0, launchModifier: m.launchModifier ?? 0 };
+    return { id: m.id, hpGain: effectiveHp, torqueGain: effectiveTq, weightChange: m.weightChange ?? 0, tractionModifier: m.tractionModifier ?? 0, launchModifier: m.launchModifier ?? 0, shiftModifier: 0, handlingModifier: 0 };
   });
 
   // Sum mod gains so trap speed/HP reflect the actual build, not just stock
