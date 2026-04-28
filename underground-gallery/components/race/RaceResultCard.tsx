@@ -108,6 +108,17 @@ export function RaceResultCard({
           Real outcomes vary with driver, weather, surface, and the day's vibe.
         </div>
       </div>
+      <RaceTicket
+        challengerLabel={challengerLabel}
+        challengerCallsign={challengerCallsign}
+        opponentLabel={opponentLabel}
+        opponentCallsign={opponentCallsign}
+        challengerEt={challengerEt}
+        opponentEt={opponentEt}
+        challengerTrap={challengerTrap}
+        opponentTrap={opponentTrap}
+        raceType={raceType}
+      />
     </div>
   );
 }
@@ -160,17 +171,7 @@ function SideCard({
         )}
       </div>
     
-      <RaceTicket
-        challengerLabel={challengerLabel}
-        challengerCallsign={challengerCallsign}
-        opponentLabel={opponentLabel}
-        opponentCallsign={opponentCallsign}
-        challengerEt={challengerEt}
-        opponentEt={opponentEt}
-        challengerTrap={challengerTrap}
-        opponentTrap={opponentTrap}
-        raceType={raceType}
-      />
+
     </div>
   );
 }
