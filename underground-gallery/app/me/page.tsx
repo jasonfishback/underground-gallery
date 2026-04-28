@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { eq, desc } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { users, vehicles, photos, vehicleSpecs, userCarMods } from '@/lib/db/schema';
+import { users, vehicles, photos, vehicleSpecs, userCarMods, modCatalog } from '@/lib/db/schema';
 import { CallsignWithBadge } from '@/components/AdminBadge';
 import { MeView } from '@/components/me/MeView';
 import { colors, fonts } from '@/lib/design';
@@ -54,15 +54,28 @@ export default async function MePage() {
 
   // Mod counts per vehicle (parallel queries — fine for low car count)
   const modCounts: Record<string, number> = {};
-  const modHpGains: Record<string, number> = {};
+  const modGains: Record<string, { hp: number; tq: number }> = {};
   await Promise.all(
     myCars.map(async (c) => {
       const rows = await db
-        .select({ id: userCarMods.id, hpGain: userCarMods.hpGain })
+        .select({
+          id: userCarMods.id,
+          hpGain: userCarMods.hpGain,
+          torqueGain: userCarMods.torqueGain,
+          catalogHp: modCatalog.defaultHpGain,
+        })
         .from(userCarMods)
+        .leftJoin(modCatalog, eq(modCatalog.id, userCarMods.modCatalogId))
         .where(eq(userCarMods.vehicleId, c.id));
       modCounts[c.id] = rows.length;
-      modHpGains[c.id] = rows.reduce((s, r) => s + (r.hpGain ?? 0), 0);
+      let hpSum = 0, tqSum = 0;
+      for (const r of rows) {
+        const hp = r.hpGain ?? r.catalogHp ?? 0;
+        const tq = (r.torqueGain != null && r.torqueGain !== 0) ? r.torqueGain : Math.round(hp * 0.9);
+        hpSum += hp;
+        tqSum += tq;
+      }
+      modGains[c.id] = { hp: hpSum, tq: tqSum };
     }),
   );
 
@@ -114,7 +127,7 @@ export default async function MePage() {
           </div>
         </header>
 
-        <MeView userId={userId} cars={myCars} modCounts={modCounts} modHpGains={modHpGains} />
+        <MeView userId={userId} cars={myCars} modCounts={modCounts} modGains={modGains} />
       </div>
     </div>
   );

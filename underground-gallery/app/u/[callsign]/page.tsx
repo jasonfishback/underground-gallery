@@ -150,6 +150,7 @@ export default async function ProfilePage({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
             {cars.map((c) => {
               const hp = c.currentHpOverride ?? ((c.stockHp ?? 0) + (modGains[c.id]?.hp ?? 0));
+              const tqSum = (modGains[c.id]?.tq ?? 0);
               return (
                 <Link
                   key={c.id}
@@ -180,7 +181,7 @@ export default async function ProfilePage({
                       </div>
                     )}
                     <div style={{ marginTop: 10, display: 'flex', gap: 12, fontSize: 11, fontFamily: fonts.mono, color: colors.textMuted }}>
-                      {hp != null && <span style={{ color: colors.text }}>{hp} hp</span>}
+                      {hp != null && <span style={{ color: colors.text }}>{hp} hp</span>}{tqSum > 0 && <span style={{ color: colors.text }}>{tqSum} tq</span>}
                       {c.drivetrain && <span>{c.drivetrain}</span>}
                     </div>
                   </div>
