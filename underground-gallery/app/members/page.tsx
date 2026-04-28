@@ -25,12 +25,10 @@ export default async function MembersPage() {
       bio: users.bio,
       regionLabel: users.regionLabel,
       isModerator: users.isModerator,
-      avatarPhotoId: users.avatarPhotoId,
-      avatarUrl: photos.urlThumb,
+      avatarUrl: sql<string | null>`(SELECT p.url_thumb FROM ${vehicles} v LEFT JOIN ${photos} p ON p.id = v.primary_photo_id WHERE v.user_id = ${users.id} AND v.is_primary = true LIMIT 1)`,
       vehicleCount: sql<number>`(SELECT COUNT(*) FROM ${vehicles} WHERE ${vehicles.userId} = ${users.id})::int`,
     })
     .from(users)
-    .leftJoin(photos, eq(photos.id, users.avatarPhotoId))
     .where(and(eq(users.status, 'active'), isNotNull(users.callsign)))
     .orderBy(desc(users.isModerator), desc(users.createdAt));
 
