@@ -25,7 +25,7 @@ export default async function MembersPage() {
       bio: users.bio,
       regionLabel: users.regionLabel,
       isModerator: users.isModerator,
-      avatarUrl: sql<string | null>`(SELECT p.url_thumb FROM ${vehicles} v LEFT JOIN ${photos} p ON p.id = v.primary_photo_id WHERE v.user_id = ${users.id} AND v.is_primary = true LIMIT 1)`,
+      avatarUrl: sql<string | null>`(SELECT ph.url_thumb FROM vehicles veh LEFT JOIN photos ph ON ph.id = veh.primary_photo_id WHERE veh.user_id = users.id AND veh.is_primary = true ORDER BY veh.created_at DESC LIMIT 1)`,
       vehicleCount: sql<number>`(SELECT COUNT(*) FROM ${vehicles} WHERE ${vehicles.userId} = ${users.id})::int`,
     })
     .from(users)
