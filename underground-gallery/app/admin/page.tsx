@@ -188,9 +188,9 @@ export default async function AdminPage() {
             marginBottom: 40,
           }}
         >
-          <Stat label="PENDING" value={pendingApps.length} highlight />
-          <Stat label="ACTIVE MEMBERS" value={activeCount} />
-          <Stat label="TOTAL USERS" value={totalUsers} />
+          <Stat label="PENDING" value={pendingApps.length} highlight href="/admin/approve" />
+          <Stat label="ACTIVE MEMBERS" value={activeCount} href="/admin/approve" />
+          <Stat label="TOTAL USERS" value={totalUsers} href="/admin/approve" />
           <Stat label="VEHICLES" value={vehicleCount} />
           <Stat label="RACES LOGGED" value={raceCount} />
         </section>
@@ -397,8 +397,8 @@ export default async function AdminPage() {
   );
 }
 
-function Stat({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
-  return (
+function Stat({ label, value, highlight, href }: { label: string; value: number; highlight?: boolean; href?: string }) {
+  const inner = (
     <div
       style={{
         background: highlight && value > 0 ? colors.accentSoft : colors.bgElevated,
@@ -430,6 +430,8 @@ function Stat({ label, value, highlight }: { label: string; value: number; highl
       </div>
     </div>
   );
+
+  return href ? <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>{inner}</Link> : inner;
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {

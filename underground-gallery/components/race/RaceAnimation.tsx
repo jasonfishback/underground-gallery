@@ -222,7 +222,7 @@ function LightTree({ phase }: { phase: Phase }) {
   const amber1 = phase === 'amber_1' || phase === 'amber_2' || phase === 'amber_3' || phase === 'green';
   const amber2 = phase === 'amber_2' || phase === 'amber_3' || phase === 'green';
   const amber3 = phase === 'amber_3' || phase === 'green';
-  const green = phase === 'green';
+  const green = phase === 'green' || phase === 'racing' || phase === 'finished';
 
   return (
     <div
