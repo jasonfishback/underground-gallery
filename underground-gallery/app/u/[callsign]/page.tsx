@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { eq, desc } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { users, vehicles, photos, vehicleSpecs } from '@/lib/db/schema';
+import { users, vehicles, photos, vehicleSpecs, userCarMods, modCatalog } from '@/lib/db/schema';
 import { CallsignWithBadge } from '@/components/AdminBadge';
 import { colors, fonts } from '@/lib/design';
 
@@ -50,6 +50,30 @@ export default async function ProfilePage({
     .leftJoin(vehicleSpecs, eq(vehicleSpecs.id, vehicles.vehicleSpecId))
     .where(eq(vehicles.userId, profile.id))
     .orderBy(desc(vehicles.isPrimary), desc(vehicles.createdAt));
+
+  // Sum mod hp/torque gains per vehicle (catalog defaults coalesced)
+  const modGains: Record<string, { hp: number; tq: number }> = {};
+  await Promise.all(
+    cars.map(async (vc) => {
+      const rows = await db
+        .select({
+          hpGain: userCarMods.hpGain,
+          torqueGain: userCarMods.torqueGain,
+          catalogHp: modCatalog.defaultHpGain,
+        })
+        .from(userCarMods)
+        .leftJoin(modCatalog, eq(modCatalog.id, userCarMods.modCatalogId))
+        .where(eq(userCarMods.vehicleId, vc.id));
+      let hpSum = 0, tqSum = 0;
+      for (const r of rows) {
+        const hp = r.hpGain ?? r.catalogHp ?? 0;
+        const tq = (r.torqueGain != null && r.torqueGain !== 0) ? r.torqueGain : Math.round(hp * 0.9);
+        hpSum += hp;
+        tqSum += tq;
+      }
+      modGains[vc.id] = { hp: hpSum, tq: tqSum };
+    }),
+  );
 
   const isMe = session.user.id === profile.id;
 
@@ -125,7 +149,7 @@ export default async function ProfilePage({
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
             {cars.map((c) => {
-              const hp = c.currentHpOverride ?? c.stockHp;
+              const hp = c.currentHpOverride ?? ((c.stockHp ?? 0) + (modGains[c.id]?.hp ?? 0));
               return (
                 <Link
                   key={c.id}
