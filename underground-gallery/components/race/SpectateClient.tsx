@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { RaceAnimation } from './RaceAnimation';
+import { RaceTicket } from './RaceTicket';
 import { styles, colors, fonts } from '@/lib/design';
 
 const APP_URL =
@@ -395,7 +396,20 @@ function Result(props: Props & { onReplay: () => void }) {
         </div>
       )}
 
-      <ShareBar slug={props.slug} winner={winnerCallsign} />
+      <RaceTicket
+        challengerLabel={props.challengerLabel}
+        challengerCallsign={props.challengerCallsign}
+        opponentLabel={props.opponentLabel}
+        opponentCallsign={props.opponentCallsign}
+        challengerEt={props.challengerEt}
+        opponentEt={props.opponentEt}
+        challengerTrap={props.challengerTrap}
+        opponentTrap={props.opponentTrap}
+        raceType={props.raceType}
+        createdAt={props.createdAt}
+      />
+
+      <ShareBar slug={props.slug} winner={winnerCallsign} challengerLabel={props.challengerLabel} opponentLabel={props.opponentLabel} challengerCallsign={props.challengerCallsign} opponentCallsign={props.opponentCallsign} />
 
       <div style={{ textAlign: 'center', marginTop: 24 }}>
         <button onClick={props.onReplay} style={styles.buttonGhost}>
@@ -464,12 +478,15 @@ function SidePhotoCard({
 
 // ── Share bar ────────────────────────────────────────────────────────────
 
-function ShareBar({ slug, winner }: { slug: string; winner: string | null }) {
+function ShareBar({ slug, winner, challengerLabel, opponentLabel, challengerCallsign, opponentCallsign }: { slug: string; winner: string | null; challengerLabel?: string; opponentLabel?: string; challengerCallsign?: string | null; opponentCallsign?: string | null }) {
   const [copied, setCopied] = useState(false);
   const url = `${APP_URL}/r/${slug}`;
+  const carsLine = challengerLabel && opponentLabel
+    ? `${challengerCallsign ? `@${challengerCallsign}'s ` : ''}${challengerLabel} vs ${opponentCallsign ? `@${opponentCallsign}'s ` : ''}${opponentLabel}`
+    : null;
   const shareText = winner
-    ? `@${winner} just took it on Underground Gallery — watch the replay`
-    : 'Photo finish on Underground Gallery — watch the replay';
+    ? `@${winner} just took it on Underground Gallery — ${carsLine ?? 'watch the replay'}`
+    : `Photo finish on Underground Gallery — ${carsLine ?? 'watch the replay'}`;
 
   async function copyLink() {
     try {
