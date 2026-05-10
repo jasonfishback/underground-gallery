@@ -42,17 +42,27 @@ export const manualSpecsSchema = z.object({
 });
 export type ManualSpecsInput = z.infer<typeof manualSpecsSchema>;
 
+/** Optional nickname for the car ("Daily", "Track Rat", "Project E36"). */
+export const carNameSchema = z
+  .string()
+  .trim()
+  .max(40)
+  .optional()
+  .or(z.literal(''));
+
 export const addCarFromSpecSchema = z.object({
   vehicleSpecId: z.string().min(1),
   /** Optional VIN; not validated against the spec. */
   vin: vinSchema.optional(),
   color: z.string().trim().max(40).optional().or(z.literal('')),
+  name: carNameSchema,
 });
 
 export const addCarFromManualSchema = z.object({
   manualSpecs: manualSpecsSchema,
   vin: vinSchema.optional(),
   color: z.string().trim().max(40).optional().or(z.literal('')),
+  name: carNameSchema,
 });
 
 // ── Mods ──────────────────────────────────────────────────────────────────

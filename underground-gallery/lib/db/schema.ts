@@ -178,6 +178,8 @@ export const vehicles = pgTable(
     make: text('make').notNull(),
     model: text('model').notNull(),
     trim: text('trim'),
+    // Optional nickname for the car ("Daily", "Track Rat", "Project E36"). Added 2026-05-09 via migration 0009.
+    name: text('name'),
     notes: text('notes'),
     isPrimary: boolean('is_primary').notNull().default(false),
     primaryPhotoId: text('primary_photo_id').references((): AnyPgColumn => photos.id, { onDelete: 'set null' }),
