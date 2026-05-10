@@ -1,32 +1,32 @@
 // ============================================================================
 // app/api/apply/route.ts
 //
-// FULL REPLACEMENT.
+// Writes to the `applications` Postgres table and validates invite codes
+// against the `invite_codes` table.
 //
-// Old version: stored applications in Vercel KV. New version writes to the
-// `applications` Postgres table (which already exists) and validates the
-// invite code against the new `invite_codes` table.
-//
-// On success:
-//   - Inserts/updates an application row
-//   - If a valid invite code is provided, sets applications.invitedBy =
-//     code owner's userId (so admin referral leaderboard works)
-//   - Sends Resend email notification (preserved from old route)
+// 2026-05-09 fix: previous version did a plain INSERT into `applications`,
+// but the schema has a unique index on user_id WHERE NOT NULL. So a user
+// who submitted the form twice (typo'd callsign, switched browser, etc.)
+// hit a unique-constraint 500. This version is idempotent:
+//   - if the user already has a pending application -> UPDATE in place
+//   - if the user already has an approved/rejected application -> reject
+//     the resubmit cleanly (409) so the form can show a friendly message
+//   - otherwise INSERT
 //
 // Body (JSON):
 //   {
-//     email:      string (required),
-//     callsign?:  string,
-//     region?:    string,
-//     drive?:     string,         // their daily / favorite ride
-//     instagram?: string,
-//     inviteCode?: string,        // optional, validated case-insensitive
-//     message?:   string
+//     email:       string (required),
+//     callsign?:   string,
+//     region?:     string,
+//     drive?:      string,         // their daily / favorite ride
+//     instagram?:  string,
+//     inviteCode?: string,         // optional, validated case-insensitive
+//     message?:    string
 //   }
 // ============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
-import { eq, sql, and } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { Resend } from "resend";
 import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
@@ -108,8 +108,6 @@ export async function POST(req: NextRequest) {
 
   // We do NOT block applications without a valid invite code — Jason can
   // still review them in admin. We just record the status.
-  // If you'd rather hard-require a valid code, change this to:
-  //   if (inviteCodeStatus !== 'ok') return 400.
 
   // ---- Find or create user shell ----
   // Auth.js will create the user properly on email magic-link verify, but
@@ -130,30 +128,80 @@ export async function POST(req: NextRequest) {
       id: userId,
       email,
       status: "pending",
-      // Other columns left to defaults / null
     });
   }
 
-  // ---- Insert (or replace) the application ----
-  const applicationId = randomUUID();
-  await db
-    .insert(applications)
-    .values({
+  // ---- Idempotent application write ----
+  // Schema has a unique index on applications.user_id WHERE NOT NULL.
+  // So we look up existing first and either UPDATE or INSERT.
+  const existingApp = await db
+    .select({
+      id: applications.id,
+      status: applications.status,
+    })
+    .from(applications)
+    .where(eq(applications.userId, userId))
+    .limit(1);
+
+  let applicationId: string;
+  let resubmit = false;
+
+  if (existingApp.length > 0) {
+    const prev = existingApp[0];
+
+    if (prev.status === "approved") {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "You're already approved. Just sign in with this email — no need to apply again.",
+        },
+        { status: 409 },
+      );
+    }
+
+    if (prev.status === "rejected") {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "This email has a previous decision on file. Reach out to the team if you think it should be revisited.",
+        },
+        { status: 409 },
+      );
+    }
+
+    // pending -> update in place so the user can fix typos and resubmit
+    applicationId = prev.id;
+    resubmit = true;
+    await db
+      .update(applications)
+      .set({
+        callsign,
+        region,
+        drive,
+        instagram,
+        invitedBy: inviterUserId,
+        message,
+        submittedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(applications.id, prev.id));
+  } else {
+    applicationId = randomUUID();
+    await db.insert(applications).values({
       id: applicationId,
       userId,
       callsign,
       region,
       drive,
       instagram,
-      invitedBy: inviterUserId, // userId, NOT free string anymore
+      invitedBy: inviterUserId,
       message,
       status: "pending",
       submittedAt: new Date(),
-    })
-    // If a previous pending app exists for this user, this naive insert
-    // would fail the FK; in practice users.id is unique so we only ever
-    // append — admin can decide if they want to reject the older one.
-    ;
+    });
+  }
 
   // ---- Email notification (best-effort) ----
   if (resend) {
@@ -166,9 +214,9 @@ export async function POST(req: NextRequest) {
         await resend.emails.send({
           from: FROM,
           to: adminEmails,
-          subject: `Application: ${callsign ?? email}`,
+          subject: `${resubmit ? "Resubmitted" : "Application"}: ${callsign ?? email}`,
           text: [
-            `New application submitted.`,
+            `${resubmit ? "Resubmitted" : "New"} application.`,
             ``,
             `Email:     ${email}`,
             `Callsign:  ${callsign ?? "(none)"}`,
@@ -189,7 +237,6 @@ export async function POST(req: NextRequest) {
         });
       } catch (err) {
         console.error("[apply] resend failed:", err);
-        // don't fail the whole request
       }
     }
   }
@@ -198,5 +245,6 @@ export async function POST(req: NextRequest) {
     ok: true,
     applicationId,
     inviteCode: inviteCodeStatus,
+    resubmitted: resubmit,
   });
 }

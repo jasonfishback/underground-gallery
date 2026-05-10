@@ -2,19 +2,23 @@
 
 // ============================================================================
 // components/garage/AddCarWizard.tsx
-// FULL REWRITE â€” replaces the broken year/make/model dropdown chain with a
-// single typeahead. User types "2015 bmw m3" and picks a match.
 //
 // Flow:
 //   step "search"  -> typeahead. Picks a SpecSearchResult (catalog) OR
 //                     NhtsaResult (no spec id, just Y/M/M). Or "add manually".
-//   step "name"    -> name your car (callsign-style label, optional).
+//   step "confirm" -> show the picked vehicle and an ADD TO GARAGE button.
+//   step "manual"  -> manual Y/M/M/T form.
 //   submit         -> calls addCarFromSpec | addCarFromManual.
 //
-// Server actions used (already in app/garage/actions.ts after the patch):
-//   - searchVehicleSpecs(query)
-//   - addCarFromSpec({ specId, name })
-//   - addCarFromManual({ year, make, model, trim?, name })
+// 2026-05-09 fix: previous version sent a flat payload to addCarFromManual
+// (e.g. { year, make, model, trim, name }) and a `name` field that never
+// existed in the DB schema. addCarFromManualSchema actually expects
+// { manualSpecs: { year, make, model, trim, ... } }. Every NHTSA-fallback
+// and every manual-add was failing Zod validation silently — that's the
+// "people had a hard time adding their vehicle" bug. We now build the
+// correctly-shaped payload, default trim to '', and surface Zod errors.
+// The "Name this car" input is removed for now (no schema column for it);
+// re-add later as a proper `vehicles.name` migration.
 // ============================================================================
 
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -50,7 +54,7 @@ type Props = {
 
 export default function AddCarWizard({ open, onClose }: Props) {
   const router = useRouter();
-  const [step, setStep] = useState<"search" | "name" | "manual">("search");
+  const [step, setStep] = useState<"search" | "confirm" | "manual">("search");
   const [picked, setPicked] = useState<Picked | null>(null);
 
   // search state
@@ -59,9 +63,6 @@ export default function AddCarWizard({ open, onClose }: Props) {
   const [searching, setSearching] = useState(false);
   const [searchedAt, setSearchedAt] = useState(0); // timestamp of last completed search
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // name state
-  const [carName, setCarName] = useState("");
 
   // manual state
   const [mYear, setMYear] = useState("");
@@ -80,7 +81,6 @@ export default function AddCarWizard({ open, onClose }: Props) {
       setPicked(null);
       setQuery("");
       setHits([]);
-      setCarName("");
       setMYear("");
       setMMake("");
       setMModel("");
@@ -156,12 +156,13 @@ export default function AddCarWizard({ open, onClose }: Props) {
         model: hit.model,
       });
     }
-    setCarName("");
-    setStep("name");
+    setSubmitErr(null);
+    setStep("confirm");
   }
 
   function handleManual() {
     setPicked({ kind: "manual" });
+    setSubmitErr(null);
     setStep("manual");
   }
 
@@ -169,26 +170,23 @@ export default function AddCarWizard({ open, onClose }: Props) {
     setSubmitErr(null);
     startSubmit(async () => {
       try {
+        let res: { ok: boolean; error?: string } | undefined;
+
         if (picked?.kind === "catalog") {
-          const res = await addCarFromSpec({
+          res = (await addCarFromSpec({
             vehicleSpecId: picked.specId,
-          } as any);
-          if (!(res as any)?.ok) {
-            setSubmitErr((res as any)?.error ?? "Could not add car.");
-            return;
-          }
+          })) as { ok: boolean; error?: string };
         } else if (picked?.kind === "nhtsa") {
-          const res = await addCarFromManual({
-            year: picked.year,
-            make: picked.make,
-            model: picked.model,
-            trim: null,
-            name: carName.trim() || null,
-          } as any);
-          if (!(res as any)?.ok) {
-            setSubmitErr((res as any)?.error ?? "Could not add car.");
-            return;
-          }
+          // NHTSA gives us Y/M/M only (no trim) — go through the manual path
+          // with the correctly-shaped payload.
+          res = (await addCarFromManual({
+            manualSpecs: {
+              year: picked.year,
+              make: picked.make,
+              model: picked.model,
+              trim: "",
+            },
+          })) as { ok: boolean; error?: string };
         } else if (picked?.kind === "manual") {
           const yearNum = parseInt(mYear, 10);
           if (!yearNum || yearNum < 1900 || yearNum > 2100) {
@@ -199,27 +197,32 @@ export default function AddCarWizard({ open, onClose }: Props) {
             setSubmitErr("Make and model required.");
             return;
           }
-          const res = await addCarFromManual({
-            year: yearNum,
-            make: mMake.trim(),
-            model: mModel.trim(),
-            trim: mTrim.trim() || null,
-            name: carName.trim() || null,
-          } as any);
-          if (!(res as any)?.ok) {
-            setSubmitErr((res as any)?.error ?? "Could not add car.");
-            return;
-          }
+          res = (await addCarFromManual({
+            manualSpecs: {
+              year: yearNum,
+              make: mMake.trim(),
+              model: mModel.trim(),
+              trim: mTrim.trim(), // empty string OK; schema defaults to ''
+            },
+          })) as { ok: boolean; error?: string };
         } else {
           setSubmitErr("Pick a vehicle first.");
           return;
         }
+
+        if (!res?.ok) {
+          setSubmitErr(res?.error ?? "Could not add car.");
+          return;
+        }
+
         // success
         onClose();
         router.refresh();
       } catch (err) {
-        console.error(err);
-        setSubmitErr("Something went wrong.");
+        console.error("[AddCarWizard] submit failed", err);
+        setSubmitErr(
+          err instanceof Error ? err.message : "Something went wrong.",
+        );
       }
     });
   }
@@ -318,36 +321,30 @@ export default function AddCarWizard({ open, onClose }: Props) {
           </div>
         )}
 
-        {step === "name" && picked && picked.kind !== "manual" && (
+        {step === "confirm" && picked && picked.kind !== "manual" && (
           <div>
             <p className="mb-1 text-xs uppercase tracking-wider text-neutral-400">
               You picked
             </p>
-            <p className="mb-4 text-lg font-semibold">{picked.label}</p>
-
-            <label className="mb-2 block text-xs uppercase tracking-wider text-neutral-400">
-              Name this car (optional)
-            </label>
-            <input
-              type="text"
-              value={carName}
-              onChange={(e) => setCarName(e.target.value)}
-              placeholder="e.g. Daily, Track Rat, Project E36"
-              maxLength={40}
-              className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 placeholder-neutral-500 outline-none focus:border-red-500"
-            />
+            <p className="mb-2 text-lg font-semibold">{picked.label}</p>
+            <p className="mb-6 text-sm text-neutral-500">
+              You can add mods, photos, and tune HP/weight after the car is in
+              your garage.
+            </p>
 
             {submitErr && (
-              <p className="mt-3 text-sm text-red-500">{submitErr}</p>
+              <p className="mb-3 rounded border border-red-900 bg-red-950/50 p-3 text-sm text-red-400">
+                {submitErr}
+              </p>
             )}
 
-            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="mt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
               <button
                 onClick={() => setStep("search")}
                 disabled={submitting}
                 className="text-sm text-neutral-400 hover:text-neutral-200"
               >
-                â† Back
+                {"<- Back"}
               </button>
               <button
                 onClick={handleSubmit}
@@ -408,20 +405,11 @@ export default function AddCarWizard({ open, onClose }: Props) {
               </Field>
             </div>
 
-            <div className="mt-4">
-              <Field label="Name this car (optional)">
-                <input
-                  type="text"
-                  value={carName}
-                  onChange={(e) => setCarName(e.target.value)}
-                  placeholder="e.g. Daily, Track Rat"
-                  maxLength={40}
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
-                />
-              </Field>
-            </div>
-
-            {submitErr && <p className="mt-3 text-sm text-red-500">{submitErr}</p>}
+            {submitErr && (
+              <p className="mt-3 rounded border border-red-900 bg-red-950/50 p-3 text-sm text-red-400">
+                {submitErr}
+              </p>
+            )}
 
             <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
               <button
@@ -429,7 +417,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                 disabled={submitting}
                 className="text-sm text-neutral-400 hover:text-neutral-200"
               >
-                â† Back to search
+                {"<- Back to search"}
               </button>
               <button
                 onClick={handleSubmit}
