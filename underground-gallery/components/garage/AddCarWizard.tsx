@@ -10,11 +10,16 @@
 //   step "manual"  -> manual Y/M/M/T form + optional name.
 //   submit         -> calls addCarFromSpec | addCarFromManual.
 //
-// 2026-05-09 fix-1: payload was flat; addCarFromManualSchema requires
-// { manualSpecs: {...} }. Wrapped properly. Default trim to ''. Surface
-// Zod errors. Removed broken `name` input (no DB column).
-// 2026-05-09 fix-2: re-added "Name this car" input now that drizzle/0009
-// added a `vehicles.name` column. Optional nickname, max 40 chars.
+// 2026-05-09 fixes (in order):
+//   1. Wizard sent flat payload; addCarFromManualSchema requires
+//      { manualSpecs: {...} }. Wrapped properly + default trim to ''.
+//   2. Re-added "Name this car" input now that drizzle/0009 added a
+//      `vehicles.name` column. Optional, max 40 chars.
+//   3. Always query both catalog AND NHTSA, dedupe by Y/M/M, so users
+//      typing "2017 ford" see F-150/F-350/Mustang/etc., not just the
+//      Focus RS that's the only Ford in the curated 42-car catalog.
+//   4. Restyled with iOS-frosted-glass design tokens from globals.css
+//      (.ug-modal, .ug-input, .ug-btn-primary, .ug-list, etc.).
 // ============================================================================
 
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -89,7 +94,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
     }
   }, [open]);
 
-  // debounced search: catalog first, then NHTSA fallback if zero hits
+  // debounced search: catalog AND NHTSA in parallel, dedupe by Y/M/M
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -104,17 +109,38 @@ export default function AddCarWizard({ open, onClose }: Props) {
     debounceRef.current = setTimeout(async () => {
       const myStamp = Date.now();
       try {
-        const catalog = await searchVehicleSpecs(q);
-        let merged: SearchHit[] = [];
-        if (catalog.ok && catalog.results.length > 0) {
-          merged = catalog.results.map((r) => ({ ...r, kind: "catalog" as const }));
-        } else {
-          const res = await fetch(`/api/vehicle-data/search?q=${encodeURIComponent(q)}`);
-          if (res.ok) {
-            const data = (await res.json()) as { ok: boolean; results: NhtsaResult[] };
-            merged = (data.results ?? []).map((r) => ({ ...r, kind: "nhtsa" as const }));
-          }
-        }
+        const [catalog, nhtsaRes] = await Promise.all([
+          searchVehicleSpecs(q),
+          fetch(`/api/vehicle-data/search?q=${encodeURIComponent(q)}`)
+            .then(async (res) =>
+              res.ok
+                ? ((await res.json()) as { ok: boolean; results: NhtsaResult[] })
+                : { ok: false as const, results: [] as NhtsaResult[] },
+            )
+            .catch(() => ({ ok: false as const, results: [] as NhtsaResult[] })),
+        ]);
+
+        const catalogHits: SearchHit[] =
+          catalog.ok && catalog.results.length > 0
+            ? catalog.results.map((r) => ({ ...r, kind: "catalog" as const }))
+            : [];
+
+        const seen = new Set(
+          catalogHits.map(
+            (h) => `${h.year}|${h.make.toLowerCase()}|${h.model.toLowerCase()}`,
+          ),
+        );
+        const nhtsaHits: SearchHit[] = (nhtsaRes.results ?? [])
+          .filter(
+            (n) =>
+              !seen.has(
+                `${n.year}|${n.make.toLowerCase()}|${n.model.toLowerCase()}`,
+              ),
+          )
+          .map((r) => ({ ...r, kind: "nhtsa" as const }));
+
+        const merged: SearchHit[] = [...catalogHits, ...nhtsaHits];
+
         if (myStamp >= searchedAt) {
           setHits(merged);
           setSearchedAt(myStamp);
@@ -228,72 +254,81 @@ export default function AddCarWizard({ open, onClose }: Props) {
 
   // ---------- render ----------
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-stretch sm:items-center justify-center bg-black/80 p-0 sm:p-4 overflow-y-auto"
-      onClick={onClose}
-    >
-      <div
-        className="w-full sm:max-w-xl sm:rounded-lg border-0 sm:border sm:border-neutral-800 bg-neutral-950 p-5 sm:p-6 text-neutral-100 shadow-2xl min-h-screen sm:min-h-0 sm:max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-wide">ADD VEHICLE</h2>
+    <div className="ug-modal-backdrop" onClick={onClose}>
+      <div className="ug-modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, letterSpacing: "0.04em" }}>
+            ADD VEHICLE
+          </h2>
           <button
             onClick={onClose}
-            className="text-neutral-500 hover:text-neutral-200"
             aria-label="Close"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid var(--ug-border)",
+              borderRadius: 999,
+              width: 32,
+              height: 32,
+              color: "var(--ug-fg-dim)",
+              fontSize: 16,
+              cursor: "pointer",
+              lineHeight: 1,
+            }}
           >
-            X
+            ×
           </button>
         </div>
 
         {step === "search" && (
           <div>
-            <label className="mb-2 block text-xs uppercase tracking-wider text-neutral-400">
-              Search your vehicle
-            </label>
+            <label className="ug-label">Search your vehicle</label>
             <input
               type="text"
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g. 2015 bmw m3"
-              className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 placeholder-neutral-500 outline-none focus:border-red-500"
+              placeholder="e.g. 2017 Ford F-350, 2015 BMW M3, Mustang GT…"
+              className="ug-input ug-input-lg"
             />
 
-            <div className="mt-4 min-h-[200px]">
+            <div style={{ marginTop: 16, minHeight: 200 }}>
               {query.trim().length < 2 ? (
-                <p className="text-sm text-neutral-500">
-                  Type a year, make, and model. The 42-car catalog is searched first, then
-                  NHTSA's full database.
+                <p style={{ fontSize: 13, color: "var(--ug-fg-muted)", margin: 0 }}>
+                  Type a year, make, and model. We search a curated catalog plus
+                  NHTSA's full database — every U.S. car ever sold.
                 </p>
               ) : searching ? (
-                <p className="text-sm text-neutral-500">Searching...</p>
+                <p style={{ fontSize: 13, color: "var(--ug-fg-muted)", margin: 0 }}>
+                  Searching…
+                </p>
               ) : hits.length === 0 ? (
-                <div>
-                  <p className="text-sm text-neutral-500">
-                    No matches. You can{" "}
-                    <button
-                      onClick={handleManual}
-                      className="text-red-500 underline hover:text-red-400"
-                    >
-                      enter it manually
-                    </button>
-                    .
-                  </p>
-                </div>
+                <p style={{ fontSize: 13, color: "var(--ug-fg-muted)", margin: 0 }}>
+                  No matches. You can{" "}
+                  <button
+                    onClick={handleManual}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "var(--ug-accent)",
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      padding: 0,
+                      fontSize: 13,
+                    }}
+                  >
+                    enter it manually
+                  </button>
+                  .
+                </p>
               ) : (
-                <ul className="max-h-[50vh] overflow-y-auto divide-y divide-neutral-800 rounded border border-neutral-800">
+                <ul className="ug-list" style={{ maxHeight: "50vh", overflowY: "auto" }}>
                   {hits.map((hit, i) => (
                     <li key={`${hit.kind}-${i}-${hit.label}`}>
-                      <button
-                        onClick={() => handlePick(hit)}
-                        className="flex w-full items-center justify-between gap-3 px-5 py-5 text-left hover:bg-neutral-900 active:bg-neutral-800"
-                      >
-                        <span className="text-neutral-100">{hit.label}</span>
-                        <span className="text-xs uppercase tracking-wider text-neutral-500">
+                      <button onClick={() => handlePick(hit)} className="ug-list-row">
+                        <span>{hit.label}</span>
+                        <span className="ug-list-meta">
                           {hit.kind === "catalog"
-                            ? `catalog${hit.hpStock ? ` * ${hit.hpStock}hp` : ""}`
+                            ? `catalog${hit.hpStock ? ` · ${hit.hpStock} hp` : ""}`
                             : "nhtsa"}
                         </span>
                       </button>
@@ -303,17 +338,11 @@ export default function AddCarWizard({ open, onClose }: Props) {
               )}
             </div>
 
-            <div className="mt-4 flex justify-between text-sm">
-              <button
-                onClick={handleManual}
-                className="text-neutral-400 hover:text-neutral-200"
-              >
+            <div style={{ marginTop: 20, display: "flex", justifyContent: "space-between", gap: 12 }}>
+              <button onClick={handleManual} className="ug-btn ug-btn-text">
                 Add manually instead
               </button>
-              <button
-                onClick={onClose}
-                className="text-neutral-400 hover:text-neutral-200"
-              >
+              <button onClick={onClose} className="ug-btn ug-btn-text">
                 Cancel
               </button>
             </div>
@@ -322,42 +351,40 @@ export default function AddCarWizard({ open, onClose }: Props) {
 
         {step === "confirm" && picked && picked.kind !== "manual" && (
           <div>
-            <p className="mb-1 text-xs uppercase tracking-wider text-neutral-400">
-              You picked
-            </p>
-            <p className="mb-5 text-lg font-semibold">{picked.label}</p>
+            <p className="ug-label" style={{ marginBottom: 4 }}>You picked</p>
+            <p style={{ fontSize: 20, fontWeight: 700, margin: "0 0 24px" }}>{picked.label}</p>
 
-            <Field label="Name this car (optional)">
-              <input
-                type="text"
-                value={carName}
-                onChange={(e) => setCarName(e.target.value)}
-                placeholder="e.g. Daily, Track Rat, Project E36"
-                maxLength={40}
-                className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 placeholder-neutral-500 outline-none focus:border-red-500"
-              />
-            </Field>
+            <label className="ug-label">Name this car (optional)</label>
+            <input
+              type="text"
+              value={carName}
+              onChange={(e) => setCarName(e.target.value)}
+              placeholder="e.g. Daily, Track Rat, Project E36"
+              maxLength={40}
+              className="ug-input ug-input-lg"
+            />
 
             {submitErr && (
-              <p className="mt-3 rounded border border-red-900 bg-red-950/50 p-3 text-sm text-red-400">
+              <div className="ug-banner ug-banner-error" style={{ marginTop: 16 }}>
                 {submitErr}
-              </p>
+              </div>
             )}
 
-            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
-              <button
-                onClick={() => setStep("search")}
-                disabled={submitting}
-                className="text-sm text-neutral-400 hover:text-neutral-200"
-              >
-                {"<- Back"}
-              </button>
+            <div style={{ marginTop: 24, display: "flex", flexDirection: "row-reverse", gap: 12, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full sm:w-auto rounded bg-red-600 px-6 py-4 text-lg font-semibold tracking-wide text-white hover:bg-red-500 disabled:opacity-50"
+                className="ug-btn ug-btn-primary ug-btn-block"
+                style={{ flex: 1, minWidth: 200 }}
               >
-                {submitting ? "Adding..." : "ADD TO GARAGE"}
+                {submitting ? "Adding…" : "Add to garage →"}
+              </button>
+              <button
+                onClick={() => setStep("search")}
+                disabled={submitting}
+                className="ug-btn ug-btn-text"
+              >
+                ← Back
               </button>
             </div>
           </div>
@@ -365,12 +392,12 @@ export default function AddCarWizard({ open, onClose }: Props) {
 
         {step === "manual" && (
           <div>
-            <p className="mb-4 text-sm text-neutral-400">
-              Enter your vehicle details. You can refine HP, weight, and drivetrain later
-              in the spec sheet.
+            <p style={{ fontSize: 14, color: "var(--ug-fg-dim)", margin: "0 0 20px" }}>
+              Enter your vehicle details. You can refine HP, weight, and drivetrain
+              later in the spec sheet.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
               <Field label="Year">
                 <input
                   type="number"
@@ -379,7 +406,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   placeholder="2015"
                   min={1900}
                   max={2100}
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
+                  className="ug-input"
                 />
               </Field>
               <Field label="Make">
@@ -388,7 +415,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   value={mMake}
                   onChange={(e) => setMMake(e.target.value)}
                   placeholder="BMW"
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
+                  className="ug-input"
                 />
               </Field>
               <Field label="Model">
@@ -397,7 +424,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   value={mModel}
                   onChange={(e) => setMModel(e.target.value)}
                   placeholder="M3"
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
+                  className="ug-input"
                 />
               </Field>
               <Field label="Trim (optional)">
@@ -406,12 +433,12 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   value={mTrim}
                   onChange={(e) => setMTrim(e.target.value)}
                   placeholder="Competition"
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
+                  className="ug-input"
                 />
               </Field>
             </div>
 
-            <div className="mt-4">
+            <div style={{ marginTop: 16 }}>
               <Field label="Name this car (optional)">
                 <input
                   type="text"
@@ -419,31 +446,32 @@ export default function AddCarWizard({ open, onClose }: Props) {
                   onChange={(e) => setCarName(e.target.value)}
                   placeholder="e.g. Daily, Track Rat"
                   maxLength={40}
-                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-5 py-4 text-lg text-neutral-100 outline-none focus:border-red-500"
+                  className="ug-input"
                 />
               </Field>
             </div>
 
             {submitErr && (
-              <p className="mt-3 rounded border border-red-900 bg-red-950/50 p-3 text-sm text-red-400">
+              <div className="ug-banner ug-banner-error" style={{ marginTop: 16 }}>
                 {submitErr}
-              </p>
+              </div>
             )}
 
-            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
-              <button
-                onClick={() => setStep("search")}
-                disabled={submitting}
-                className="text-sm text-neutral-400 hover:text-neutral-200"
-              >
-                {"<- Back to search"}
-              </button>
+            <div style={{ marginTop: 24, display: "flex", flexDirection: "row-reverse", gap: 12, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full sm:w-auto rounded bg-red-600 px-6 py-4 text-lg font-semibold tracking-wide text-white hover:bg-red-500 disabled:opacity-50"
+                className="ug-btn ug-btn-primary ug-btn-block"
+                style={{ flex: 1, minWidth: 200 }}
               >
-                {submitting ? "Adding..." : "ADD TO GARAGE"}
+                {submitting ? "Adding…" : "Add to garage →"}
+              </button>
+              <button
+                onClick={() => setStep("search")}
+                disabled={submitting}
+                className="ug-btn ug-btn-text"
+              >
+                ← Back to search
               </button>
             </div>
           </div>
@@ -461,10 +489,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="block">
-      <span className="mb-1 block text-xs uppercase tracking-wider text-neutral-400">
-        {label}
-      </span>
+    <label style={{ display: "block" }}>
+      <span className="ug-label">{label}</span>
       {children}
     </label>
   );

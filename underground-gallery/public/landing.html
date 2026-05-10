@@ -36,7 +36,7 @@
   @keyframes ugRingSpin { to { transform: rotate(360deg); } }
   @keyframes ugScanSweep { 0% { transform: translateY(-8px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(94px); opacity: 0; } }
 
-  /* â”€â”€â”€ Boot intro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ─── Boot intro ─────────────────────────────────────────────── */
   /* Reality-glitch flicker - total ~4.5s.
      Each element runs its OWN flicker timeline, intentionally desynced
      so nothing pulses in unison. The container fades the whole scene
@@ -430,7 +430,7 @@
 </head>
 <body>
 
-<!-- â”€â”€â”€ Boot intro overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+<!-- ─── Boot intro overlay ──────────────────────────────────────────
      Plays once per browser session. Tap anywhere to skip.
      Hidden entirely if user prefers reduced motion. -->
 <div id="ug-boot" aria-hidden="true">
@@ -521,7 +521,7 @@
     <div id="ug-state" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px;">
 
       <div id="state-loading" class="ug-fade-4" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(201,204,209,0.4); letter-spacing: 0.3em; text-transform: uppercase;">
-        <span class="ug-loading-dot ug-blink"></span> CHECKING CREDENTIALSâ€¦
+        <span class="ug-loading-dot ug-blink"></span> CHECKING CREDENTIALS…
       </div>
 
       <div id="state-signedin" hidden class="ug-fade-in" style="display: none; flex-direction: column; align-items: center; gap: 14px; width: 100%;">
@@ -555,7 +555,7 @@
           </div>
           <div id="signin-msg" class="ug-panel-msg"></div>
         </form>
-        <button class="ug-panel-back" data-action="back" type="button">â† BACK</button>
+        <button class="ug-panel-back" data-action="back" type="button">← BACK</button>
       </div>
 
       <div id="panel-scan" hidden class="ug-panel ug-fade-in" style="display: none;">
@@ -577,7 +577,7 @@
           <video id="scan-video" class="ug-scan-video" hidden playsinline muted></video>
 <canvas id="qr-canvas" hidden width="640" height="480"></canvas>
         </form>
-        <button class="ug-panel-back" data-action="back" type="button">â† BACK</button>
+        <button class="ug-panel-back" data-action="back" type="button">← BACK</button>
       </div>
     </div>
   </main>
@@ -595,7 +595,7 @@
 
 <script>
 (function () {
-  // â”€â”€â”€ Boot intro orchestration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Boot intro orchestration ────────────────────────────────────
   // Plays once per browser tab session. Skips on tap, on reduced-motion,
   // or for visitors who've already seen it this session.
   const boot = document.getElementById('ug-boot');
@@ -675,7 +675,7 @@
     }
   });
 
-  // â”€â”€ ENTER button: play the unlock animation, THEN navigate â”€â”€â”€â”€â”€â”€
+  // ── ENTER button: play the unlock animation, THEN navigate ──────
   // Subsequent taps skip the animation (impatient users go straight through).
   const enterLink = document.getElementById('enter-link');
   let enterTaps = 0;
@@ -740,7 +740,7 @@
       return;
     }
     signinSubmit.disabled = true;
-    signinSubmit.textContent = 'SENDINGâ€¦';
+    signinSubmit.textContent = 'SENDING…';
     try {
       const csrfRes = await fetch('/api/auth/csrf', { credentials: 'include' });
       const csrf = csrfRes.ok ? (await csrfRes.json()).csrfToken : '';
@@ -791,7 +791,7 @@
       return;
     }
     scanSubmit.disabled = true;
-    scanSubmit.textContent = 'OPENINGâ€¦';
+    scanSubmit.textContent = 'OPENING…';
     window.location.href = '/invite/' + encodeURIComponent(code);
   });
 
