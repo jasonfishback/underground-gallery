@@ -48,6 +48,42 @@ export default function InitDbPage() {
     }
   };
 
+  const runMarketplace = async () => {
+    if (!token.trim()) {
+      setStatus('error');
+      setResult('Paste your ADMIN_TOKEN first.');
+      return;
+    }
+    setStatus('loading');
+    setResult('');
+    try {
+      const res = await fetch('/api/db-init/marketplace', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token.trim()}` },
+      });
+      const json = await res.json();
+      setResult(JSON.stringify(json, null, 2));
+      setStatus(res.ok && json.ok ? 'done' : 'error');
+    } catch (err) {
+      setStatus('error');
+      setResult(err instanceof Error ? err.message : 'Network error');
+    }
+  };
+
+  const checkMarketplace = async () => {
+    setStatus('loading');
+    setResult('');
+    try {
+      const res = await fetch('/api/db-init/marketplace');
+      const json = await res.json();
+      setResult(JSON.stringify(json, null, 2));
+      setStatus('done');
+    } catch (err) {
+      setStatus('error');
+      setResult(err instanceof Error ? err.message : 'Network error');
+    }
+  };
+
   return (
     <main
       style={{
@@ -166,6 +202,78 @@ export default function InitDbPage() {
         >
           CHECK EXISTING
         </button>
+      </div>
+
+      <div
+        style={{
+          marginTop: 32,
+          paddingTop: 24,
+          borderTop: '0.5px solid rgba(255,255,255,0.12)',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: 11,
+            color: '#ff2a2a',
+            letterSpacing: '0.4em',
+            fontWeight: 700,
+            marginBottom: 8,
+          }}
+        >
+          ∕∕ STAGE 4 · MARKETPLACE
+        </div>
+        <p
+          style={{
+            fontSize: 14,
+            color: 'rgba(201,204,209,0.7)',
+            lineHeight: 1.55,
+            marginBottom: 18,
+          }}
+        >
+          Adds the listings, listing_messages, listing_offers, and listing_watches
+          tables. Extends photos, notifications, and flags enums to include
+          marketplace events. Idempotent — safe to rerun.
+        </p>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button
+            onClick={runMarketplace}
+            disabled={status === 'loading'}
+            style={{
+              padding: '14px 28px',
+              background: '#ff2a2a',
+              color: '#05060a',
+              border: 'none',
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              cursor: status === 'loading' ? 'default' : 'pointer',
+              opacity: status === 'loading' ? 0.5 : 1,
+            }}
+          >
+            {status === 'loading' ? 'WORKING…' : 'RUN MARKETPLACE MIGRATION'}
+          </button>
+          <button
+            onClick={checkMarketplace}
+            disabled={status === 'loading'}
+            style={{
+              padding: '14px 28px',
+              background: 'transparent',
+              color: 'rgba(201,204,209,0.85)',
+              border: '0.5px solid rgba(255,255,255,0.2)',
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              cursor: status === 'loading' ? 'default' : 'pointer',
+            }}
+          >
+            CHECK MARKETPLACE TABLES
+          </button>
+        </div>
       </div>
 
       {result && (

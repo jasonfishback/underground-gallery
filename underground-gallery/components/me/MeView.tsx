@@ -39,38 +39,32 @@ export function MeView({ cars, modCounts, modGains }: Props) {
   return (
     <div>
       {/* Action bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12, flexWrap: 'wrap' }}>
         <div style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, fontFamily: fonts.mono, fontWeight: 700 }}>
           {cars.length} {cars.length === 1 ? 'VEHICLE' : 'VEHICLES'}
         </div>
         <button
           onClick={() => setWizardOpen(true)}
-          style={{
-            ...styles.buttonPrimary,
-            padding: '12px 24px',
-            fontSize: 11,
-            letterSpacing: '0.3em',
-          }}
+          className="ug-btn ug-btn-primary"
         >
-          + ADD VEHICLE
+          + Add Vehicle
         </button>
       </div>
 
       {/* Car list */}
       {cars.length === 0 ? (
-        <div style={{
+        <div className="ug-card" style={{
           padding: 48,
-          border: `1px dashed ${colors.border}`,
           textAlign: 'center',
           color: colors.textMuted,
           fontFamily: fonts.mono,
           fontSize: 12,
-          letterSpacing: '0.1em',
+          letterSpacing: '0.18em',
         }}>
           NO VEHICLES YET. ADD ONE TO START RACING.
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: 16 }}>
+        <div style={{ display: 'grid', gap: 14 }}>
           {cars.map((c) => {
             const label = `${c.year} ${c.make} ${c.model}${c.trim ? ' ' + c.trim : ''}`;
             const modCount = modCounts[c.id] ?? 0;
@@ -78,26 +72,27 @@ export function MeView({ cars, modCounts, modGains }: Props) {
               <Link
                 key={c.id}
                 href={`/v/${c.id}`}
+                className="ug-card"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: 16,
                   padding: 16,
-                  border: `1px solid ${colors.border}`,
-                  background: colors.bgElevated,
                   textDecoration: 'none',
                   color: colors.text,
                 }}
               >
                 <div style={{
-                  width: 80,
-                  height: 80,
-                  background: colors.bgSubtle,
-                  border: `1px solid ${colors.border}`,
+                  width: 88,
+                  height: 88,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 10,
                   flexShrink: 0,
                   backgroundImage: c.thumbUrl ? `url(${c.thumbUrl})` : undefined,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
                 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontFamily: fonts.mono, fontSize: 13, fontWeight: 700, letterSpacing: '0.05em', marginBottom: 4 }}>

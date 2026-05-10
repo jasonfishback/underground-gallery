@@ -9,7 +9,10 @@ function SignInForm() {
   const errorParam = params?.get('error');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(errorParam ? 'Authentication failed. Try again.' : null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(
+    errorParam ? 'Authentication failed. Try again.' : null,
+  );
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,7 +23,11 @@ function SignInForm() {
     }
     setSubmitting(true);
     try {
-      await signIn('resend', { email: email.trim().toLowerCase(), redirectTo: '/pending' });
+      await signIn('resend', {
+        email: email.trim().toLowerCase(),
+        redirectTo: '/pending',
+      });
+      setSentTo(email.trim().toLowerCase());
     } catch {
       setErrorMsg('Could not send link. Try again.');
       setSubmitting(false);
@@ -28,48 +35,139 @@ function SignInForm() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#05060a', color: '#f5f6f7', padding: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'system-ui, sans-serif' }}>
-      <div style={{ maxWidth: 460, width: '100%' }}>
-        <div style={{ fontSize: 11, color: '#ff2a2a', letterSpacing: '0.4em', fontWeight: 700, marginBottom: 16, textAlign: 'center', fontFamily: 'monospace' }}>
-          ACCESS RESTRICTED · SIGN IN
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#05060a',
+        backgroundImage:
+          'radial-gradient(ellipse at 50% 30%, rgba(255,42,42,0.10), transparent 55%), radial-gradient(ellipse at 50% 90%, rgba(255,42,42,0.05), transparent 60%)',
+        color: '#f5f6f7',
+        padding: 24,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div className="ug-glass" style={{ maxWidth: 460, width: '100%', padding: 32 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            marginBottom: 16,
+          }}
+        >
+          <span
+            style={{
+              display: 'inline-block',
+              width: 7,
+              height: 7,
+              borderRadius: 999,
+              background: '#ff2a2a',
+              boxShadow: '0 0 8px rgba(255,42,42,0.8)',
+            }}
+          />
+          <span
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: 11,
+              letterSpacing: '0.4em',
+              color: '#ff2a2a',
+              fontWeight: 700,
+            }}
+          >
+            ACCESS RESTRICTED · SIGN IN
+          </span>
         </div>
-        <h1 style={{ fontSize: 44, fontWeight: 800, margin: '0 0 16px', textAlign: 'center' }}>
+
+        <h1
+          style={{
+            fontSize: 44,
+            fontWeight: 800,
+            margin: '0 0 12px',
+            textAlign: 'center',
+            letterSpacing: '-0.025em',
+            lineHeight: 1.05,
+          }}
+        >
           Members <span style={{ color: '#ff2a2a' }}>only.</span>
         </h1>
-        <p style={{ fontSize: 14, color: 'rgba(201,204,209,0.7)', textAlign: 'center', margin: '0 0 36px' }}>
-          Enter your email. We&apos;ll send a sign-in link.
+
+        <p
+          style={{
+            fontSize: 14,
+            color: 'rgba(245,246,247,0.65)',
+            textAlign: 'center',
+            margin: '0 0 28px',
+            lineHeight: 1.5,
+          }}
+        >
+          Enter your email. We&apos;ll send you a one-time sign-in link.
         </p>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            name="email"
-            autoComplete="email"
-            inputMode="email"
-            autoCapitalize="off"
-            autoCorrect="off"
-            spellCheck={false}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@domain.com"
-            required
-            disabled={submitting}
-            style={{ width: '100%', padding: 14, background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.12)', color: '#f5f6f7', fontSize: 16, marginBottom: 24, boxSizing: 'border-box' }}
-          />
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{ width: '100%', padding: 16, background: '#ff2a2a', color: '#05060a', border: 'none', fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', fontSize: 11, cursor: 'pointer', opacity: submitting ? 0.5 : 1, fontFamily: 'monospace' }}
+
+        {sentTo ? (
+          <div className="ug-banner ug-banner-success" style={{ textAlign: 'center' }}>
+            Check <strong>{sentTo}</strong> for the sign-in link.
+            <br />
+            <span style={{ fontSize: 11, opacity: 0.8 }}>
+              Link expires in 24 hours · check spam if you don&apos;t see it
+            </span>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <label className="ug-label">Email</label>
+            <input
+              type="email"
+              name="email"
+              autoComplete="email"
+              inputMode="email"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@domain.com"
+              required
+              disabled={submitting}
+              className="ug-input ug-input-lg"
+            />
+            <button
+              type="submit"
+              disabled={submitting}
+              className="ug-btn ug-btn-primary ug-btn-block"
+              style={{ marginTop: 16 }}
+            >
+              {submitting ? 'Sending…' : 'Send sign-in link →'}
+            </button>
+            {errorMsg && (
+              <div className="ug-banner ug-banner-error" style={{ marginTop: 16 }}>
+                {errorMsg}
+              </div>
+            )}
+          </form>
+        )}
+
+        <p
+          style={{
+            marginTop: 28,
+            fontSize: 11,
+            color: 'rgba(245,246,247,0.4)',
+            textAlign: 'center',
+            letterSpacing: '0.18em',
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            textTransform: 'uppercase',
+          }}
+        >
+          <a
+            href="/"
+            style={{
+              color: 'rgba(245,246,247,0.55)',
+              textDecoration: 'none',
+            }}
           >
-            {submitting ? 'Sending...' : 'Send sign-in link'}
-          </button>
-          {errorMsg && (
-            <div style={{ marginTop: 20, padding: 14, border: '1px solid #ff2a2a', background: 'rgba(255,42,42,0.08)', color: '#ff2a2a', fontSize: 12 }}>
-              {errorMsg}
-            </div>
-          )}
-        </form>
-        <p style={{ marginTop: 32, fontSize: 12, color: 'rgba(201,204,209,0.5)', textAlign: 'center' }}>
-          <a href="/" style={{ color: 'rgba(201,204,209,0.5)' }}>Back to landing</a>
+            ← BACK TO LANDING
+          </a>
         </p>
       </div>
     </main>

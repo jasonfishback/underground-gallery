@@ -216,7 +216,7 @@ export const photos = pgTable(
   {
     id: text('id').primaryKey(),
     uploaderId: text('uploader_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-    subjectType: text('subject_type', { enum: ['user', 'vehicle'] }).notNull(),
+    subjectType: text('subject_type', { enum: ['user', 'vehicle', 'listing'] }).notNull(),
     subjectId: text('subject_id').notNull(),
     urlFull: text('url_full').notNull(),
     urlThumb: text('url_thumb').notNull(),
@@ -244,7 +244,7 @@ export const flags = pgTable(
   {
     id: text('id').primaryKey(),
     reporterId: text('reporter_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-    subjectType: text('subject_type', { enum: ['photo', 'vehicle', 'user'] }).notNull(),
+    subjectType: text('subject_type', { enum: ['photo', 'vehicle', 'user', 'listing'] }).notNull(),
     subjectId: text('subject_id').notNull(),
     reason: text('reason', { enum: ['nsfw', 'fake', 'spam', 'harassment', 'other'] }).notNull(),
     details: text('details'),
@@ -429,6 +429,14 @@ export const notifications = pgTable(
         'photo_flagged',
         'application_decision',
         'system',
+        // Marketplace
+        'listing_message',
+        'listing_offer_received',
+        'listing_offer_accepted',
+        'listing_offer_declined',
+        'listing_watched_sold',
+        'listing_expiring_soon',
+        'listing_flagged',
       ],
     }).notNull(),
     title: text('title').notNull(),
@@ -503,3 +511,167 @@ export const inviteCodes = pgTable(
 
 export type InviteCode = typeof inviteCodes.$inferSelect;
 export type NewInviteCode = typeof inviteCodes.$inferInsert;
+
+
+// ============================================================================
+// Marketplace (Stage 4) — added 2026-05-10 via migration 0010_marketplace.sql
+// Unified classifieds table for cars and parts. Contact-only (no payments).
+// ============================================================================
+
+export const LISTING_TYPES = ['car', 'part'] as const;
+export type ListingType = (typeof LISTING_TYPES)[number];
+
+export const LISTING_CONDITIONS = ['new', 'like_new', 'used', 'for_parts', 'project'] as const;
+export type ListingCondition = (typeof LISTING_CONDITIONS)[number];
+
+export const LISTING_STATUSES = ['draft', 'active', 'sold', 'expired', 'removed'] as const;
+export type ListingStatus = (typeof LISTING_STATUSES)[number];
+
+export const LISTING_PRICE_TYPES = ['firm', 'obo', 'trade', 'free'] as const;
+export type ListingPriceType = (typeof LISTING_PRICE_TYPES)[number];
+
+export const LISTING_TITLE_STATUSES = ['clean', 'salvage', 'rebuilt', 'bonded', 'other'] as const;
+export type ListingTitleStatus = (typeof LISTING_TITLE_STATUSES)[number];
+
+// Mirrors mod_catalog.category — kept in lock-step
+export const PART_CATEGORIES = [
+  'Tune', 'Turbo', 'Intake', 'Exhaust', 'Downpipes', 'Headers',
+  'Fuel', 'Intercooler', 'Transmission', 'Tires', 'Suspension',
+  'Brakes', 'WeightReduction', 'Aero', 'Drivetrain', 'Custom',
+] as const;
+export type PartCategory = (typeof PART_CATEGORIES)[number];
+
+export const listings = pgTable(
+  'listings',
+  {
+    id: text('id').primaryKey(),
+    sellerId: text('seller_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    listingType: text('listing_type', { enum: LISTING_TYPES }).notNull(),
+
+    // Common
+    title: text('title').notNull(),
+    description: text('description'),
+    priceCents: integer('price_cents'),
+    currency: text('currency').notNull().default('USD'),
+    priceType: text('price_type', { enum: LISTING_PRICE_TYPES }).notNull().default('firm'),
+    condition: text('condition', { enum: LISTING_CONDITIONS }).notNull(),
+    status: text('status', { enum: LISTING_STATUSES }).notNull().default('draft'),
+    primaryPhotoId: text('primary_photo_id').references((): AnyPgColumn => photos.id, { onDelete: 'set null' }),
+    viewCount: integer('view_count').notNull().default(0),
+    favoriteCount: integer('favorite_count').notNull().default(0),
+
+    // Location
+    locationLabel: text('location_label'),
+    locationLat: doublePrecision('location_lat'),
+    locationLng: doublePrecision('location_lng'),
+    locationCountry: text('location_country'),
+    locationAdmin1: text('location_admin1'),
+
+    // Lifecycle
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+    publishedAt: timestamp('published_at', { mode: 'date', withTimezone: true }),
+    expiresAt: timestamp('expires_at', { mode: 'date', withTimezone: true }),
+    soldAt: timestamp('sold_at', { mode: 'date', withTimezone: true }),
+    bumpedAt: timestamp('bumped_at', { mode: 'date', withTimezone: true }),
+    removedAt: timestamp('removed_at', { mode: 'date', withTimezone: true }),
+
+    // Car-specific
+    garageVehicleId: text('garage_vehicle_id').references(() => vehicles.id, { onDelete: 'set null' }),
+    year: integer('year'),
+    make: text('make'),
+    model: text('model'),
+    trim: text('trim'),
+    bodyStyle: text('body_style'),
+    vin: text('vin'),
+    mileage: integer('mileage'),
+    color: text('color'),
+    transmission: text('transmission'),
+    drivetrain: text('drivetrain'),
+    titleStatus: text('title_status', { enum: LISTING_TITLE_STATUSES }),
+    modsSummary: text('mods_summary'),
+
+    // Part-specific
+    partCategory: text('part_category', { enum: PART_CATEGORIES }),
+    partBrand: text('part_brand'),
+    partNumber: text('part_number'),
+    oemNumber: text('oem_number'),
+    fitmentMake: text('fitment_make'),
+    fitmentModel: text('fitment_model'),
+    fitmentYearFrom: integer('fitment_year_from'),
+    fitmentYearTo: integer('fitment_year_to'),
+    fitmentTrim: text('fitment_trim'),
+    fitmentNotes: text('fitment_notes'),
+    quantity: integer('quantity').notNull().default(1),
+  },
+  (t) => ({
+    browseIdx: index('listings_browse_idx').on(t.status, t.listingType, t.createdAt),
+    sellerIdx: index('listings_seller_idx').on(t.sellerId, t.status, t.createdAt),
+    partsCategoryIdx: index('listings_parts_category_idx').on(t.partCategory, t.status),
+    carsMmyIdx: index('listings_cars_mmy_idx').on(t.make, t.model, t.year),
+    expiryIdx: index('listings_expiry_idx').on(t.status, t.expiresAt),
+  }),
+);
+
+export const listingMessages = pgTable(
+  'listing_messages',
+  {
+    id: text('id').primaryKey(),
+    listingId: text('listing_id').notNull().references(() => listings.id, { onDelete: 'cascade' }),
+    fromUserId: text('from_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    toUserId: text('to_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    body: text('body').notNull(),
+    readAt: timestamp('read_at', { mode: 'date', withTimezone: true }),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    threadIdx: index('listing_messages_thread_idx').on(t.listingId, t.fromUserId, t.toUserId, t.createdAt),
+    inboxIdx: index('listing_messages_inbox_idx').on(t.toUserId, t.readAt, t.createdAt),
+  }),
+);
+
+export const LISTING_OFFER_STATUSES = ['pending', 'accepted', 'declined', 'withdrawn', 'expired'] as const;
+export type ListingOfferStatus = (typeof LISTING_OFFER_STATUSES)[number];
+
+export const listingOffers = pgTable(
+  'listing_offers',
+  {
+    id: text('id').primaryKey(),
+    listingId: text('listing_id').notNull().references(() => listings.id, { onDelete: 'cascade' }),
+    buyerId: text('buyer_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    amountCents: integer('amount_cents').notNull(),
+    currency: text('currency').notNull().default('USD'),
+    message: text('message'),
+    status: text('status', { enum: LISTING_OFFER_STATUSES }).notNull().default('pending'),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+    respondedAt: timestamp('responded_at', { mode: 'date', withTimezone: true }),
+    expiresAt: timestamp('expires_at', { mode: 'date', withTimezone: true }).notNull(),
+  },
+  (t) => ({
+    listingIdx: index('listing_offers_listing_idx').on(t.listingId, t.status, t.createdAt),
+    buyerIdx: index('listing_offers_buyer_idx').on(t.buyerId, t.createdAt),
+  }),
+);
+
+export const listingWatches = pgTable(
+  'listing_watches',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    listingId: text('listing_id').notNull().references(() => listings.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    unique: uniqueIndex('listing_watches_unique').on(t.userId, t.listingId),
+    listingIdx: index('listing_watches_listing_idx').on(t.listingId),
+  }),
+);
+
+export type Listing = typeof listings.$inferSelect;
+export type NewListing = typeof listings.$inferInsert;
+export type ListingMessage = typeof listingMessages.$inferSelect;
+export type NewListingMessage = typeof listingMessages.$inferInsert;
+export type ListingOffer = typeof listingOffers.$inferSelect;
+export type NewListingOffer = typeof listingOffers.$inferInsert;
+export type ListingWatch = typeof listingWatches.$inferSelect;
+export type NewListingWatch = typeof listingWatches.$inferInsert;

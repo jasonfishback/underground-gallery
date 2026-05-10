@@ -18,7 +18,15 @@ type NotificationKind =
   | 'race_practice_run'
   | 'photo_flagged'
   | 'application_decision'
-  | 'system';
+  | 'system'
+  // Marketplace (added 2026-05-10)
+  | 'listing_message'
+  | 'listing_offer_received'
+  | 'listing_offer_accepted'
+  | 'listing_offer_declined'
+  | 'listing_watched_sold'
+  | 'listing_expiring_soon'
+  | 'listing_flagged';
 
 export type NotifyInput = {
   userId: string;

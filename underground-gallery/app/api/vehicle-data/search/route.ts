@@ -68,10 +68,15 @@ export async function GET(req: NextRequest) {
 
     let models = data.Results ?? [];
 
-    // Filter by remaining tokens against Model_Name
+    // Filter by remaining tokens against Model_Name. Normalize BOTH sides
+    // so "f250" matches NHTSA's "F-250 SD" (the hyphen + " SD" suffix
+    // shouldn't break the match). Strip everything non-alphanumeric.
     if (modelFilter) {
-      const lc = modelFilter.toLowerCase();
-      models = models.filter((m) => m.Model_Name.toLowerCase().includes(lc));
+      const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const needle = norm(modelFilter);
+      if (needle) {
+        models = models.filter((m) => norm(m.Model_Name).includes(needle));
+      }
     }
 
     // Dedup + cap
