@@ -1,0 +1,5 @@
+C:\Users\Jason Fishback\Documents\Claude\Projects\Underground gallery\_restyle_staging\design_handoff_underground_gallery
+C:\Users\Jason Fishback\Documents\Claude\Projects\Underground gallery\_restyle_staging\_FILE_LIST.txt
+C:\Users\Jason Fishback\Documents\Claude\Projects\Underground gallery\_restyle_staging\design_handoff_underground_gallery\ios-frame.jsx
+C:\Users\Jason Fishback\Documents\Claude\Projects\Underground gallery\_restyle_staging\design_handoff_underground_gallery\Mobile Boot.html
+C:\Users\Jason Fishback\Documents\Claude\Projects\Underground gallery\_restyle_staging\design_handoff_underground_gallery\README.md

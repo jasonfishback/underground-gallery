@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow,nosnippet,noarchive">
+<title>UG · Mobile Boot</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+
+<style>
+  html, body { margin: 0; padding: 0; background: #08070a; min-height: 100vh; font-family: "Inter Tight", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+
+  /* Boot animations */
+  @keyframes ugBlink { 50% { opacity: 0; } }
+  @keyframes ugPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.985); } }
+  @keyframes ugSlideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes ugFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes ugFadeOut { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes ugScan { 0% { transform: translateY(-120%); } 100% { transform: translateY(120%); } }
+  @keyframes ugRingExpand { 0% { transform: scale(0.4); opacity: 0; } 25% { opacity: 0.7; } 100% { transform: scale(1.6); opacity: 0; } }
+  @keyframes ugTickerRoll { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+  @keyframes ugCharCycle {
+    0%   { content: "█"; }
+    20%  { content: "▓"; }
+    40%  { content: "▒"; }
+    60%  { content: "░"; }
+    80%  { content: "▪"; }
+    100% { content: "·"; }
+  }
+  @keyframes ugCircleSweep { from { stroke-dashoffset: 283; } to { stroke-dashoffset: 0; } }
+  @keyframes ugCornersIn {
+    from { transform: scale(1.25); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes ugGlassRise {
+    from { opacity: 0; transform: translateY(24px); filter: blur(14px); }
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  @keyframes ugShimmer {
+    0% { transform: translateX(-120%) skewX(-20deg); }
+    100% { transform: translateX(220%) skewX(-20deg); }
+  }
+  @keyframes ugStatusBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+
+  .ug-grain {
+    position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: 0.5;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  .ug-vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.55) 100%);
+  }
+
+  .ug-glass {
+    background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.025) 100%);
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+    border: 0.5px solid rgba(255,255,255,0.14);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      inset 0 -1px 0 rgba(0,0,0,0.3),
+      0 24px 60px -12px rgba(0,0,0,0.6),
+      0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  .ug-glass-tinted {
+    background:
+      linear-gradient(180deg, rgba(255,42,42,0.10) 0%, rgba(255,42,42,0.03) 100%),
+      linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 0.5px solid rgba(255,80,80,0.25);
+    box-shadow:
+      inset 0 1px 0 rgba(255,180,180,0.18),
+      inset 0 -1px 0 rgba(0,0,0,0.45),
+      0 0 32px rgba(255,42,42,0.18),
+      0 24px 60px -12px rgba(0,0,0,0.7);
+  }
+
+  .ug-shimmer {
+    position: absolute; top: 0; bottom: 0; width: 60%; pointer-events: none; overflow: hidden;
+  }
+  .ug-shimmer::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 45%, rgba(255,255,255,0.32) 50%, rgba(255,255,255,0.18) 55%, transparent 100%);
+    animation: ugShimmer 4.2s ease-in-out infinite;
+    animation-delay: 1s;
+  }
+
+  .ug-mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+
+<script type="text/babel">
+const ACCENT = '#ff2a2a';
+const ACCENT_SOFT = 'rgba(255,42,42,0.32)';
+const ACCENT_DEEP = 'rgba(255,42,42,0.08)';
+const TEXT_HI = '#f5f6f7';
+const TEXT_MID = 'rgba(232,228,224,0.62)';
+const TEXT_LOW = 'rgba(201,204,209,0.38)';
+
+/* ──────────────────────────────────────────────────────────
+   BOOT SEQUENCE — high-tech identity verification flow
+   ────────────────────────────────────────────────────────── */
+function BootSequence({ onComplete, replayKey }) {
+  // Phases: 0 cold-start, 1 ignition, 2 scan, 3 verify, 4 unlocking, 5 fade-out
+  const [phase, setPhase] = React.useState(0);
+  const [hash, setHash] = React.useState('00000000');
+  const [progress, setProgress] = React.useState(0);
+
+  React.useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 150);   // ignition
+    const t2 = setTimeout(() => setPhase(2), 900);   // scan begins
+    const t3 = setTimeout(() => setPhase(3), 3200);  // verified
+    const t4 = setTimeout(() => setPhase(4), 4000);  // unlocking
+    const t5 = setTimeout(() => setPhase(5), 4900);  // fade out
+    const t6 = setTimeout(() => onComplete && onComplete(), 5500);
+    return () => [t1,t2,t3,t4,t5,t6].forEach(clearTimeout);
+  }, [replayKey]);
+
+  // rolling hash + progress
+  React.useEffect(() => {
+    if (phase < 2 || phase > 3) return;
+    let p = 0;
+    const id = setInterval(() => {
+      const chars = '0123456789ABCDEF';
+      let h = '';
+      for (let i = 0; i < 8; i++) h += chars[Math.floor(Math.random() * 16)];
+      setHash(h);
+      p = Math.min(100, p + 4 + Math.random() * 6);
+      setProgress(p);
+    }, 70);
+    return () => clearInterval(id);
+  }, [phase, replayKey]);
+
+  React.useEffect(() => { if (phase === 3) setProgress(100); }, [phase]);
+
+  const tickerLines = [
+    'cipher.handshake          0x4F2C',
+    'session.fingerprint       OK',
+    'attestation.local         signed',
+    'gateway.tier              MEMBERS',
+    'invite.envelope           valid',
+    'biometric.passive         match',
+    'tunnel.tor                idle',
+    'kdf.argon2id              OK',
+    'time.skew                 ±0.02s',
+    'jurisdiction.assert       redacted',
+  ];
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 30,
+      background: 'radial-gradient(ellipse at 50% 38%, #1c0d0d 0%, #0a0708 55%, #050405 100%)',
+      overflow: 'hidden',
+      opacity: phase === 5 ? 0 : 1,
+      transition: 'opacity 600ms ease',
+      pointerEvents: phase >= 4 ? 'none' : 'auto',
+    }}>
+      {/* MATRIX-INTRO STATIC — fades in/out across phase 0 */}
+      {phase === 0 && (
+        <div style={{
+          position:'absolute', inset:0, zIndex: 5, pointerEvents:'none',
+          mixBlendMode:'screen',
+          animation: 'ugStaticDip 1700ms ease-in-out forwards',
+        }}>
+          <div style={{
+            position:'absolute', inset:'-10%',
+            backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 0.8 0 0 0 0 0.8 0 0 0 1.4 -0.4'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+            backgroundSize:'160px 160px',
+            animation:'ugStaticShift 110ms steps(2) infinite, ugStaticFlicker 900ms ease-in-out infinite',
+            opacity: 0.85,
+          }}/>
+          <div style={{
+            position:'absolute', left:0, right:0, height: 38,
+            background:'linear-gradient(180deg, transparent, rgba(255,42,42,0.55) 30%, rgba(255,255,255,0.85) 50%, rgba(255,42,42,0.55) 70%, transparent)',
+            mixBlendMode:'screen',
+            animation:'ugBandSweep 700ms ease-out 1 forwards',
+            filter:'blur(0.6px)',
+          }}/>
+          <div style={{
+            position:'absolute', left:0, right:0, height: 14,
+            background:'linear-gradient(180deg, transparent, rgba(255,255,255,0.6), transparent)',
+            mixBlendMode:'screen',
+            animation:'ugBandSweep 1100ms ease-in 200ms 1 forwards',
+          }}/>
+          <div style={{
+            position:'absolute', inset:0,
+            background:'repeating-linear-gradient(0deg, rgba(255,42,42,0.04) 0 1px, transparent 1px 3px)',
+            mixBlendMode:'screen',
+          }}/>
+          <div className="ug-mono" style={{
+            position:'absolute', left:0, right:0, top:'42%',
+            textAlign:'center',
+            fontSize: 9, letterSpacing:'0.5em', color: ACCENT, opacity: 0.85,
+            mixBlendMode:'normal',
+            textShadow:'0 0 8px rgba(255,42,42,0.8)',
+          }}>
+            <span style={{ animation:'ugStaticFlicker 220ms steps(2) infinite' }}>∕∕ SIGNAL ACQUIRING</span>
+          </div>
+        </div>
+      )}
+
+      {/* residual static through the boot phases */}
+      {phase >= 1 && phase <= 3 && (
+        <div style={{
+          position:'absolute', inset:'-10%', pointerEvents:'none',
+          backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+          backgroundSize:'140px 140px',
+          mixBlendMode:'screen',
+          animation:'ugStaticShift 140ms steps(2) infinite',
+          opacity: phase === 1 ? 0.18 : 0.08,
+          transition:'opacity 600ms ease',
+        }}/>
+      )}
+
+      {/* film grain */}
+      <div className="ug-grain"/>
+
+      {/* dot grid */}
+      <div style={{
+        position: 'absolute', inset: 0, opacity: 0.3,
+        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,80,80,0.18) 0.6px, transparent 0)',
+        backgroundSize: '14px 14px',
+      }}/>
+
+      {/* horizontal scanline */}
+      {phase >= 1 && phase <= 3 && (
+        <div style={{
+          position: 'absolute', left: 0, right: 0, height: 80,
+          background: 'linear-gradient(180deg, transparent, rgba(255,42,42,0.16) 50%, transparent)',
+          animation: 'ugScan 2.4s linear infinite',
+          mixBlendMode: 'screen',
+        }}/>
+      )}
+
+      {/* center stack */}
+      <div style={{
+        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', padding: 32, gap: 28,
+      }}>
+        {/* Concentric scanner */}
+        <div style={{ position: 'relative', width: 168, height: 168 }}>
+          {/* expanding rings */}
+          {phase >= 2 && phase <= 3 && [0, 0.6, 1.2].map((d, i) => (
+            <div key={i} style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              border: `1px solid ${ACCENT}`,
+              animation: `ugRingExpand 2.4s ${d}s ease-out infinite`,
+            }}/>
+          ))}
+
+          {/* SVG sweep ring */}
+          <svg viewBox="0 0 100 100" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" strokeDasharray="2 3"/>
+            {phase >= 2 && (
+              <circle cx="50" cy="50" r="45" fill="none"
+                stroke={phase >= 3 ? '#5fff9a' : ACCENT}
+                strokeWidth="1"
+                strokeDasharray={`${(progress/100)*283} 283`}
+                strokeLinecap="round"
+                transform="rotate(-90 50 50)"
+                style={{ transition: 'stroke 300ms, stroke-dasharray 70ms linear', filter: `drop-shadow(0 0 4px ${phase >= 3 ? '#5fff9a' : ACCENT})` }}
+              />
+            )}
+            {/* tick marks */}
+            {Array.from({ length: 60 }).map((_, i) => {
+              const a = (i / 60) * Math.PI * 2;
+              const r1 = 47, r2 = i % 5 === 0 ? 44 : 45.5;
+              const x1 = 50 + Math.cos(a) * r1, y1 = 50 + Math.sin(a) * r1;
+              const x2 = 50 + Math.cos(a) * r2, y2 = 50 + Math.sin(a) * r2;
+              return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.18)" strokeWidth="0.4"/>;
+            })}
+          </svg>
+
+          {/* corner brackets */}
+          {phase >= 1 && (
+            <div style={{ position: 'absolute', inset: 18, animation: 'ugCornersIn 600ms ease-out both' }}>
+              {[[0,0,'tl'],[0,1,'tr'],[1,0,'bl'],[1,1,'br']].map(([y,x,k]) => (
+                <div key={k} style={{
+                  position: 'absolute',
+                  top: y ? 'auto' : 0, bottom: y ? 0 : 'auto',
+                  left: x ? 'auto' : 0, right: x ? 0 : 'auto',
+                  width: 14, height: 14,
+                  borderTop: y ? 'none' : `1px solid ${ACCENT}`,
+                  borderBottom: y ? `1px solid ${ACCENT}` : 'none',
+                  borderLeft: x ? 'none' : `1px solid ${ACCENT}`,
+                  borderRight: x ? `1px solid ${ACCENT}` : 'none',
+                }}/>
+              ))}
+            </div>
+          )}
+
+          {/* center monogram — aperture tach miniature */}
+          <div style={{
+            position: 'absolute', inset: 0, display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+          }}>
+            <div style={{
+              width: 76, height: 76,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              animation: phase >= 1 ? 'ugLogoEmerge 900ms cubic-bezier(.2,.7,.3,1) both' : 'none',
+              opacity: phase === 0 ? 0 : 1,
+            }}>
+              <svg viewBox="0 0 200 200" width="76" height="76">
+                <defs>
+                  <radialGradient id="bbBezel" cx="0.5" cy="0.35" r="0.7">
+                    <stop offset="0" stopColor="#3a3a44"/>
+                    <stop offset="0.5" stopColor="#15151c"/>
+                    <stop offset="1" stopColor="#000"/>
+                  </radialGradient>
+                  <radialGradient id="bbWell" cx="0.45" cy="0.45" r="0.6">
+                    <stop offset="0" stopColor="#15151c"/>
+                    <stop offset="1" stopColor="#000"/>
+                  </radialGradient>
+                  <radialGradient id="bbWellGlow" cx="0.5" cy="0.55" r="0.55">
+                    <stop offset="0" stopColor="rgba(255,42,42,0.45)"/>
+                    <stop offset="1" stopColor="rgba(255,42,42,0)"/>
+                  </radialGradient>
+                  <radialGradient id="bbDome" cx="0.4" cy="0.3" r="0.55">
+                    <stop offset="0" stopColor="rgba(255,255,255,0.18)"/>
+                    <stop offset="1" stopColor="rgba(255,255,255,0)"/>
+                  </radialGradient>
+                  <linearGradient id="bbU" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#fff"/>
+                    <stop offset="0.6" stopColor="#cfd2d6"/>
+                    <stop offset="1" stopColor="#5a5d64"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="100" cy="100" r="96" fill="url(#bbBezel)" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8"/>
+                {Array.from({length: 33}).map((_, i) => {
+                  const theta = 135 + (i / 32) * 270;
+                  const rad = (theta * Math.PI) / 180;
+                  const major = i % 4 === 0;
+                  const inRed = i / 4 >= 6.7;
+                  const r1 = 90, r2 = major ? 80 : 86;
+                  return <line key={i}
+                    x1={100 + Math.sin(rad) * r1} y1={100 - Math.cos(rad) * r1}
+                    x2={100 + Math.sin(rad) * r2} y2={100 - Math.cos(rad) * r2}
+                    stroke={inRed ? ACCENT : 'rgba(255,225,225,0.85)'}
+                    strokeWidth={major ? 1.4 : 0.55} strokeLinecap="round"/>;
+                })}
+                {(() => {
+                  const r = 92;
+                  const tA = 135 + 6.7 * 33.75;
+                  const tB = 135 + 8.4 * 33.75;
+                  const rad = (t) => (t * Math.PI) / 180;
+                  return <path d={`M ${100+Math.sin(rad(tA))*r} ${100-Math.cos(rad(tA))*r} A ${r} ${r} 0 0 1 ${100+Math.sin(rad(tB))*r} ${100-Math.cos(rad(tB))*r}`}
+                    fill="none" stroke={ACCENT} strokeWidth="3" strokeLinecap="round"
+                    style={{ filter:`drop-shadow(0 0 4px ${ACCENT})` }}/>;
+                })()}
+                {(() => {
+                  const r = 88;
+                  const tA = 135;
+                  const tB = 135 + 8 * 33.75;
+                  const rad = (t) => (t * Math.PI) / 180;
+                  const arc = `M ${100+Math.sin(rad(tA))*r} ${100-Math.cos(rad(tA))*r} A ${r} ${r} 0 1 1 ${100+Math.sin(rad(tB))*r} ${100-Math.cos(rad(tB))*r}`;
+                  return <React.Fragment>
+                    <path d={arc} fill="none" stroke="rgba(255,42,42,0.85)" strokeWidth="2.2"
+                      strokeLinecap="round" strokeDasharray="60 540"
+                      style={{ animation: phase >= 1 ? 'ugTachSweepDash 3.4s linear infinite' : 'none',
+                               filter:`drop-shadow(0 0 5px ${ACCENT})` }}/>
+                    <path d={arc} fill="none" stroke="#ffe5d8" strokeWidth="2.4"
+                      strokeLinecap="round" strokeDasharray="6 600"
+                      style={{ animation: phase >= 1 ? 'ugTachSweepDash 3.4s linear infinite' : 'none',
+                               filter:'drop-shadow(0 0 6px rgba(255,255,255,0.9))' }}/>
+                  </React.Fragment>;
+                })()}
+                <circle cx="100" cy="100" r="32" fill="url(#bbWell)"/>
+                <circle cx="100" cy="100" r="32" fill="url(#bbWellGlow)"/>
+                <circle cx="100" cy="100" r="32" fill="none" stroke="rgba(0,0,0,0.95)" strokeWidth="2"/>
+                <circle cx="100" cy="100" r="30.5" fill="none" stroke="rgba(255,42,42,0.5)" strokeWidth="0.4"/>
+                <path d="M 86 84 L 86 112 Q 86 117 91 117 L 109 117 Q 114 117 114 112 L 114 84"
+                  stroke="url(#bbU)" strokeWidth="3.4" fill="none" strokeLinecap="round"/>
+                <circle cx="100" cy="105" r="3.4" fill={phase >= 3 ? '#7df0a6' : ACCENT}
+                  style={{ filter:`drop-shadow(0 0 3px ${phase >= 3 ? '#7df0a6' : ACCENT})` }}/>
+                <circle cx="100" cy="100" r="96" fill="url(#bbDome)" pointerEvents="none"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* status code */}
+        <div style={{ textAlign: 'center', minHeight: 92, animation: 'ugFadeIn 800ms 200ms both' }}>
+          <div className="ug-mono" style={{
+            fontSize: 9, letterSpacing: '0.42em', fontWeight: 500,
+            color: phase >= 3 ? '#7df0a6' : ACCENT,
+            marginBottom: 14,
+            textTransform: 'uppercase',
+          }}>
+            {phase < 2 && '∕∕ INITIALIZING'}
+            {phase === 2 && '∕∕ VERIFYING CREDENTIALS'}
+            {phase >= 3 && '∕∕ ACCESS GRANTED'}
+          </div>
+
+          <div style={{
+            fontFamily: '"Inter Tight", sans-serif',
+            fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em',
+            color: TEXT_HI, lineHeight: 1.15,
+          }}>
+            {phase < 2 && (
+              <div style={{
+                fontFamily:'"JetBrains Mono", monospace',
+                fontWeight: 700, letterSpacing: '0.32em',
+                background: 'linear-gradient(180deg, #fff 0%, #cfd2d6 50%, #6a6d74 100%)',
+                WebkitBackgroundClip: 'text', backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 1px 0 rgba(0,0,0,0.5), 0 2px 0 rgba(0,0,0,0.4), 0 6px 14px rgba(0,0,0,0.6), 0 0 18px rgba(255,42,42,0.18)',
+                display:'inline-block',
+                animation: 'ugRotisserie 7s cubic-bezier(.45,.05,.55,.95) infinite',
+                transformStyle: 'preserve-3d',
+              }}>UNDERGROUND</div>
+            )}
+            {phase === 2 && (<>Authenticating <span style={{color: ACCENT}}>session</span></>)}
+            {phase >= 3 && 'Welcome back, member.'}
+          </div>
+
+          <div className="ug-mono" style={{
+            fontSize: 10, letterSpacing: '0.18em',
+            color: TEXT_LOW, marginTop: 10,
+          }}>
+            <span style={{ opacity: 0.6 }}>SID·</span>
+            <span style={{ color: TEXT_MID }}>{hash}</span>
+          </div>
+        </div>
+
+        {/* ticker readout */}
+        <div style={{
+          width: 240, height: 88, position: 'relative', overflow: 'hidden',
+          maskImage: 'linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent)',
+          WebkitMaskImage: 'linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent)',
+        }}>
+          <div className="ug-mono" style={{
+            position: 'absolute', left: 0, right: 0,
+            fontSize: 9, letterSpacing: '0.04em', color: TEXT_MID,
+            animation: 'ugTickerRoll 6s linear infinite',
+            lineHeight: 2.0,
+          }}>
+            {[...tickerLines, ...tickerLines].map((l, i) => {
+              const ok = /(OK|signed|valid|match|MEMBERS|redacted|idle|±0\.02s|0x4F2C)/.test(l);
+              return (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ opacity: 0.55 }}>{l.split(/\s{2,}/)[0]}</span>
+                  <span style={{ color: ok ? '#7df0a6' : ACCENT, opacity: 0.9 }}>{l.split(/\s{2,}/)[1] || '…'}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* edge HUD */}
+      <div className="ug-mono" style={{
+        position: 'absolute', top: 56, left: 16, right: 16,
+        display: 'flex', justifyContent: 'space-between',
+        fontSize: 8.5, letterSpacing: '0.22em', color: TEXT_LOW,
+      }}>
+        <span>UG · NODE 07</span>
+        <span style={{ color: phase >= 3 ? '#7df0a6' : ACCENT, animation: 'ugStatusBlink 1.4s ease-in-out infinite' }}>
+          ● {phase >= 3 ? 'SECURE' : 'LINK'}
+        </span>
+      </div>
+      <div className="ug-mono" style={{
+        position: 'absolute', bottom: 24, left: 16, right: 16,
+        display: 'flex', justifyContent: 'space-between',
+        fontSize: 8.5, letterSpacing: '0.22em', color: TEXT_LOW,
+      }}>
+        <span>EST. MMXXVI</span>
+        <span>{Math.round(progress).toString().padStart(3,'0')}%</span>
+      </div>
+
+      <div className="ug-vignette"/>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+   LANDING — frosted glass, iOS-modern
+   ────────────────────────────────────────────────────────── */
+function Landing() {
+  const [mode, setMode] = React.useState('home'); // home | invite | redeem
+  const [code, setCode] = React.useState('');
+  const [email, setEmail] = React.useState('');
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0,
+      display: 'flex', flexDirection: 'column',
+      color: TEXT_HI,
+      // Layered background: deep red wash + warm dark
+      background: `
+        radial-gradient(70% 40% at 50% 18%, rgba(255,42,42,0.18) 0%, transparent 65%),
+        radial-gradient(80% 50% at 50% 105%, rgba(120,20,20,0.32) 0%, transparent 70%),
+        linear-gradient(180deg, #120a0a 0%, #08070a 50%, #0a0508 100%)
+      `,
+      overflow: 'hidden',
+    }}>
+      {/* Status bar safe area is handled by IOSDevice */}
+
+      {/* Atmospheric backdrop */}
+      <div style={{
+        position: 'absolute', inset: 0, opacity: 0.5, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 0.6px, transparent 0)',
+        backgroundSize: '22px 22px',
+      }}/>
+      <div className="ug-grain"/>
+
+      {/* Floating orb (light source) */}
+      <div style={{
+        position: 'absolute', top: -60, left: '50%', transform: 'translateX(-50%)',
+        width: 320, height: 320, borderRadius: '50%', pointerEvents: 'none',
+        background: 'radial-gradient(circle, rgba(255,72,72,0.42) 0%, rgba(255,42,42,0.08) 40%, transparent 70%)',
+        filter: 'blur(20px)',
+      }}/>
+
+      {/* TOP — wordmark + status pill */}
+      <div style={{
+        position: 'relative', paddingTop: 64, paddingLeft: 24, paddingRight: 24,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
+        animation: 'ugSlideUp 700ms 50ms ease-out both',
+      }}>
+        {/* Status pill */}
+        <div className="ug-glass ug-mono" style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '6px 12px', borderRadius: 999,
+          fontSize: 9, letterSpacing: '0.32em', fontWeight: 500,
+          color: TEXT_MID,
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%', background: '#7df0a6',
+            boxShadow: '0 0 8px #7df0a6',
+            animation: 'ugStatusBlink 1.8s ease-in-out infinite',
+          }}/>
+          SECURED · MEMBERS
+        </div>
+
+        {/* Wordmark */}
+        <div style={{ textAlign: 'center', marginTop: 6 }}>
+          <div style={{
+            fontSize: 13, fontWeight: 600, letterSpacing: '0.42em',
+            color: TEXT_HI, lineHeight: 1,
+          }}>UNDERGROUND</div>
+          <div style={{
+            fontSize: 13, fontWeight: 300, letterSpacing: '0.42em',
+            color: TEXT_MID, marginTop: 4, lineHeight: 1,
+          }}>·· GALLERY ··</div>
+        </div>
+      </div>
+
+      {/* MIDDLE — hero + frosted card */}
+      <div style={{
+        flex: 1, position: 'relative',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        padding: '0 22px',
+      }}>
+        {mode === 'home' && (
+          <div style={{ animation: 'ugGlassRise 800ms 200ms ease-out both' }}>
+            {/* Glass card */}
+            <div className="ug-glass" style={{
+              position: 'relative', overflow: 'hidden',
+              borderRadius: 28, padding: '28px 24px 22px',
+            }}>
+              {/* corner crosshairs */}
+              {[[0,0,'tl'],[0,1,'tr'],[1,0,'bl'],[1,1,'br']].map(([y,x,k]) => (
+                <div key={k} style={{
+                  position: 'absolute',
+                  top: y ? 'auto' : 10, bottom: y ? 10 : 'auto',
+                  left: x ? 'auto' : 10, right: x ? 10 : 'auto',
+                  width: 8, height: 8,
+                  borderTop: y ? 'none' : '0.5px solid rgba(255,255,255,0.4)',
+                  borderBottom: y ? '0.5px solid rgba(255,255,255,0.4)' : 'none',
+                  borderLeft: x ? 'none' : '0.5px solid rgba(255,255,255,0.4)',
+                  borderRight: x ? '0.5px solid rgba(255,255,255,0.4)' : 'none',
+                }}/>
+              ))}
+
+              <div className="ug-mono" style={{
+                fontSize: 9, letterSpacing: '0.4em', fontWeight: 500,
+                color: ACCENT, marginBottom: 16, textAlign: 'center',
+              }}>
+                ∕∕ ACCESS RESTRICTED
+              </div>
+
+              <h1 style={{
+                margin: 0, textAlign: 'center',
+                fontSize: 34, fontWeight: 500, letterSpacing: '-0.025em',
+                lineHeight: 1.05, color: TEXT_HI,
+              }}>
+                Members<br/>only.
+              </h1>
+
+              <p style={{
+                margin: '14px 0 0', textAlign: 'center',
+                fontSize: 14, lineHeight: 1.5, color: TEXT_MID,
+                fontWeight: 400, letterSpacing: '-0.005em',
+              }}>
+                Access is by invitation. Continue with<br/>your member email or invite code.
+              </p>
+
+              {/* divider with hash */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                margin: '22px 4px 18px',
+              }}>
+                <div style={{ flex: 1, height: 0.5, background: 'rgba(255,255,255,0.12)' }}/>
+                <span className="ug-mono" style={{ fontSize: 8, letterSpacing: '0.3em', color: TEXT_LOW }}>
+                  · MMXXVI ·
+                </span>
+                <div style={{ flex: 1, height: 0.5, background: 'rgba(255,255,255,0.12)' }}/>
+              </div>
+
+              {/* Buttons — iOS frosted glass */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <GlassButton primary onClick={() => setMode('invite')}>
+                  Continue with member email
+                </GlassButton>
+                <GlassButton onClick={() => setMode('redeem')}>
+                  I have an invite code
+                </GlassButton>
+              </div>
+            </div>
+
+            {/* sub line */}
+            <div className="ug-mono" style={{
+              textAlign: 'center', marginTop: 18,
+              fontSize: 9, letterSpacing: '0.32em', color: TEXT_LOW,
+            }}>
+              EST · MMXXVI &nbsp;·&nbsp; INVITE-ONLY
+            </div>
+          </div>
+        )}
+
+        {mode === 'invite' && (
+          <FormCard
+            kind="invite"
+            label="∕∕ MEMBER EMAIL"
+            title="Send sign-in link"
+            sub="A secure link will be delivered to your member address."
+            onBack={() => setMode('home')}
+            value={email}
+            onChange={setEmail}
+            placeholder="you@example.com"
+            type="email"
+            cta="Send link"
+          />
+        )}
+
+        {mode === 'redeem' && (
+          <FormCard
+            kind="redeem"
+            label="∕∕ REDEEM INVITE"
+            title="Enter your code"
+            sub="Codes are single-use and tied to the address that received them."
+            onBack={() => setMode('home')}
+            value={code}
+            onChange={(v) => setCode(v.toUpperCase())}
+            placeholder="UG-XXXX-XXXX"
+            mono
+            cta="Redeem"
+          />
+        )}
+      </div>
+
+      {/* FOOTER */}
+      <div className="ug-mono" style={{
+        position: 'relative', padding: '0 22px 30px',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        fontSize: 8, letterSpacing: '0.28em', color: TEXT_LOW,
+      }}>
+        <span>© MMXXVI</span>
+        <span style={{ display: 'flex', gap: 14 }}>
+          <span>PRIVACY</span>
+          <span>TERMS</span>
+          <span>CONTACT</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* iOS-style frosted glass button */
+function GlassButton({ children, onClick, primary, disabled }) {
+  const [pressed, setPressed] = React.useState(false);
+  return (
+    <button
+      onClick={disabled ? undefined : onClick}
+      onMouseDown={() => !disabled && setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      onMouseLeave={() => setPressed(false)}
+      onTouchStart={() => !disabled && setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+      disabled={disabled}
+      className={primary ? 'ug-glass-tinted' : 'ug-glass'}
+      style={{
+        position: 'relative', overflow: 'hidden',
+        appearance: 'none', cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.55 : 1,
+        width: '100%', padding: '15px 18px',
+        borderRadius: 16,
+        color: primary ? '#fff5f5' : TEXT_HI,
+        fontFamily: '"Inter Tight", sans-serif',
+        fontSize: 15, fontWeight: 500, letterSpacing: '-0.005em',
+        textAlign: 'left',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        gap: 10,
+        transform: pressed ? 'scale(0.985)' : 'scale(1)',
+        transition: 'transform 120ms ease, opacity 200ms ease',
+      }}
+    >
+      {/* shimmer for primary */}
+      {primary && <div className="ug-shimmer" style={{ left: 0 }}/>}
+      <span style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 10 }}>
+        {primary && (
+          <span style={{
+            width: 22, height: 22, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.10)',
+            border: '0.5px solid rgba(255,255,255,0.25)',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11,
+          }}>
+            <svg width="10" height="10" viewBox="0 0 12 12">
+              <path d="M2 6h8M7 3l3 3-3 3" fill="none" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
+        )}
+        {children}
+      </span>
+      <span className="ug-mono" style={{
+        position: 'relative',
+        fontSize: 9, letterSpacing: '0.3em',
+        color: primary ? 'rgba(255,255,255,0.7)' : TEXT_LOW,
+      }}>↗</span>
+    </button>
+  );
+}
+
+function FormCard({ label, title, sub, onBack, value, onChange, placeholder, type='text', mono, cta, kind }) {
+  const [focused, setFocused] = React.useState(false);
+  const [state, setState] = React.useState('idle'); // idle | checking | done
+  const [hash, setHash] = React.useState('—— ——');
+
+  const submit = () => {
+    if (!value || state !== 'idle') return;
+    setState('checking');
+    let count = 0;
+    const id = setInterval(() => {
+      const chars = '0123456789ABCDEF';
+      let h = '';
+      for (let i = 0; i < 4; i++) h += chars[Math.floor(Math.random() * 16)];
+      h += ' ';
+      for (let i = 0; i < 4; i++) h += chars[Math.floor(Math.random() * 16)];
+      setHash(h);
+      count++;
+      if (count > 26) {
+        clearInterval(id);
+        setState('done');
+      }
+    }, 60);
+  };
+
+  const isDone = state === 'done';
+  const isChecking = state === 'checking';
+
+  return (
+    <div className="ug-glass" style={{
+      position: 'relative', overflow: 'hidden',
+      borderRadius: 28, padding: '20px 22px 22px',
+      animation: 'ugGlassRise 500ms ease-out both',
+    }}>
+      {/* corner crosshairs — match home */}
+      {[[0,0,'tl'],[0,1,'tr'],[1,0,'bl'],[1,1,'br']].map(([y,x,k]) => (
+        <div key={k} style={{
+          position: 'absolute',
+          top: y ? 'auto' : 10, bottom: y ? 10 : 'auto',
+          left: x ? 'auto' : 10, right: x ? 10 : 'auto',
+          width: 8, height: 8,
+          borderTop: y ? 'none' : '0.5px solid rgba(255,255,255,0.4)',
+          borderBottom: y ? '0.5px solid rgba(255,255,255,0.4)' : 'none',
+          borderLeft: x ? 'none' : '0.5px solid rgba(255,255,255,0.4)',
+          borderRight: x ? '0.5px solid rgba(255,255,255,0.4)' : 'none',
+        }}/>
+      ))}
+
+      {/* Top row: back + step indicator */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: 16,
+      }}>
+        <button onClick={onBack} className="ug-mono" style={{
+          appearance: 'none', background: 'transparent', border: 'none', cursor: 'pointer',
+          color: TEXT_MID, fontSize: 9, letterSpacing: '0.34em',
+          padding: 0,
+        }}>← BACK</button>
+
+        <span className="ug-mono" style={{
+          fontSize: 8, letterSpacing: '0.32em',
+          color: TEXT_LOW,
+        }}>STEP 02 / 03</span>
+      </div>
+
+      <div className="ug-mono" style={{
+        fontSize: 9, letterSpacing: '0.4em', fontWeight: 500,
+        color: ACCENT, marginBottom: 12,
+      }}>{label}</div>
+
+      <h2 style={{
+        margin: 0, fontSize: 28, fontWeight: 500, letterSpacing: '-0.025em',
+        color: TEXT_HI, lineHeight: 1.08,
+      }}>{isDone ? (kind === 'invite' ? 'Link sent.' : 'Code accepted.') : title}</h2>
+
+      <p style={{
+        margin: '10px 0 20px', fontSize: 13, lineHeight: 1.5,
+        color: TEXT_MID,
+      }}>
+        {isDone
+          ? (kind === 'invite'
+              ? <>Check your member inbox. The link expires in <span style={{color: TEXT_HI}}>10 minutes</span>.</>
+              : <>Welcome. Routing you to the gallery now.</>)
+          : sub}
+      </p>
+
+      {/* Input — hidden when done */}
+      {!isDone && (
+        <div style={{
+          position: 'relative',
+          background: 'rgba(0,0,0,0.36)',
+          border: `0.5px solid ${focused ? ACCENT : 'rgba(255,255,255,0.14)'}`,
+          borderRadius: 14, padding: '14px 14px',
+          boxShadow: focused ? `0 0 0 3px ${ACCENT_DEEP}, inset 0 1px 0 rgba(255,255,255,0.04)` : 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          transition: 'all 200ms ease',
+          display: 'flex', alignItems: 'center', gap: 10,
+          opacity: isChecking ? 0.5 : 1,
+        }}>
+          <span className="ug-mono" style={{ fontSize: 10, color: ACCENT, opacity: focused ? 1 : 0.5 }}>›</span>
+          <input
+            type={type}
+            value={value}
+            disabled={isChecking}
+            onChange={(e) => onChange(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onKeyDown={(e) => { if (e.key === 'Enter') submit(); }}
+            placeholder={placeholder}
+            style={{
+              flex: 1, appearance: 'none', background: 'transparent', border: 'none', outline: 'none',
+              color: TEXT_HI, fontFamily: mono ? '"JetBrains Mono", monospace' : '"Inter Tight", sans-serif',
+              fontSize: mono ? 14 : 15, fontWeight: 400, letterSpacing: mono ? '0.1em' : '-0.005em',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Verifying readout */}
+      {isChecking && (
+        <div className="ug-mono" style={{
+          marginTop: 14,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          fontSize: 9, letterSpacing: '0.28em', color: TEXT_MID,
+          padding: '10px 14px',
+          background: 'rgba(255,42,42,0.05)',
+          border: `0.5px solid ${ACCENT_SOFT}`,
+          borderRadius: 12,
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%', background: ACCENT,
+              boxShadow: `0 0 6px ${ACCENT}`,
+              animation: 'ugStatusBlink 0.8s ease-in-out infinite',
+            }}/>
+            CHECKING CREDENTIALS
+          </span>
+          <span style={{ color: ACCENT }}>{hash}</span>
+        </div>
+      )}
+
+      {/* Confirmation card when done */}
+      {isDone && (
+        <div className="ug-mono" style={{
+          marginBottom: 14,
+          padding: '14px 14px',
+          background: 'rgba(95,255,154,0.06)',
+          border: '0.5px solid rgba(125,240,166,0.32)',
+          borderRadius: 12,
+          fontSize: 9, letterSpacing: '0.26em', color: 'rgba(180,250,200,0.85)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%', background: '#7df0a6',
+              boxShadow: '0 0 6px #7df0a6',
+            }}/>
+            VERIFIED
+          </span>
+          <span>{hash}</span>
+        </div>
+      )}
+
+      <div style={{ marginTop: 14 }}>
+        {!isDone ? (
+          <GlassButton primary onClick={submit} disabled={isChecking || !value}>
+            {isChecking ? 'Verifying…' : cta}
+          </GlassButton>
+        ) : (
+          <GlassButton primary onClick={onBack}>
+            {kind === 'invite' ? 'Done' : 'Enter gallery'}
+          </GlassButton>
+        )}
+      </div>
+
+      {/* Bottom security strip — matches home tone */}
+      <div className="ug-mono" style={{
+        marginTop: 16, paddingTop: 14,
+        borderTop: '0.5px solid rgba(255,255,255,0.08)',
+        display: 'flex', justifyContent: 'space-between',
+        fontSize: 8, letterSpacing: '0.3em', color: TEXT_LOW,
+      }}>
+        <span>END-TO-END</span>
+        <span>· MMXXVI ·</span>
+        <span>NODE 07</span>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+   PREVIEW WRAPPER — same shell as before
+   ────────────────────────────────────────────────────────── */
+/* Wrap a fixed-size device in a stage that scales it AND reserves correct space */
+function DeviceStage({ children }) {
+  const wrapRef = React.useRef(null);
+  const [scale, setScale] = React.useState(1);
+  const DEVICE_W = 402, DEVICE_H = 874;
+
+  React.useLayoutEffect(() => {
+    const compute = () => {
+      // Available room: viewport minus chrome (~ title 80 + controls 70 + padding 64)
+      const availH = Math.max(320, window.innerHeight - 230);
+      const availW = Math.max(280, window.innerWidth - 48);
+      const s = Math.min(1, availH / DEVICE_H, availW / DEVICE_W);
+      setScale(s);
+    };
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, []);
+
+  return (
+    <div ref={wrapRef} style={{
+      width: DEVICE_W * scale, height: DEVICE_H * scale,
+      position: 'relative', flexShrink: 0,
+    }}>
+      <div style={{
+        position: 'absolute', top: 0, left: 0,
+        width: DEVICE_W, height: DEVICE_H,
+        transform: `scale(${scale})`, transformOrigin: 'top left',
+      }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function MobileBootPreview() {
+  const [booted, setBooted] = React.useState(false);
+  const [replayKey, setReplayKey] = React.useState(0);
+
+  const replay = () => {
+    setBooted(false);
+    setReplayKey(k => k + 1);
+  };
+
+  return (
+    <div data-screen-label="01 Mobile Boot" style={{
+      minHeight: '100vh',
+      background: `
+        radial-gradient(ellipse 60% 50% at 50% 20%, rgba(255,42,42,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse at center, #120c0a 0%, #06050a 70%, #030307 100%)
+      `,
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+      padding: '36px 24px 28px', gap: 18, position: 'relative',
+    }}>
+      {/* Backdrop pattern */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.5,
+        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,42,42,0.08) 1px, transparent 0)`,
+        backgroundSize: '32px 32px',
+      }}/>
+
+      {/* Title chrome */}
+      <div style={{ position: 'relative', textAlign: 'center', maxWidth: 720, padding: '0 8px' }}>
+        <div className="ug-mono" style={{
+          fontSize: 9.5, color: ACCENT,
+          letterSpacing: '0.42em', fontWeight: 500, marginBottom: 10,
+        }}>∕∕ MOBILE BOOT · DEVICE PREVIEW</div>
+        <h1 style={{
+          fontSize: 'clamp(20px, 3vw, 30px)',
+          fontWeight: 500, color: TEXT_HI, letterSpacing: '-0.025em',
+          margin: 0, lineHeight: 1.1, textWrap: 'balance',
+        }}>
+          What members see <span style={{ color: ACCENT, fontWeight: 400, fontStyle: 'italic' }}>on their phone</span>
+        </h1>
+      </div>
+
+      {/* Device — scaled wrapper that reserves correct space */}
+      <DeviceStage>
+        <IOSDevice dark>
+          <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', background: '#05060a' }}>
+            <Landing/>
+            {!booted && <BootSequence replayKey={replayKey} onComplete={() => setBooted(true)}/>}
+          </div>
+        </IOSDevice>
+      </DeviceStage>
+
+      {/* Controls */}
+      <div style={{
+        position: 'relative',
+        display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center',
+      }}>
+        <button onClick={replay} className="ug-mono" style={{
+          appearance: 'none', cursor: 'pointer',
+          padding: '12px 22px', borderRadius: 999,
+          background: ACCENT, border: `1px solid ${ACCENT}`,
+          color: '#0b0408',
+          fontSize: 10.5, fontWeight: 700, letterSpacing: '0.32em',
+          boxShadow: `0 0 24px ${ACCENT_SOFT}, inset 0 1px 0 rgba(255,255,255,0.2)`,
+        }}>▸ REPLAY BOOT</button>
+
+        <div className="ug-glass ug-mono" style={{
+          padding: '10px 18px', borderRadius: 999,
+          fontSize: 9, letterSpacing: '0.28em',
+          color: TEXT_MID,
+          display: 'flex', alignItems: 'center', gap: 8,
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: booted ? '#7df0a6' : ACCENT,
+            boxShadow: `0 0 8px ${booted ? '#7df0a6' : ACCENT}`,
+            animation: 'ugStatusBlink 1.4s ease-in-out infinite',
+          }}/>
+          STATUS: {booted ? 'LANDED' : 'BOOTING…'}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<MobileBootPreview/>);
+</script>
+</body>
+</html>
