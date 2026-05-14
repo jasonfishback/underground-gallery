@@ -170,20 +170,20 @@ export default async function VehicleDetailPage({ params }: Params) {
         {/* Hero photo (if exists) */}
         {v.heroUrl ? (
           <div
+            className="ug-card"
             style={{
               width: '100%',
               aspectRatio: '16 / 9',
-              background: colors.bgElevated,
-              border: `0.5px solid ${colors.border}`,
               marginBottom: 24,
               overflow: 'hidden',
+              padding: 0,
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={v.heroUrl}
               alt=""
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
           </div>
         ) : null}
@@ -202,10 +202,12 @@ export default async function VehicleDetailPage({ params }: Params) {
           <div>
             <h1
               style={{
-                fontSize: 32,
-                margin: '0 0 4px',
-                letterSpacing: '0.05em',
+                fontSize: 'clamp(28px, 5vw, 36px)',
+                margin: '0 0 6px',
+                letterSpacing: '-0.02em',
                 color: colors.text,
+                fontWeight: 800,
+                lineHeight: 1.05,
               }}
             >
               {title}
@@ -221,20 +223,8 @@ export default async function VehicleDetailPage({ params }: Params) {
           </div>
 
           {!isOwner && (
-            <Link
-              href={`/race?opponent=${v.id}`}
-              style={{
-                padding: '12px 22px',
-                background: colors.accent,
-                color: '#0a0a0a',
-                fontFamily: fonts.mono,
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: '0.3em',
-                textDecoration: 'none',
-              }}
-            >
-              RACE THIS CAR
+            <Link href={`/race?opponent=${v.id}`} className="ug-btn ug-btn-primary">
+              Race this car
             </Link>
           )}
         </div>
@@ -252,17 +242,18 @@ export default async function VehicleDetailPage({ params }: Params) {
               textTransform: 'uppercase',
             }}
           >
-            Spec Sheet
+            ∕∕ Spec Sheet
           </h2>
           <div
+            className="ug-card"
             style={{
-              background: colors.bgElevated,
-              border: `0.5px solid ${colors.border}`,
               fontFamily: fonts.mono,
               fontSize: 12,
+              overflow: 'hidden',
+              padding: 0,
             }}
           >
-            <SpecRow label="HP (CURRENT)" value={currentHp ? `${currentHp}` : '—'} stockHint={v.stockHp ? `stock ${v.stockHp}` : null} highlight />
+            <SpecRow label="HP (CURRENT)" value={currentHp ? `${currentHp}` : '—'} stockHint={v.stockHp ? `stock ${v.stockHp}` : null} highlight first />
             <SpecRow label="TORQUE" value={currentTorque ? `${currentTorque} lb-ft` : '—'} stockHint={v.stockTorque ? `stock ${v.stockTorque}` : null} />
             <SpecRow label="WEIGHT" value={currentWeight ? `${currentWeight} lb` : '—'} stockHint={v.curbWeight ? `stock ${v.curbWeight}` : null} />
             <SpecRow label="DRIVETRAIN" value={drivetrainDisplay} />
@@ -294,28 +285,25 @@ export default async function VehicleDetailPage({ params }: Params) {
                 textTransform: 'uppercase',
               }}
             >
-              Modifications
+              ∕∕ Modifications
             </h2>
             {mods.length === 0 ? (
               <div
+                className="ug-card"
                 style={{
-                  background: colors.bgElevated,
-                  border: `0.5px dashed ${colors.border}`,
-                  padding: 24,
+                  borderStyle: 'dashed',
+                  padding: 32,
                   textAlign: 'center',
                   color: colors.textMuted,
                   fontSize: 13,
+                  fontFamily: fonts.mono,
+                  letterSpacing: '0.12em',
                 }}
               >
                 Bone stock.
               </div>
             ) : (
-              <div
-                style={{
-                  background: colors.bgElevated,
-                  border: `0.5px solid ${colors.border}`,
-                }}
-              >
+              <div className="ug-card" style={{ overflow: 'hidden', padding: 0 }}>
                 {mods.map((m, i) => (
                   <div
                     key={m.id}
@@ -323,8 +311,8 @@ export default async function VehicleDetailPage({ params }: Params) {
                       display: 'grid',
                       gridTemplateColumns: 'auto 1fr auto',
                       gap: 16,
-                      padding: '12px 16px',
-                      borderTop: i === 0 ? 'none' : `0.5px solid ${colors.border}`,
+                      padding: '14px 18px',
+                      borderTop: i === 0 ? 'none' : `1px solid ${colors.border}`,
                       alignItems: 'center',
                     }}
                   >
@@ -376,11 +364,13 @@ function SpecRow({
   value,
   stockHint,
   highlight,
+  first,
 }: {
   label: string;
   value: string;
   stockHint?: string | null;
   highlight?: boolean;
+  first?: boolean;
 }) {
   return (
     <div
@@ -388,8 +378,9 @@ function SpecRow({
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gap: 16,
-        padding: '10px 16px',
-        borderTop: `0.5px solid ${colors.border}`,
+        padding: '12px 18px',
+        borderTop: first ? 'none' : `1px solid ${colors.border}`,
+        background: highlight ? 'rgba(255,42,42,0.04)' : 'transparent',
       }}
     >
       <span
