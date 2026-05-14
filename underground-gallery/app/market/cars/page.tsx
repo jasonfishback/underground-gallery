@@ -47,24 +47,34 @@ export default async function CarsPage({
   return (
     <main
       style={{
-        padding: '32px 24px 64px',
-        maxWidth: 1280,
+        padding: '40px 24px 80px',
+        maxWidth: 1320,
         margin: '0 auto',
         color: '#fff',
         fontFamily: "'Inter Tight', system-ui, sans-serif",
       }}
     >
-      <header style={{ marginBottom: 24 }}>
+      <header style={{ marginBottom: 32, maxWidth: 760 }}>
         <div style={accentLabelStyle}>UNDERGROUND · CARS</div>
-        <h1 style={{ fontSize: 32, fontWeight: 700, margin: '6px 0 4px' }}>Cars for sale</h1>
-        <p style={{ fontSize: 14, color: 'rgba(245,246,247,0.55)', margin: 0 }}>
-          {total.toLocaleString()} car{total === 1 ? '' : 's'} listed by members.
+        <h1
+          style={{
+            fontSize: 'clamp(36px, 5vw, 56px)',
+            fontWeight: 800,
+            margin: '12px 0 14px',
+            lineHeight: 1.05,
+            letterSpacing: '-0.025em',
+          }}
+        >
+          Cars for sale
+        </h1>
+        <p style={{ fontSize: 17, color: 'rgba(245,246,247,0.65)', margin: 0, lineHeight: 1.5 }}>
+          {total.toLocaleString()} car{total === 1 ? '' : 's'} listed by members of the gallery.
         </p>
       </header>
 
       <MarketSearchBar type="car" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 280px) 1fr', gap: 22, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 280px) 1fr', gap: 32, alignItems: 'start', marginTop: 8 }}>
         <div>
           <MarketFilters type="car" />
         </div>
@@ -89,4 +99,5 @@ const accentLabelStyle: React.CSSProperties = {
   color: '#ff3030',
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
   fontWeight: 700,
+  marginBottom: 4,
 };

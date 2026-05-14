@@ -1,4 +1,4 @@
-// app/market/page.tsx — browse all listings (cars + parts).
+// app/market/page.tsx — Cars-and-Bids style browse (all listings).
 
 import { Metadata } from 'next';
 import { browseListings } from '@/lib/market/queries';
@@ -48,14 +48,14 @@ export default async function MarketBrowsePage({
   return (
     <main
       style={{
-        padding: '32px 24px 64px',
-        maxWidth: 1280,
+        padding: '40px 24px 80px',
+        maxWidth: 1320,
         margin: '0 auto',
         color: '#fff',
         fontFamily: "'Inter Tight', system-ui, sans-serif",
       }}
     >
-      <header style={{ marginBottom: 24 }}>
+      <header style={{ marginBottom: 32, maxWidth: 760 }}>
         <div
           style={{
             fontSize: 11,
@@ -63,16 +63,32 @@ export default async function MarketBrowsePage({
             color: '#ff3030',
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
             fontWeight: 700,
+            marginBottom: 12,
           }}
         >
           UNDERGROUND · MARKET
         </div>
-        <h1 style={{ fontSize: 32, fontWeight: 700, margin: '6px 0 4px' }}>
+        <h1
+          style={{
+            fontSize: 'clamp(36px, 5vw, 56px)',
+            fontWeight: 800,
+            margin: '0 0 14px',
+            lineHeight: 1.05,
+            letterSpacing: '-0.025em',
+          }}
+        >
           For sale among members
         </h1>
-        <p style={{ fontSize: 14, color: 'rgba(245,246,247,0.55)', margin: 0 }}>
-          {total.toLocaleString()} listing{total === 1 ? '' : 's'} live.
-          Contact-only. No platform fees.
+        <p
+          style={{
+            fontSize: 17,
+            color: 'rgba(245,246,247,0.65)',
+            margin: 0,
+            lineHeight: 1.5,
+          }}
+        >
+          {total.toLocaleString()} listing{total === 1 ? '' : 's'} live ·
+          buyer-and-seller direct, contact only, zero platform fees.
         </p>
       </header>
 
@@ -82,8 +98,9 @@ export default async function MarketBrowsePage({
         style={{
           display: 'grid',
           gridTemplateColumns: 'minmax(240px, 280px) 1fr',
-          gap: 22,
+          gap: 32,
           alignItems: 'start',
+          marginTop: 8,
         }}
       >
         <div>
