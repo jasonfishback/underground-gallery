@@ -469,3 +469,67 @@ header nav::-webkit-scrollbar {
   .ug-shimmer::after { animation: none; }
   .ug-corners { animation: none; }
 }
+
+
+/* ──────────────────────────────────────────────────────────
+   Marketplace responsive grids (added with C&B-style redesign).
+   Detail page: 2-col on tablet+, single column on phones.
+   Browse: filters sidebar collapses to a top accordion area on phones.
+   ────────────────────────────────────────────────────────── */
+.ug-market-grid-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: 36px;
+  align-items: start;
+  margin-top: 36px;
+}
+.ug-market-grid-detail > aside {
+  position: sticky;
+  top: 96px;
+}
+@media (max-width: 880px) {
+  .ug-market-grid-detail {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .ug-market-grid-detail > aside {
+    position: static;
+    top: auto;
+    order: -1; /* show seller/actions before the spec wall */
+  }
+}
+
+.ug-market-grid-browse {
+  display: grid;
+  grid-template-columns: minmax(240px, 280px) 1fr;
+  gap: 32px;
+  align-items: start;
+  margin-top: 8px;
+}
+@media (max-width: 760px) {
+  .ug-market-grid-browse {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+.ug-market-hero-block {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  margin-top: 28px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+@media (max-width: 600px) {
+  .ug-market-hero-block {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  .ug-market-hero-block > div:last-child {
+    text-align: left !important;
+  }
+}

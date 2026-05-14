@@ -94,15 +94,7 @@ export default async function MarketBrowsePage({
 
       <MarketSearchBar />
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(240px, 280px) 1fr',
-          gap: 32,
-          alignItems: 'start',
-          marginTop: 8,
-        }}
-      >
+      <div className="ug-market-grid-browse">
         <div>
           <MarketFilters />
         </div>

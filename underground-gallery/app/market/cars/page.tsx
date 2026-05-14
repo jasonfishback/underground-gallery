@@ -74,7 +74,7 @@ export default async function CarsPage({
 
       <MarketSearchBar type="car" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 280px) 1fr', gap: 32, alignItems: 'start', marginTop: 8 }}>
+      <div className="ug-market-grid-browse">
         <div>
           <MarketFilters type="car" />
         </div>

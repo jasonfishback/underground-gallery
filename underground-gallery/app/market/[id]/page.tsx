@@ -114,17 +114,7 @@ export default async function ListingDetailPage({
       <ListingGallery photos={photos} fallback={l.primaryPhotoUrl} />
 
       {/* Hero text block */}
-      <header
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) auto',
-          gap: 24,
-          alignItems: 'end',
-          marginTop: 28,
-          paddingBottom: 22,
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-        }}
-      >
+      <header className="ug-market-hero-block">
         <div>
           <div style={kickerStyle}>
             {isCar ? 'CAR' : 'PART'}
@@ -197,15 +187,7 @@ export default async function ListingDetailPage({
       )}
 
       {/* Body grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(300px, 360px)',
-          gap: 36,
-          alignItems: 'start',
-          marginTop: 36,
-        }}
-      >
+      <div className="ug-market-grid-detail">
         {/* LEFT: editorial content */}
         <div style={{ minWidth: 0 }}>
           {l.description && (
@@ -309,11 +291,9 @@ export default async function ListingDetailPage({
           )}
         </div>
 
-        {/* RIGHT: sticky seller / actions */}
+        {/* RIGHT: sticky seller / actions (collapses above content on mobile) */}
         <aside
           style={{
-            position: 'sticky',
-            top: 96,
             display: 'flex',
             flexDirection: 'column',
             gap: 16,
