@@ -64,7 +64,7 @@ export function SellerOfferList({ offers }: { offers: SellerOffer[] }) {
                   type="button"
                   className="ug-btn ug-btn-primary"
                   disabled={isPending}
-                  onClick={() => start(() => respondToOffer({ offerId: o.id, decision: 'accept' }))}
+                  onClick={() => start(async () => { await respondToOffer({ offerId: o.id, decision: 'accept' }); })}
                 >
                   Accept
                 </button>
@@ -72,7 +72,7 @@ export function SellerOfferList({ offers }: { offers: SellerOffer[] }) {
                   type="button"
                   className="ug-btn"
                   disabled={isPending}
-                  onClick={() => start(() => respondToOffer({ offerId: o.id, decision: 'decline' }))}
+                  onClick={() => start(async () => { await respondToOffer({ offerId: o.id, decision: 'decline' }); })}
                 >
                   Decline
                 </button>
@@ -107,7 +107,7 @@ export function BuyerOfferList({ offers }: { offers: BuyerOffer[] }) {
                 type="button"
                 className="ug-btn"
                 disabled={isPending}
-                onClick={() => start(() => withdrawOffer(o.id))}
+                onClick={() => start(async () => { await withdrawOffer(o.id); })}
               >
                 Withdraw
               </button>

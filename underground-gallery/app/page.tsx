@@ -35,7 +35,6 @@ export default async function LandingPage() {
   return (
     <main
       style={{
-        minHeight: '100vh',
         minHeight: '100dvh',
         background:
           'radial-gradient(ellipse at 50% 30%, rgba(255,42,42,0.12), transparent 55%), ' +
@@ -104,7 +103,6 @@ export default async function LandingPage() {
         style={{
           position: 'relative',
           zIndex: 3,
-          minHeight: '100vh',
           minHeight: '100dvh',
           display: 'flex',
           flexDirection: 'column',
