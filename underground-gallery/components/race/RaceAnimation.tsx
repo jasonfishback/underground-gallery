@@ -17,9 +17,11 @@ import { colors, fonts } from '@/lib/design';
 export type AnimationCar = {
   label: string;
   estimatedEt: number;          // seconds (the calculated 1/4 mile ET)
-  estimatedTrapSpeed: number;   // mph
+  estimatedTrapSpeed: number;   // mph at the 1/4 mile mark
+  estimatedTopSpeed?: number;   // mph unrestricted top speed (display ceiling)
   drivetrain: string;
   callsign?: string;
+  thumbUrl?: string | null;     // optional hero thumbnail for the lane chip
 };
 
 type Props = {
@@ -164,20 +166,24 @@ export function RaceAnimation({ challenger, opponent, onFinish, autoStart = fals
         <Lane
           label={challenger.label}
           callsign={challenger.callsign}
+          thumbUrl={challenger.thumbUrl ?? null}
           position={cPos}
           mph={cMph}
+          topSpeed={challenger.estimatedTopSpeed ?? Math.round(challenger.estimatedTrapSpeed * 1.42)}
           elapsed={cElapsed}
           finished={cElapsed !== null}
           isLeading={cPos > oPos && phase === 'racing'}
         />
 
-        <div style={{ height: 8 }} />
+        <div style={{ height: 14 }} />
 
         <Lane
           label={opponent.label}
           callsign={opponent.callsign}
+          thumbUrl={opponent.thumbUrl ?? null}
           position={oPos}
           mph={oMph}
+          topSpeed={opponent.estimatedTopSpeed ?? Math.round(opponent.estimatedTrapSpeed * 1.42)}
           elapsed={oElapsed}
           finished={oElapsed !== null}
           isLeading={oPos > cPos && phase === 'racing'}
@@ -284,81 +290,178 @@ function Bulb({ on, color, size }: { on: boolean; color: string; size: 'small' |
 function Lane({
   label,
   callsign,
+  thumbUrl,
   position,
   mph,
+  topSpeed,
   elapsed,
   finished,
   isLeading,
 }: {
   label: string;
   callsign?: string;
+  thumbUrl: string | null;
   position: number;   // 0 to 1
   mph: number;
+  topSpeed: number;
   elapsed: number | null;
   finished: boolean;
   isLeading: boolean;
 }) {
+  const speedPct = Math.min(1, mph / Math.max(topSpeed, 1));
   return (
-    <div style={{ position: 'relative', height: 48, padding: '0 16px' }}>
-      {/* Lane background */}
+    <div style={{ position: 'relative', height: 88, padding: '0 16px' }}>
+      {/* Lane art: gradient + scrolling dashed center stripe */}
       <div
         style={{
           position: 'absolute',
           inset: '0 16px',
-          background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0 40px, transparent 40px 80px)',
-          borderTop: `0.5px dashed ${colors.border}`,
-          borderBottom: `0.5px dashed ${colors.border}`,
+          background:
+            'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.04) 100%), ' +
+            'repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 28px, transparent 28px 56px)',
+          borderRadius: 12,
+          border: isLeading
+            ? `1px solid ${colors.accent}`
+            : `1px solid rgba(255,255,255,0.07)`,
+          boxShadow: isLeading ? `0 0 24px rgba(255,42,42,0.25)` : 'none',
+          transition: 'border-color 120ms, box-shadow 120ms',
         }}
       />
 
-      {/* Label on left */}
+      {/* Top-left: callsign + label + thumb */}
       <div
         style={{
           position: 'absolute',
-          left: 16,
-          top: 4,
-          fontSize: 10,
-          letterSpacing: '0.2em',
-          fontFamily: fonts.mono,
-          color: isLeading ? colors.accent : colors.textMuted,
-          fontWeight: 700,
-          background: '#0d0d0d',
-          padding: '0 6px',
+          left: 28,
+          top: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          zIndex: 2,
         }}
       >
-        {callsign ? `${callsign} · ` : ''}{label}
+        {thumbUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={thumbUrl}
+            alt=""
+            style={{
+              width: 40,
+              height: 28,
+              objectFit: 'cover',
+              borderRadius: 4,
+              border: '1px solid rgba(255,255,255,0.12)',
+            }}
+          />
+        ) : null}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {callsign && (
+            <span
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.28em',
+                fontFamily: fonts.mono,
+                color: isLeading ? colors.accent : 'rgba(245,246,247,0.65)',
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
+              @{callsign}
+            </span>
+          )}
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#fff',
+              letterSpacing: '-0.01em',
+              lineHeight: 1.2,
+            }}
+          >
+            {label}
+          </span>
+        </div>
       </div>
 
-      {/* Live mph + elapsed on right */}
+      {/* Top-right: BIG live speed + top-speed ceiling */}
       <div
         style={{
           position: 'absolute',
-          right: 16,
-          top: 4,
-          fontSize: 10,
-          letterSpacing: '0.2em',
-          fontFamily: fonts.mono,
-          color: finished ? colors.success : colors.textMuted,
-          background: '#0d0d0d',
-          padding: '0 6px',
+          right: 28,
+          top: 8,
+          textAlign: 'right',
+          zIndex: 2,
         }}
       >
-        {finished && elapsed !== null
-          ? `${elapsed.toFixed(2)}s @ ${mph.toFixed(0)} mph`
-          : `${mph.toFixed(0)} mph`}
+        <div
+          style={{
+            fontSize: 26,
+            fontWeight: 800,
+            letterSpacing: '-0.02em',
+            lineHeight: 1,
+            color: finished ? colors.success : isLeading ? colors.accent : '#fff',
+            fontFamily: "'Inter Tight', system-ui, sans-serif",
+            transition: 'color 200ms',
+          }}
+        >
+          {mph.toFixed(0)}
+          <span style={{ fontSize: 11, letterSpacing: '0.2em', fontFamily: fonts.mono, marginLeft: 4, opacity: 0.65, fontWeight: 700 }}>
+            MPH
+          </span>
+        </div>
+        <div
+          style={{
+            fontSize: 9,
+            letterSpacing: '0.22em',
+            fontFamily: fonts.mono,
+            color: 'rgba(245,246,247,0.48)',
+            marginTop: 2,
+            fontWeight: 600,
+          }}
+        >
+          {finished && elapsed !== null
+            ? `${elapsed.toFixed(2)}s · TRAP`
+            : `EST TOP ${topSpeed.toFixed(0)}`}
+        </div>
+      </div>
+
+      {/* Speed meter bar at bottom of lane */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 28,
+          right: 28,
+          bottom: 10,
+          height: 3,
+          background: 'rgba(255,255,255,0.08)',
+          borderRadius: 999,
+          overflow: 'hidden',
+          zIndex: 2,
+        }}
+      >
+        <div
+          style={{
+            height: '100%',
+            width: `${speedPct * 100}%`,
+            background: `linear-gradient(90deg, ${colors.accent}, #ff8030)`,
+            transition: 'width 100ms linear',
+            boxShadow: isLeading ? '0 0 8px rgba(255,42,42,0.7)' : 'none',
+          }}
+        />
       </div>
 
       {/* Car icon */}
       <div
         style={{
           position: 'absolute',
-          left: `calc(16px + ${position * 100}% - ${position * 32}px)`,
-          top: 18,
-          fontSize: 22,
+          left: `calc(28px + ${position * 100}% - ${position * 56}px)`,
+          top: 36,
+          fontSize: 24,
           transition: 'none',
-          textShadow: isLeading ? `0 0 12px ${colors.accent}` : 'none',
+          filter: isLeading ? `drop-shadow(0 0 14px ${colors.accent})` : 'none',
           willChange: 'left',
           transform: 'scaleX(-1)',
+          zIndex: 1,
         }}
       >
         🏎️
@@ -371,9 +474,11 @@ function Lane({
           right: 16,
           top: 0,
           bottom: 0,
-          width: 2,
-          background: '#fff',
-          opacity: 0.4,
+          width: 3,
+          background:
+            'repeating-linear-gradient(0deg, #fff 0 6px, #000 6px 12px)',
+          opacity: 0.85,
+          zIndex: 3,
         }}
       />
     </div>
