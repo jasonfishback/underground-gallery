@@ -21,6 +21,7 @@ import { ContactSheet } from '@/components/market/ContactSheet';
 import { WatchButton } from '@/components/market/WatchButton';
 import { OfferModal } from '@/components/market/OfferModal';
 import { SellerOfferList } from '@/components/market/OfferList';
+import { MarketMobileBar } from '@/components/market/MarketMobileBar';
 import { incrementViewCount } from '@/app/market/actions';
 
 export const dynamic = 'force-dynamic';
@@ -95,6 +96,7 @@ export default async function ListingDetailPage({
 
   return (
     <main
+      className="ug-market-detail-padded"
       style={{
         padding: '24px 20px 80px',
         maxWidth: 1280,
@@ -425,6 +427,19 @@ export default async function ListingDetailPage({
           </div>
         </aside>
       </div>
+
+      <MarketMobileBar
+        listingId={l.id}
+        sellerId={l.sellerId}
+        sellerCallsign={l.sellerCallsign}
+        priceCents={l.priceCents}
+        priceType={l.priceType}
+        currency={l.currency}
+        status={l.status}
+        isOwner={isOwner}
+        initialWatching={watching}
+        signedIn={!!ctx}
+      />
     </main>
   );
 }
