@@ -17,9 +17,11 @@ import { colors, fonts } from '@/lib/design';
 export type AnimationCar = {
   label: string;
   estimatedEt: number;          // seconds (the calculated 1/4 mile ET)
-  estimatedTrapSpeed: number;   // mph
+  estimatedTrapSpeed: number;   // mph at the 1/4 mile mark
+  estimatedTopSpeed?: number;   // mph unrestricted top speed (display ceiling)
   drivetrain: string;
   callsign?: string;
+  thumbUrl?: string | null;     // optional hero thumbnail for the lane chip
 };
 
 type Props = {
@@ -29,14 +31,29 @@ type Props = {
   onFinish?: () => void;
   /** Auto-start vs wait for click. Default: false. */
   autoStart?: boolean;
+  /** What kind of race this is. Drag-strip starts (¼ mile / dig / 0-60) use a
+   *  full christmas tree; rolling starts (roll, highway pull) use a 3-2-1-GO
+   *  countdown. Half-mile uses a tree (it's still a strip race). Defaults to
+   *  'quarter_mile' for backward compat. */
+  raceType?: 'quarter_mile' | 'dig' | 'zero_sixty' | 'half_mile' | 'roll_40_140' | 'highway_pull' | 'overall';
 };
+
+function isStandingStart(raceType: Props['raceType']) {
+  return raceType === undefined
+    || raceType === 'quarter_mile'
+    || raceType === 'dig'
+    || raceType === 'zero_sixty'
+    || raceType === 'half_mile'
+    || raceType === 'overall';
+}
 
 type Phase = 'idle' | 'pre_stage' | 'stage' | 'amber_1' | 'amber_2' | 'amber_3' | 'green' | 'racing' | 'finished';
 
 const QUARTER_MILE_FT = 1320;
 
-export function RaceAnimation({ challenger, opponent, onFinish, autoStart = false }: Props) {
+export function RaceAnimation({ challenger, opponent, onFinish, autoStart = false, raceType }: Props) {
   const [phase, setPhase] = useState<Phase>('idle');
+  const standing = isStandingStart(raceType);
   const [cPos, setCPos] = useState(0); // 0-1 position along the strip
   const [oPos, setOPos] = useState(0);
   const [cMph, setCMph] = useState(0);
@@ -112,9 +129,13 @@ export function RaceAnimation({ challenger, opponent, onFinish, autoStart = fals
       setCPos(cFt / QUARTER_MILE_FT);
       setOPos(oFt / QUARTER_MILE_FT);
 
-      // Live mph: v = a·t, converted to mph (ft/s → mph: ×0.6818)
-      setCMph(Math.min(challenger.estimatedTrapSpeed, cAccel * cT * 0.6818));
-      setOMph(Math.min(opponent.estimatedTrapSpeed, oAccel * oT * 0.6818));
+      // Live mph: quarter-sine curve from 0 → trap, so cars accelerate
+      // hard early and taper as they approach trap (like real cars).
+      // sin(π/2·t/ET) hits 1 at t=ET, with smooth taper near the top.
+      const cTn = Math.min(1, cT / challenger.estimatedEt);
+      const oTn = Math.min(1, oT / opponent.estimatedEt);
+      setCMph(challenger.estimatedTrapSpeed * Math.sin((Math.PI / 2) * cTn));
+      setOMph(opponent.estimatedTrapSpeed * Math.sin((Math.PI / 2) * oTn));
 
       // Detect each car finishing
       if (cFin === null && cFt >= QUARTER_MILE_FT) {
@@ -143,8 +164,13 @@ export function RaceAnimation({ challenger, opponent, onFinish, autoStart = fals
 
   return (
     <div style={{ width: '100%', maxWidth: 900, margin: '0 auto' }}>
-      {/* Light tree */}
-      <LightTree phase={phase} />
+      {/* Start sequence: christmas tree for standing-start races,
+          3-2-1 countdown for rolling-start races. */}
+      {standing ? (
+        <LightTree phase={phase} />
+      ) : (
+        <RollStart phase={phase} />
+      )}
 
       {/* Strip */}
       <div
@@ -164,20 +190,24 @@ export function RaceAnimation({ challenger, opponent, onFinish, autoStart = fals
         <Lane
           label={challenger.label}
           callsign={challenger.callsign}
+          thumbUrl={challenger.thumbUrl ?? null}
           position={cPos}
           mph={cMph}
+          topSpeed={challenger.estimatedTopSpeed ?? Math.round(challenger.estimatedTrapSpeed * 1.42)}
           elapsed={cElapsed}
           finished={cElapsed !== null}
           isLeading={cPos > oPos && phase === 'racing'}
         />
 
-        <div style={{ height: 8 }} />
+        <div style={{ height: 14 }} />
 
         <Lane
           label={opponent.label}
           callsign={opponent.callsign}
+          thumbUrl={opponent.thumbUrl ?? null}
           position={oPos}
           mph={oMph}
+          topSpeed={opponent.estimatedTopSpeed ?? Math.round(opponent.estimatedTrapSpeed * 1.42)}
           elapsed={oElapsed}
           finished={oElapsed !== null}
           isLeading={oPos > cPos && phase === 'racing'}
@@ -284,81 +314,178 @@ function Bulb({ on, color, size }: { on: boolean; color: string; size: 'small' |
 function Lane({
   label,
   callsign,
+  thumbUrl,
   position,
   mph,
+  topSpeed,
   elapsed,
   finished,
   isLeading,
 }: {
   label: string;
   callsign?: string;
+  thumbUrl: string | null;
   position: number;   // 0 to 1
   mph: number;
+  topSpeed: number;
   elapsed: number | null;
   finished: boolean;
   isLeading: boolean;
 }) {
+  const speedPct = Math.min(1, mph / Math.max(topSpeed, 1));
   return (
-    <div style={{ position: 'relative', height: 48, padding: '0 16px' }}>
-      {/* Lane background */}
+    <div style={{ position: 'relative', height: 88, padding: '0 16px' }}>
+      {/* Lane art: gradient + scrolling dashed center stripe */}
       <div
         style={{
           position: 'absolute',
           inset: '0 16px',
-          background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0 40px, transparent 40px 80px)',
-          borderTop: `0.5px dashed ${colors.border}`,
-          borderBottom: `0.5px dashed ${colors.border}`,
+          background:
+            'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.04) 100%), ' +
+            'repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 28px, transparent 28px 56px)',
+          borderRadius: 12,
+          border: isLeading
+            ? `1px solid ${colors.accent}`
+            : `1px solid rgba(255,255,255,0.07)`,
+          boxShadow: isLeading ? `0 0 24px rgba(255,42,42,0.25)` : 'none',
+          transition: 'border-color 120ms, box-shadow 120ms',
         }}
       />
 
-      {/* Label on left */}
+      {/* Top-left: callsign + label + thumb */}
       <div
         style={{
           position: 'absolute',
-          left: 16,
-          top: 4,
-          fontSize: 10,
-          letterSpacing: '0.2em',
-          fontFamily: fonts.mono,
-          color: isLeading ? colors.accent : colors.textMuted,
-          fontWeight: 700,
-          background: '#0d0d0d',
-          padding: '0 6px',
+          left: 28,
+          top: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          zIndex: 2,
         }}
       >
-        {callsign ? `${callsign} · ` : ''}{label}
+        {thumbUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={thumbUrl}
+            alt=""
+            style={{
+              width: 40,
+              height: 28,
+              objectFit: 'cover',
+              borderRadius: 4,
+              border: '1px solid rgba(255,255,255,0.12)',
+            }}
+          />
+        ) : null}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {callsign && (
+            <span
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.28em',
+                fontFamily: fonts.mono,
+                color: isLeading ? colors.accent : 'rgba(245,246,247,0.65)',
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
+              @{callsign}
+            </span>
+          )}
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#fff',
+              letterSpacing: '-0.01em',
+              lineHeight: 1.2,
+            }}
+          >
+            {label}
+          </span>
+        </div>
       </div>
 
-      {/* Live mph + elapsed on right */}
+      {/* Top-right: BIG live speed + top-speed ceiling */}
       <div
         style={{
           position: 'absolute',
-          right: 16,
-          top: 4,
-          fontSize: 10,
-          letterSpacing: '0.2em',
-          fontFamily: fonts.mono,
-          color: finished ? colors.success : colors.textMuted,
-          background: '#0d0d0d',
-          padding: '0 6px',
+          right: 28,
+          top: 8,
+          textAlign: 'right',
+          zIndex: 2,
         }}
       >
-        {finished && elapsed !== null
-          ? `${elapsed.toFixed(2)}s @ ${mph.toFixed(0)} mph`
-          : `${mph.toFixed(0)} mph`}
+        <div
+          style={{
+            fontSize: 26,
+            fontWeight: 800,
+            letterSpacing: '-0.02em',
+            lineHeight: 1,
+            color: finished ? colors.success : isLeading ? colors.accent : '#fff',
+            fontFamily: "'Inter Tight', system-ui, sans-serif",
+            transition: 'color 200ms',
+          }}
+        >
+          {mph.toFixed(0)}
+          <span style={{ fontSize: 11, letterSpacing: '0.2em', fontFamily: fonts.mono, marginLeft: 4, opacity: 0.65, fontWeight: 700 }}>
+            MPH
+          </span>
+        </div>
+        <div
+          style={{
+            fontSize: 9,
+            letterSpacing: '0.22em',
+            fontFamily: fonts.mono,
+            color: 'rgba(245,246,247,0.48)',
+            marginTop: 2,
+            fontWeight: 600,
+          }}
+        >
+          {finished && elapsed !== null
+            ? `${elapsed.toFixed(2)}s · TRAP`
+            : `EST TOP ${topSpeed.toFixed(0)}`}
+        </div>
+      </div>
+
+      {/* Speed meter bar at bottom of lane */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 28,
+          right: 28,
+          bottom: 10,
+          height: 3,
+          background: 'rgba(255,255,255,0.08)',
+          borderRadius: 999,
+          overflow: 'hidden',
+          zIndex: 2,
+        }}
+      >
+        <div
+          style={{
+            height: '100%',
+            width: `${speedPct * 100}%`,
+            background: `linear-gradient(90deg, ${colors.accent}, #ff8030)`,
+            transition: 'width 100ms linear',
+            boxShadow: isLeading ? '0 0 8px rgba(255,42,42,0.7)' : 'none',
+          }}
+        />
       </div>
 
       {/* Car icon */}
       <div
         style={{
           position: 'absolute',
-          left: `calc(16px + ${position * 100}% - ${position * 32}px)`,
-          top: 18,
-          fontSize: 22,
+          left: `calc(28px + ${position * 100}% - ${position * 56}px)`,
+          top: 36,
+          fontSize: 24,
           transition: 'none',
-          textShadow: isLeading ? `0 0 12px ${colors.accent}` : 'none',
+          filter: isLeading ? `drop-shadow(0 0 14px ${colors.accent})` : 'none',
           willChange: 'left',
           transform: 'scaleX(-1)',
+          zIndex: 1,
         }}
       >
         🏎️
@@ -371,9 +498,11 @@ function Lane({
           right: 16,
           top: 0,
           bottom: 0,
-          width: 2,
-          background: '#fff',
-          opacity: 0.4,
+          width: 3,
+          background:
+            'repeating-linear-gradient(0deg, #fff 0 6px, #000 6px 12px)',
+          opacity: 0.85,
+          zIndex: 3,
         }}
       />
     </div>
@@ -406,6 +535,70 @@ function DistanceMarkers() {
           {ft === 0 ? 'START' : ft === 1320 ? '1/4' : `${ft}'`}
         </div>
       ))}
+    </div>
+  );
+}
+
+// ── Rolling-start countdown (for roll / highway / overall races) ──────────
+
+function RollStart({ phase }: { phase: Phase }) {
+  // Map phases to the rolling-start countdown.
+  // pre_stage  → "ROLLING START"
+  // stage      → "3"
+  // amber_1    → "2"
+  // amber_2    → "1"
+  // amber_3    → "1" (held)
+  // green      → "GO"
+  // racing/finished → no overlay text needed
+  let text: string;
+  let color: string;
+  if (phase === 'idle' || phase === 'pre_stage') {
+    text = 'ROLLING START';
+    color = 'rgba(245,246,247,0.55)';
+  } else if (phase === 'stage') {
+    text = '3';
+    color = '#ffaa30';
+  } else if (phase === 'amber_1') {
+    text = '2';
+    color = '#ffaa30';
+  } else if (phase === 'amber_2' || phase === 'amber_3') {
+    text = '1';
+    color = '#ffaa30';
+  } else if (phase === 'green') {
+    text = 'GO';
+    color = '#4ade80';
+  } else {
+    text = '';
+    color = 'transparent';
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 140,
+        background:
+          'radial-gradient(ellipse at center, rgba(255,42,42,0.10), transparent 70%), #0a0a0a',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: 12,
+      }}
+    >
+      <span
+        style={{
+          fontFamily: text === 'ROLLING START' || text === '' ? 'JetBrains Mono, monospace' : "'Inter Tight', system-ui, sans-serif",
+          fontSize: text === 'ROLLING START' || text === '' ? 14 : 88,
+          fontWeight: 800,
+          letterSpacing: text === 'ROLLING START' ? '0.4em' : '-0.04em',
+          color,
+          textShadow: text !== 'ROLLING START' && text !== '' ? `0 0 32px ${color}` : 'none',
+          transition: 'color 100ms, text-shadow 100ms',
+          lineHeight: 1,
+        }}
+      >
+        {text}
+      </span>
     </div>
   );
 }

@@ -62,6 +62,7 @@ export function SpectateClient(props: Props) {
           estimatedTrapSpeed: props.challengerTrap ?? 100,
           drivetrain: props.challengerDrivetrain,
           callsign: props.challengerCallsign ?? undefined,
+          thumbUrl: props.challengerPhotoUrl,
         }}
         opponent={{
           label: props.opponentShortLabel,
@@ -69,7 +70,9 @@ export function SpectateClient(props: Props) {
           estimatedTrapSpeed: props.opponentTrap ?? 100,
           drivetrain: props.opponentDrivetrain,
           callsign: props.opponentCallsign ?? undefined,
+          thumbUrl: props.opponentPhotoUrl,
         }}
+        raceType={props.raceType as any}
         autoStart
         onFinish={() => setStage('result')}
       />
