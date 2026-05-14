@@ -161,6 +161,7 @@ export function RaceUI({ myCars, communityCars }: Props) {
       <RaceAnimation
         challenger={animCars.challenger}
         opponent={animCars.opponent}
+        raceType={raceType}
         autoStart
         onFinish={() => setStage('done')}
       />

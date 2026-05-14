@@ -31,14 +31,29 @@ type Props = {
   onFinish?: () => void;
   /** Auto-start vs wait for click. Default: false. */
   autoStart?: boolean;
+  /** What kind of race this is. Drag-strip starts (¼ mile / dig / 0-60) use a
+   *  full christmas tree; rolling starts (roll, highway pull) use a 3-2-1-GO
+   *  countdown. Half-mile uses a tree (it's still a strip race). Defaults to
+   *  'quarter_mile' for backward compat. */
+  raceType?: 'quarter_mile' | 'dig' | 'zero_sixty' | 'half_mile' | 'roll_40_140' | 'highway_pull' | 'overall';
 };
+
+function isStandingStart(raceType: Props['raceType']) {
+  return raceType === undefined
+    || raceType === 'quarter_mile'
+    || raceType === 'dig'
+    || raceType === 'zero_sixty'
+    || raceType === 'half_mile'
+    || raceType === 'overall';
+}
 
 type Phase = 'idle' | 'pre_stage' | 'stage' | 'amber_1' | 'amber_2' | 'amber_3' | 'green' | 'racing' | 'finished';
 
 const QUARTER_MILE_FT = 1320;
 
-export function RaceAnimation({ challenger, opponent, onFinish, autoStart = false }: Props) {
+export function RaceAnimation({ challenger, opponent, onFinish, autoStart = false, raceType }: Props) {
   const [phase, setPhase] = useState<Phase>('idle');
+  const standing = isStandingStart(raceType);
   const [cPos, setCPos] = useState(0); // 0-1 position along the strip
   const [oPos, setOPos] = useState(0);
   const [cMph, setCMph] = useState(0);
@@ -114,9 +129,13 @@ export function RaceAnimation({ challenger, opponent, onFinish, autoStart = fals
       setCPos(cFt / QUARTER_MILE_FT);
       setOPos(oFt / QUARTER_MILE_FT);
 
-      // Live mph: v = a·t, converted to mph (ft/s → mph: ×0.6818)
-      setCMph(Math.min(challenger.estimatedTrapSpeed, cAccel * cT * 0.6818));
-      setOMph(Math.min(opponent.estimatedTrapSpeed, oAccel * oT * 0.6818));
+      // Live mph: quarter-sine curve from 0 → trap, so cars accelerate
+      // hard early and taper as they approach trap (like real cars).
+      // sin(π/2·t/ET) hits 1 at t=ET, with smooth taper near the top.
+      const cTn = Math.min(1, cT / challenger.estimatedEt);
+      const oTn = Math.min(1, oT / opponent.estimatedEt);
+      setCMph(challenger.estimatedTrapSpeed * Math.sin((Math.PI / 2) * cTn));
+      setOMph(opponent.estimatedTrapSpeed * Math.sin((Math.PI / 2) * oTn));
 
       // Detect each car finishing
       if (cFin === null && cFt >= QUARTER_MILE_FT) {
@@ -145,8 +164,13 @@ export function RaceAnimation({ challenger, opponent, onFinish, autoStart = fals
 
   return (
     <div style={{ width: '100%', maxWidth: 900, margin: '0 auto' }}>
-      {/* Light tree */}
-      <LightTree phase={phase} />
+      {/* Start sequence: christmas tree for standing-start races,
+          3-2-1 countdown for rolling-start races. */}
+      {standing ? (
+        <LightTree phase={phase} />
+      ) : (
+        <RollStart phase={phase} />
+      )}
 
       {/* Strip */}
       <div
@@ -511,6 +535,70 @@ function DistanceMarkers() {
           {ft === 0 ? 'START' : ft === 1320 ? '1/4' : `${ft}'`}
         </div>
       ))}
+    </div>
+  );
+}
+
+// ── Rolling-start countdown (for roll / highway / overall races) ──────────
+
+function RollStart({ phase }: { phase: Phase }) {
+  // Map phases to the rolling-start countdown.
+  // pre_stage  → "ROLLING START"
+  // stage      → "3"
+  // amber_1    → "2"
+  // amber_2    → "1"
+  // amber_3    → "1" (held)
+  // green      → "GO"
+  // racing/finished → no overlay text needed
+  let text: string;
+  let color: string;
+  if (phase === 'idle' || phase === 'pre_stage') {
+    text = 'ROLLING START';
+    color = 'rgba(245,246,247,0.55)';
+  } else if (phase === 'stage') {
+    text = '3';
+    color = '#ffaa30';
+  } else if (phase === 'amber_1') {
+    text = '2';
+    color = '#ffaa30';
+  } else if (phase === 'amber_2' || phase === 'amber_3') {
+    text = '1';
+    color = '#ffaa30';
+  } else if (phase === 'green') {
+    text = 'GO';
+    color = '#4ade80';
+  } else {
+    text = '';
+    color = 'transparent';
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 140,
+        background:
+          'radial-gradient(ellipse at center, rgba(255,42,42,0.10), transparent 70%), #0a0a0a',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: 12,
+      }}
+    >
+      <span
+        style={{
+          fontFamily: text === 'ROLLING START' || text === '' ? 'JetBrains Mono, monospace' : "'Inter Tight', system-ui, sans-serif",
+          fontSize: text === 'ROLLING START' || text === '' ? 14 : 88,
+          fontWeight: 800,
+          letterSpacing: text === 'ROLLING START' ? '0.4em' : '-0.04em',
+          color,
+          textShadow: text !== 'ROLLING START' && text !== '' ? `0 0 32px ${color}` : 'none',
+          transition: 'color 100ms, text-shadow 100ms',
+          lineHeight: 1,
+        }}
+      >
+        {text}
+      </span>
     </div>
   );
 }
