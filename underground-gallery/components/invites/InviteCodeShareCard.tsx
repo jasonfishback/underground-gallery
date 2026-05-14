@@ -110,9 +110,8 @@ export default function InviteCodeShareCard({ code, shareLink, createdAt }: Prop
 
   return (
     <div
+      className="ug-card"
       style={{
-        background: colors.bgElevated,
-        border: `0.5px solid ${colors.border}`,
         padding: 24,
         display: "grid",
         gridTemplateColumns: "minmax(0, 1fr)",
@@ -122,54 +121,53 @@ export default function InviteCodeShareCard({ code, shareLink, createdAt }: Prop
     >
       <div style={{ minWidth: 0 }}>
         <div
+          className="ug-mono"
           style={{
             fontSize: 9,
             letterSpacing: "0.3em",
             color: colors.textMuted,
-            fontFamily: fonts.mono,
             fontWeight: 700,
             marginBottom: 8,
           }}
         >
-          YOUR CODE
+          ∕∕ YOUR CODE
         </div>
         <div
+          className="ug-glass-tinted ug-mono"
           style={{
-            fontFamily: fonts.mono,
             fontSize: 28,
             fontWeight: 700,
             letterSpacing: "0.15em",
-            color: colors.accent,
+            color: colors.text,
             marginBottom: 16,
+            padding: "14px 18px",
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
+            textAlign: "center",
           }}
         >
           {code}
         </div>
 
         <div
-          style={{
-            fontSize: 11,
-            color: colors.textMuted,
-            marginBottom: 8,
-            fontFamily: fonts.mono,
-          }}
+          className="ug-label"
+          style={{ marginBottom: 8 }}
         >
-          SHARE LINK
+          Share link
         </div>
         <div
+          className="ug-mono"
           style={{
             fontSize: 11,
             color: colors.textMuted,
             marginBottom: 16,
-            fontFamily: fonts.mono,
             wordBreak: "break-word",
             overflowWrap: "anywhere",
-            background: colors.bg,
-            padding: "8px 10px",
-            border: `0.5px solid ${colors.border}`,
+            background: "rgba(255,255,255,0.03)",
+            padding: "10px 12px",
+            border: `1px solid ${colors.border}`,
+            borderRadius: 8,
             lineHeight: 1.5,
           }}
         >
@@ -192,11 +190,12 @@ export default function InviteCodeShareCard({ code, shareLink, createdAt }: Prop
         </div>
 
         <p
+          className="ug-mono"
           style={{
             fontSize: 10,
             color: colors.textDim,
             marginTop: 14,
-            fontFamily: fonts.mono,
+            letterSpacing: "0.1em",
           }}
         >
           Issued {new Date(createdAt).toLocaleDateString()}
@@ -207,6 +206,7 @@ export default function InviteCodeShareCard({ code, shareLink, createdAt }: Prop
         style={{
           background: "#fff",
           padding: 12,
+          borderRadius: 8,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -234,16 +234,12 @@ function PrimaryBtn({ onClick, children }: { onClick: () => void; children: Reac
   return (
     <button
       onClick={onClick}
+      className="ug-btn ug-btn-primary"
       style={{
-        padding: "10px 18px",
-        background: colors.accent,
-        color: "#0a0a0a",
-        border: "none",
         fontFamily: fonts.mono,
         fontSize: 11,
-        fontWeight: 700,
         letterSpacing: "0.3em",
-        cursor: "pointer",
+        padding: "10px 18px",
       }}
     >
       {children}
@@ -255,16 +251,12 @@ function ActionBtn({ onClick, children }: { onClick: () => void; children: React
   return (
     <button
       onClick={onClick}
+      className="ug-btn ug-btn-ghost"
       style={{
-        padding: "8px 14px",
-        background: "transparent",
-        color: colors.text,
-        border: `0.5px solid ${colors.border}`,
         fontFamily: fonts.mono,
         fontSize: 10,
-        fontWeight: 700,
         letterSpacing: "0.3em",
-        cursor: "pointer",
+        padding: "8px 14px",
       }}
     >
       {children}

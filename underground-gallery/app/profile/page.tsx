@@ -1,5 +1,6 @@
 import { auth, signOut } from '@/auth';
 import { redirect } from 'next/navigation';
+import { colors, fonts } from '@/lib/design';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
@@ -25,28 +26,19 @@ export default async function ProfilePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#05060a',
-        color: '#f5f6f7',
-        fontFamily: "'Inter Tight', system-ui, -apple-system, sans-serif",
+        background: colors.bg,
+        color: colors.text,
+        fontFamily: fonts.sans,
         position: 'relative',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
       }}
     >
-      {/* Carbon-fiber backdrop */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          pointerEvents: 'none',
-          zIndex: 0,
-          opacity: 0.6,
-          backgroundImage:
-            'repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px), repeating-linear-gradient(-45deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px)',
-        }}
-      />
-      {/* Vignette glow */}
+      {/* Grain + vignette overlays */}
+      <div className="ug-grain" style={{ position: 'fixed', zIndex: 0 }} />
+      <div className="ug-vignette" style={{ position: 'fixed', zIndex: 0 }} />
+      {/* Accent glow */}
       <div
         style={{
           position: 'fixed',
@@ -78,32 +70,32 @@ export default async function ProfilePage() {
             alignItems: 'center',
             justifyContent: 'space-between',
             paddingBottom: 24,
-            borderBottom: '0.5px solid rgba(255,255,255,0.08)',
+            borderBottom: `1px solid ${colors.border}`,
             gap: 16,
             flexWrap: 'wrap',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+            <svg width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden="true">
               <rect
                 x="3"
                 y="3"
                 width="34"
                 height="34"
-                stroke="#ff2a2a"
+                stroke={colors.accent}
                 strokeWidth="1.5"
                 fill="none"
                 strokeOpacity="0.4"
               />
               <path
                 d="M3 3 L7 3 M37 3 L33 3 M3 37 L7 37 M37 37 L33 37"
-                stroke="#ff2a2a"
+                stroke={colors.accent}
                 strokeWidth="2"
                 strokeLinecap="square"
               />
               <path
                 d="M8 8 L8 32 L32 32 L32 8"
-                stroke="#ff2a2a"
+                stroke={colors.accent}
                 strokeWidth="3"
                 strokeLinecap="square"
                 strokeLinejoin="miter"
@@ -111,7 +103,7 @@ export default async function ProfilePage() {
               />
               <path
                 d="M25 15 L15 15 L15 27 L25 27 L25 22 L20 22"
-                stroke="#ff2a2a"
+                stroke={colors.accent}
                 strokeWidth="2"
                 strokeLinecap="square"
                 strokeLinejoin="miter"
@@ -121,24 +113,24 @@ export default async function ProfilePage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <div
                 style={{
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: fonts.mono,
                   fontWeight: 700,
                   fontSize: 12,
                   letterSpacing: '0.18em',
                 }}
               >
                 UNDERGROUND
-                <span style={{ color: '#ff2a2a', padding: '0 4px', fontWeight: 900 }}>
+                <span style={{ color: colors.accent, padding: '0 4px', fontWeight: 900 }}>
                   ∕∕
                 </span>
                 GALLERY
               </div>
               <div
                 style={{
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: fonts.mono,
                   fontSize: 9,
                   letterSpacing: '0.3em',
-                  color: 'rgba(201,204,209,0.4)',
+                  color: colors.textDim,
                   textTransform: 'uppercase',
                 }}
               >
@@ -153,11 +145,12 @@ export default async function ProfilePage() {
               gap: 10,
               padding: '8px 14px',
               background: 'rgba(80,200,120,0.08)',
-              border: '0.5px solid rgba(80,200,120,0.5)',
-              fontFamily: "'JetBrains Mono', monospace",
+              border: '1px solid rgba(80,200,120,0.5)',
+              borderRadius: 999,
+              fontFamily: fonts.mono,
               fontSize: 10,
               letterSpacing: '0.3em',
-              color: 'rgb(120,220,150)',
+              color: colors.success,
               textTransform: 'uppercase',
               fontWeight: 700,
             }}
@@ -167,9 +160,9 @@ export default async function ProfilePage() {
                 display: 'inline-block',
                 width: 6,
                 height: 6,
-                background: 'rgb(120,220,150)',
+                background: colors.success,
                 borderRadius: '50%',
-                boxShadow: '0 0 8px rgb(120,220,150)',
+                boxShadow: `0 0 8px ${colors.success}`,
               }}
             />
             <span>ACCESS GRANTED</span>
@@ -191,8 +184,8 @@ export default async function ProfilePage() {
         >
           {/* Hero mark */}
           <div style={{ width: 200, height: 200, position: 'relative' }}>
-            <svg width="100%" height="100%" viewBox="0 0 120 120" fill="none">
-              <g stroke="#ff2a2a" strokeWidth="1" opacity="0.4">
+            <svg width="100%" height="100%" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+              <g stroke={colors.accent} strokeWidth="1" opacity="0.4">
                 <path d="M2 6 L10 6 M6 2 L6 10" />
                 <path d="M118 6 L110 6 M114 2 L114 10" />
                 <path d="M2 114 L10 114 M6 110 L6 118" />
@@ -203,20 +196,20 @@ export default async function ProfilePage() {
                 y="14"
                 width="92"
                 height="92"
-                stroke="#ff2a2a"
+                stroke={colors.accent}
                 strokeWidth="1.5"
                 fill="none"
                 strokeOpacity="0.35"
               />
               <path
                 d="M14 14 L26 14 M106 14 L94 14 M14 106 L26 106 M106 106 L94 106"
-                stroke="#ff2a2a"
+                stroke={colors.accent}
                 strokeWidth="3"
                 strokeLinecap="square"
               />
               <path
                 d="M28 24 L28 92 L92 92 L92 24"
-                stroke="#ff2a2a"
+                stroke={colors.accent}
                 strokeWidth="8"
                 strokeLinecap="square"
                 strokeLinejoin="miter"
@@ -224,7 +217,7 @@ export default async function ProfilePage() {
               />
               <path
                 d="M80 44 L42 44 L42 80 L80 80 L80 64 L60 64"
-                stroke="#ff2a2a"
+                stroke={colors.accent}
                 strokeWidth="5"
                 strokeLinecap="square"
                 strokeLinejoin="miter"
@@ -234,7 +227,7 @@ export default async function ProfilePage() {
                 cx="60"
                 cy="60"
                 r="56"
-                stroke="#ff2a2a"
+                stroke={colors.accent}
                 strokeWidth="0.5"
                 strokeOpacity="0.25"
                 strokeDasharray="2 4"
@@ -244,10 +237,10 @@ export default async function ProfilePage() {
 
           {/* Welcome */}
           <div
+            className="ug-mono"
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11,
-              color: '#ff2a2a',
+              color: colors.accent,
               letterSpacing: '0.4em',
               fontWeight: 700,
             }}
@@ -263,12 +256,12 @@ export default async function ProfilePage() {
               margin: 0,
             }}
           >
-            <span style={{ color: '#ff2a2a' }}>{display}</span>.
+            <span style={{ color: colors.accent }}>{display}</span>.
           </h1>
           <p
             style={{
               fontSize: 16,
-              color: 'rgba(201,204,209,0.75)',
+              color: colors.textMuted,
               lineHeight: 1.65,
               maxWidth: 460,
               margin: 0,
@@ -280,32 +273,30 @@ export default async function ProfilePage() {
 
           {/* Status panel */}
           <div
+            className="ug-card ug-mono"
             style={{
               width: '100%',
               maxWidth: 460,
               padding: 20,
-              background: 'rgba(255,255,255,0.02)',
-              border: '0.5px solid rgba(255,255,255,0.08)',
-              fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11,
               textAlign: 'left',
               display: 'flex',
               flexDirection: 'column',
               gap: 8,
-              color: 'rgba(201,204,209,0.7)',
+              color: colors.textMuted,
               letterSpacing: '0.05em',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'rgba(201,204,209,0.45)' }}>EMAIL</span>
+              <span style={{ color: colors.textDim }}>EMAIL</span>
               <span>{session.user.email}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'rgba(201,204,209,0.45)' }}>STATUS</span>
-              <span style={{ color: 'rgb(120,220,150)' }}>ACTIVE</span>
+              <span style={{ color: colors.textDim }}>STATUS</span>
+              <span style={{ color: colors.success }}>ACTIVE</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'rgba(201,204,209,0.45)' }}>SEASON</span>
+              <span style={{ color: colors.textDim }}>SEASON</span>
               <span>01</span>
             </div>
           </div>
@@ -316,21 +307,7 @@ export default async function ProfilePage() {
               await signOut({ redirectTo: '/' });
             }}
           >
-            <button
-              type="submit"
-              style={{
-                padding: '12px 24px',
-                background: 'transparent',
-                color: 'rgba(201,204,209,0.5)',
-                border: '0.5px solid rgba(255,255,255,0.12)',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: '0.3em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-              }}
-            >
+            <button type="submit" className="ug-btn ug-btn-ghost">
               SIGN OUT
             </button>
           </form>
@@ -340,30 +317,30 @@ export default async function ProfilePage() {
         <footer
           style={{
             paddingTop: 24,
-            borderTop: '0.5px solid rgba(255,255,255,0.08)',
+            borderTop: `1px solid ${colors.border}`,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: 16,
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: fonts.mono,
             fontSize: 10,
             letterSpacing: '0.3em',
             textTransform: 'uppercase',
-            color: 'rgba(201,204,209,0.4)',
+            color: colors.textDim,
           }}
         >
           <div>© MMXXVI · UNDERGROUND GALLERY</div>
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-            <a href="/privacy" style={{ color: 'rgba(201,204,209,0.6)', textDecoration: 'none' }}>
+            <a href="/privacy" style={{ color: colors.textMuted, textDecoration: 'none' }}>
               PRIVACY
             </a>
-            <a href="/terms" style={{ color: 'rgba(201,204,209,0.6)', textDecoration: 'none' }}>
+            <a href="/terms" style={{ color: colors.textMuted, textDecoration: 'none' }}>
               TERMS
             </a>
             <a
               href="mailto:info@undergroundgallery.ai"
-              style={{ color: 'rgba(201,204,209,0.6)', textDecoration: 'none' }}
+              style={{ color: colors.textMuted, textDecoration: 'none' }}
             >
               CONTACT
             </a>

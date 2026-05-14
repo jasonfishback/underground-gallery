@@ -1,17 +1,16 @@
 // components/market/MarketCard.tsx
 //
 // Cars-and-Bids style listing card. Big edge-to-edge photo, minimal chrome,
-// title + price hero block underneath. Hover lifts subtly.
+// title + price hero block underneath. Uses .ug-card for hover lift.
 
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { CONDITION_LABELS, formatPriceWithType } from '@/lib/market/types';
 import type { ListingCard as ListingCardData } from '@/lib/market/queries';
+import { colors, fonts } from '@/lib/design';
 
 export function MarketCard({ listing }: { listing: ListingCardData }) {
-  const [hover, setHover] = useState(false);
   const photo = listing.primaryPhotoThumb || listing.primaryPhotoUrl;
   const isCar = listing.listingType === 'car';
 
@@ -31,7 +30,7 @@ export function MarketCard({ listing }: { listing: ListingCardData }) {
 
   const statusBadge =
     listing.status === 'sold'
-      ? { label: 'SOLD', bg: '#ff2a2a' }
+      ? { label: 'SOLD', bg: colors.accent }
       : listing.status === 'expired'
         ? { label: 'EXPIRED', bg: '#555' }
         : listing.status === 'draft'
@@ -41,32 +40,22 @@ export function MarketCard({ listing }: { listing: ListingCardData }) {
   return (
     <Link
       href={`/market/${listing.id}`}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      className="ug-card"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        background: 'rgba(20,22,30,0.5)',
-        border: hover
-          ? '1px solid rgba(255,48,48,0.45)'
-          : '1px solid rgba(255,255,255,0.06)',
-        borderRadius: 14,
         overflow: 'hidden',
         textDecoration: 'none',
         color: 'inherit',
-        transition: 'border-color 180ms ease, transform 180ms ease',
-        transform: hover ? 'translateY(-3px)' : 'translateY(0)',
       }}
     >
       <div
         style={{
           aspectRatio: '16 / 10',
           background: photo
-            ? `#0a0c12 url(${photo}) center / cover no-repeat`
+            ? `${colors.bgElevated} url(${photo}) center / cover no-repeat`
             : 'linear-gradient(135deg, #1a1d28, #0f1119)',
           position: 'relative',
-          transition: 'transform 360ms ease',
-          transform: hover ? 'scale(1.02)' : 'scale(1)',
         }}
       >
         {statusBadge && (
@@ -82,11 +71,12 @@ export function MarketCard({ listing }: { listing: ListingCardData }) {
             letterSpacing: '0.22em',
             background: 'rgba(0,0,0,0.55)',
             backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             color: '#fff',
             fontWeight: 700,
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontFamily: fonts.mono,
             borderRadius: 999,
-            border: '1px solid rgba(255,255,255,0.15)',
+            border: `1px solid ${colors.borderStrong}`,
           }}
         >
           {isCar ? 'CAR' : 'PART'}
@@ -106,7 +96,7 @@ export function MarketCard({ listing }: { listing: ListingCardData }) {
               fontSize: 16,
               fontWeight: 700,
               margin: 0,
-              color: '#fff',
+              color: colors.text,
               lineHeight: 1.3,
               flex: 1,
               overflow: 'hidden',
@@ -121,7 +111,7 @@ export function MarketCard({ listing }: { listing: ListingCardData }) {
             style={{
               fontSize: 16,
               fontWeight: 800,
-              color: '#ff3030',
+              color: colors.accent,
               whiteSpace: 'nowrap',
               letterSpacing: '-0.01em',
             }}
@@ -130,7 +120,7 @@ export function MarketCard({ listing }: { listing: ListingCardData }) {
           </span>
         </div>
         {subtitle && (
-          <div style={{ fontSize: 13, color: 'rgba(245,246,247,0.65)', lineHeight: 1.4 }}>
+          <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.4 }}>
             {subtitle}
           </div>
         )}
@@ -141,11 +131,11 @@ export function MarketCard({ listing }: { listing: ListingCardData }) {
             alignItems: 'center',
             marginTop: 4,
             paddingTop: 10,
-            borderTop: '1px solid rgba(255,255,255,0.06)',
+            borderTop: `1px solid ${colors.border}`,
             fontSize: 10,
             letterSpacing: '0.2em',
-            color: 'rgba(245,246,247,0.5)',
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            color: colors.textDim,
+            fontFamily: fonts.mono,
           }}
         >
           <span>{CONDITION_LABELS[listing.condition].toUpperCase()}</span>
@@ -171,7 +161,7 @@ function badgeStyle(bg: string): React.CSSProperties {
     background: bg,
     color: '#fff',
     fontWeight: 700,
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+    fontFamily: fonts.mono,
     borderRadius: 4,
   };
 }

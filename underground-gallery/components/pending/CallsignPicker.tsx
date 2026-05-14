@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { checkCallsign, submitApplication } from '@/app/pending/actions';
+import { colors, fonts } from '@/lib/design';
 
 type Props = {
   email: string;
@@ -67,21 +68,27 @@ export function CallsignPicker({ email, suggestion }: Props) {
   }
 
   const canSubmit = available === true && !checking && !submitting;
+  const statusColor =
+    available === true ? colors.success : available === false ? colors.accent : colors.textDim;
+  const inputBorderColor =
+    available === true ? colors.success : available === false ? colors.accent : colors.border;
 
   return (
-    <div style={{ maxWidth: 480, width: '100%' }}>
-      <div style={{ fontSize: 11, color: '#ff2a2a', letterSpacing: '0.4em', fontWeight: 700, marginBottom: 16, fontFamily: 'monospace' }}>
-        STEP 1 · PICK YOUR CALLSIGN
+    <div className="ug-card" style={{ maxWidth: 480, width: '100%', padding: 32 }}>
+      <div className="ug-mono" style={{ fontSize: 11, color: colors.accent, letterSpacing: '0.4em', fontWeight: 700, marginBottom: 16 }}>
+        ∕∕ STEP 1 · PICK YOUR CALLSIGN
       </div>
-      <h1 style={{ fontSize: 36, fontWeight: 800, margin: '0 0 16px' }}>
+      <h1 style={{ fontSize: 36, fontWeight: 800, margin: '0 0 16px', letterSpacing: '-0.02em', lineHeight: 1.05 }}>
         What should we call you?
       </h1>
-      <p style={{ fontSize: 14, color: 'rgba(201,204,209,0.75)', lineHeight: 1.6, margin: '0 0 24px' }}>
+      <p style={{ fontSize: 14, color: colors.textMuted, lineHeight: 1.6, margin: '0 0 24px' }}>
         This is how other members will see you. 3-20 characters. Letters, numbers, underscores.
       </p>
 
+      <label className="ug-label" htmlFor="callsign-input">Callsign</label>
       <div style={{ position: 'relative', marginBottom: 8 }}>
         <input
+          id="callsign-input"
           type="text"
           value={callsign}
           onChange={(e) => setCallsign(e.target.value)}
@@ -90,47 +97,52 @@ export function CallsignPicker({ email, suggestion }: Props) {
           spellCheck={false}
           autoCapitalize="none"
           placeholder="your callsign"
+          className="ug-input"
           style={{
-            width: '100%',
-            padding: '14px 16px',
+            fontFamily: fonts.mono,
             fontSize: 20,
-            fontFamily: 'monospace',
-            color: '#f5f6f7',
-            background: 'rgba(255,255,255,0.02)',
-            border: `1px solid ${available === true ? '#2aff2a' : available === false ? '#ff2a2a' : 'rgba(255,255,255,0.18)'}`,
-            boxSizing: 'border-box',
-            outline: 'none',
+            borderColor: inputBorderColor,
+            paddingRight: 140,
           }}
         />
-        <div style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.2em', color: available === true ? '#2aff2a' : available === false ? '#ff2a2a' : 'rgba(201,204,209,0.5)' }}>
+        <div
+          className="ug-mono"
+          style={{
+            position: 'absolute',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            fontSize: 10,
+            letterSpacing: '0.2em',
+            color: statusColor,
+            pointerEvents: 'none',
+          }}
+        >
           {checking ? 'CHECKING...' : available === true ? '✓ AVAILABLE' : available === false ? 'NOT AVAILABLE' : ''}
         </div>
       </div>
 
-      <div style={{ minHeight: 20, fontSize: 12, color: error ? '#ff2a2a' : 'rgba(201,204,209,0.6)', fontFamily: 'monospace', marginBottom: 24 }}>
+      <div
+        className="ug-mono"
+        style={{
+          minHeight: 20,
+          fontSize: 12,
+          color: error ? colors.accent : colors.textMuted,
+          marginBottom: 24,
+        }}
+      >
         {error || (available === true ? 'Nice. Claim it.' : '')}
       </div>
 
       <button
         onClick={onSubmit}
         disabled={!canSubmit}
-        style={{
-          width: '100%',
-          padding: '16px 32px',
-          background: canSubmit ? '#ff2a2a' : 'rgba(255,255,255,0.08)',
-          color: canSubmit ? '#0a0a0a' : 'rgba(201,204,209,0.3)',
-          border: 'none',
-          fontFamily: 'monospace',
-          fontSize: 12,
-          fontWeight: 700,
-          letterSpacing: '0.35em',
-          cursor: canSubmit ? 'pointer' : 'not-allowed',
-        }}
+        className="ug-btn ug-btn-primary ug-btn-block"
       >
         {submitting ? 'SUBMITTING...' : 'SUBMIT APPLICATION →'}
       </button>
 
-      <div style={{ fontSize: 11, color: 'rgba(201,204,209,0.5)', marginTop: 24, fontFamily: 'monospace' }}>
+      <div className="ug-mono" style={{ fontSize: 11, color: colors.textDim, marginTop: 24, letterSpacing: '0.1em' }}>
         SIGNED IN AS {email}
       </div>
     </div>

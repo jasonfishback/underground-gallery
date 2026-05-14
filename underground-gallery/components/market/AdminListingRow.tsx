@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminRemoveListing, adminRestoreListing } from '@/app/admin/market/actions';
+import { colors, fonts } from '@/lib/design';
 
 export function AdminListingRow({
   id,
@@ -39,11 +40,9 @@ export function AdminListingRow({
 
   return (
     <li
+      className="ug-card"
       style={{
         padding: '10px 14px',
-        background: 'rgba(20,22,30,0.4)',
-        border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: 10,
         display: 'flex',
         gap: 12,
         alignItems: 'center',
@@ -52,11 +51,11 @@ export function AdminListingRow({
       <div style={{ flex: 1, minWidth: 0 }}>
         <Link
           href={`/market/${id}`}
-          style={{ fontSize: 14, fontWeight: 600, color: '#fff', textDecoration: 'none' }}
+          style={{ fontSize: 14, fontWeight: 600, color: colors.text, textDecoration: 'none' }}
         >
           {title}
         </Link>
-        <div style={{ fontSize: 11, color: 'rgba(245,246,247,0.55)', marginTop: 2 }}>
+        <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 2 }}>
           {listingType === 'car' ? 'Car' : 'Part'} · {priceLabel} · by{' '}
           {sellerCallsign ?? 'member'} ·{' '}
           <span style={statusStyle(status)}>{status.toUpperCase()}</span> ·{' '}
@@ -66,21 +65,21 @@ export function AdminListingRow({
       {status !== 'removed' ? (
         <button
           type="button"
-          className="ug-btn"
+          className="ug-btn ug-btn-ghost"
           disabled={isPending}
           onClick={() => {
             if (confirm('Remove this listing?')) {
               run(() => adminRemoveListing(id));
             }
           }}
-          style={{ color: '#ff5252', borderColor: 'rgba(255,82,82,0.3)' }}
+          style={{ color: colors.accent, borderColor: colors.accentBorder }}
         >
           Remove
         </button>
       ) : (
         <button
           type="button"
-          className="ug-btn"
+          className="ug-btn ug-btn-ghost"
           disabled={isPending}
           onClick={() => run(() => adminRestoreListing(id))}
         >
@@ -93,9 +92,9 @@ export function AdminListingRow({
 
 function statusStyle(s: string): React.CSSProperties {
   const color =
-    s === 'active' ? '#7ee787' :
-    s === 'sold' ? '#ff5252' :
-    s === 'expired' || s === 'removed' ? '#888' :
-    '#ff9';
-  return { color, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontWeight: 700 };
+    s === 'active' ? colors.success :
+    s === 'sold' ? colors.accent :
+    s === 'expired' || s === 'removed' ? colors.textDim :
+    colors.warning;
+  return { color, fontFamily: fonts.mono, fontWeight: 700 };
 }

@@ -3,7 +3,7 @@
 // components/vehicle/VehicleOwnerPanel.tsx
 // Owner-only photo manager + mod manager for /v/[id].
 
-import { useRef, useState, useTransition, useEffect } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   setPrimaryVehiclePhoto,
@@ -158,261 +158,245 @@ export default function VehicleOwnerPanel({
   }
 
   return (
-    <div style={{ marginTop: 32 }}>
+    <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 24 }}>
       {/* PHOTOS */}
-      <SectionHeader
-        title="Photos"
-        action={
-          <>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              style={{ display: "none" }}
-              onChange={(e) => onFilesPicked(e.target.files)}
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              style={{
-                padding: "6px 14px",
-                background: colors.accent,
-                color: "#0a0a0a",
-                border: "none",
-                fontFamily: fonts.mono,
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.3em",
-                cursor: uploading ? "wait" : "pointer",
-                opacity: uploading ? 0.6 : 1,
-              }}
-            >
-              {uploading ? "UPLOADING…" : "+ ADD PHOTOS"}
-            </button>
-          </>
-        }
-      />
-
-      {uploadErr && (
-        <p style={{ color: colors.danger, fontSize: 12, marginBottom: 12 }}>
-          {uploadErr}
-        </p>
-      )}
-
-      {photos.length === 0 ? (
-        <EmptyBox>
-          No photos yet. Click <strong>+ ADD PHOTOS</strong> to upload. Your
-          first photo becomes the hero automatically.
-        </EmptyBox>
-      ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-            gap: 8,
-          }}
-        >
-          {photos.map((p) => {
-            const isHero = p.id === heroId;
-            return (
-              <div
-                key={p.id}
-                style={{
-                  position: "relative",
-                  aspectRatio: "4 / 3",
-                  background: colors.bgElevated,
-                  border: isHero
-                    ? `1.5px solid ${colors.accent}`
-                    : `0.5px solid ${colors.border}`,
-                  overflow: "hidden",
-                }}
+      <section className="ug-card" style={{ padding: 20 }}>
+        <SectionHeader
+          title="Photos"
+          action={
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                style={{ display: "none" }}
+                onChange={(e) => onFilesPicked(e.target.files)}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="ug-btn ug-btn-primary"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={p.urlThumb ?? p.urlFull}
-                  alt=""
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
+                {uploading ? "UPLOADING…" : "+ ADD PHOTOS"}
+              </button>
+            </>
+          }
+        />
 
-                {isHero && (
+        {uploadErr && (
+          <div className="ug-banner ug-banner-error" style={{ marginBottom: 12 }}>
+            {uploadErr}
+          </div>
+        )}
+
+        {photos.length === 0 ? (
+          <EmptyBox>
+            No photos yet. Click <strong>+ ADD PHOTOS</strong> to upload. Your
+            first photo becomes the hero automatically.
+          </EmptyBox>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+              gap: 8,
+            }}
+          >
+            {photos.map((p) => {
+              const isHero = p.id === heroId;
+              return (
+                <div
+                  key={p.id}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "4 / 3",
+                    background: colors.bgElevated,
+                    border: isHero
+                      ? `1.5px solid ${colors.accent}`
+                      : `1px solid ${colors.border}`,
+                    borderRadius: 10,
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p.urlThumb ?? p.urlFull}
+                    alt=""
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+
+                  {isHero && (
+                    <div
+                      className="ug-mono"
+                      style={{
+                        position: "absolute",
+                        top: 6,
+                        left: 6,
+                        background: colors.accent,
+                        color: "#0a0a0a",
+                        padding: "3px 8px",
+                        borderRadius: 4,
+                        fontSize: 9,
+                        fontWeight: 700,
+                        letterSpacing: "0.3em",
+                      }}
+                    >
+                      ★ HERO
+                    </div>
+                  )}
+
                   <div
                     style={{
                       position: "absolute",
-                      top: 6,
-                      left: 6,
-                      background: colors.accent,
-                      color: "#0a0a0a",
-                      padding: "3px 8px",
-                      fontFamily: fonts.mono,
-                      fontSize: 9,
-                      fontWeight: 700,
-                      letterSpacing: "0.3em",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      display: "flex",
+                      gap: 4,
+                      padding: 6,
+                      background:
+                        "linear-gradient(to top, rgba(0,0,0,0.85), transparent)",
                     }}
                   >
-                    ★ HERO
-                  </div>
-                )}
-
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    display: "flex",
-                    gap: 4,
-                    padding: 6,
-                    background:
-                      "linear-gradient(to top, rgba(0,0,0,0.85), transparent)",
-                  }}
-                >
-                  {!isHero && (
+                    {!isHero && (
+                      <button
+                        onClick={() => handleSetHero(p.id)}
+                        disabled={actionPending}
+                        className="ug-mono"
+                        style={{
+                          padding: "5px 8px",
+                          background: "rgba(0,0,0,0.6)",
+                          backdropFilter: "blur(8px)",
+                          WebkitBackdropFilter: "blur(8px)" as any,
+                          color: colors.text,
+                          border: `1px solid ${colors.border}`,
+                          borderRadius: 6,
+                          fontSize: 9,
+                          fontWeight: 700,
+                          letterSpacing: "0.2em",
+                          cursor: "pointer",
+                        }}
+                        title="Set as hero photo"
+                      >
+                        ★ HERO
+                      </button>
+                    )}
                     <button
-                      onClick={() => handleSetHero(p.id)}
+                      onClick={() => handleDeletePhoto(p.id)}
                       disabled={actionPending}
+                      className="ug-mono"
                       style={{
                         padding: "5px 8px",
-                        background: "rgba(0,0,0,0.7)",
-                        color: colors.text,
-                        border: `0.5px solid ${colors.border}`,
-                        fontFamily: fonts.mono,
+                        background: "rgba(0,0,0,0.6)",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)" as any,
+                        color: "#ff8a8a",
+                        border: `1px solid ${colors.accentBorder}`,
+                        borderRadius: 6,
                         fontSize: 9,
                         fontWeight: 700,
                         letterSpacing: "0.2em",
                         cursor: "pointer",
+                        marginLeft: "auto",
                       }}
-                      title="Set as hero photo"
+                      title="Delete photo"
                     >
-                      ★ HERO
+                      🗑
                     </button>
-                  )}
-                  <button
-                    onClick={() => handleDeletePhoto(p.id)}
-                    disabled={actionPending}
-                    style={{
-                      padding: "5px 8px",
-                      background: "rgba(0,0,0,0.7)",
-                      color: "#ff8a8a",
-                      border: `0.5px solid #663030`,
-                      fontFamily: fonts.mono,
-                      fontSize: 9,
-                      fontWeight: 700,
-                      letterSpacing: "0.2em",
-                      cursor: "pointer",
-                      marginLeft: "auto",
-                    }}
-                    title="Delete photo"
-                  >
-                    🗑
-                  </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       {/* MODS */}
-      <SectionHeader
-        title="Modifications"
-        action={
-          <button
-            onClick={() => setShowModModal(true)}
-            style={{
-              padding: "6px 14px",
-              background: colors.accent,
-              color: "#0a0a0a",
-              border: "none",
-              fontFamily: fonts.mono,
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.3em",
-              cursor: "pointer",
-            }}
-          >
-            + ADD MOD
-          </button>
-        }
-        topGap={48}
-      />
-
-      {mods.length === 0 ? (
-        <EmptyBox>
-          No mods logged. Click <strong>+ ADD MOD</strong> to track suspension,
-          tuning, intake, and more.
-        </EmptyBox>
-      ) : (
-        <div
-          style={{
-            background: colors.bgElevated,
-            border: `0.5px solid ${colors.border}`,
-          }}
-        >
-          {initialMods.map((m, i) => (
-            <div
-              key={m.id}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "auto 1fr auto auto",
-                gap: 16,
-                padding: "12px 16px",
-                borderTop: i === 0 ? "none" : `0.5px solid ${colors.border}`,
-                alignItems: "center",
-              }}
+      <section className="ug-card" style={{ padding: 20 }}>
+        <SectionHeader
+          title="Modifications"
+          action={
+            <button
+              onClick={() => setShowModModal(true)}
+              className="ug-btn ug-btn-primary"
             >
-              <span
+              + ADD MOD
+            </button>
+          }
+        />
+
+        {mods.length === 0 ? (
+          <EmptyBox>
+            No mods logged. Click <strong>+ ADD MOD</strong> to track suspension,
+            tuning, intake, and more.
+          </EmptyBox>
+        ) : (
+          <ul className="ug-list">
+            {initialMods.map((m) => (
+              <li
+                key={m.id}
                 style={{
-                  fontFamily: fonts.mono,
-                  fontSize: 9,
-                  letterSpacing: "0.3em",
-                  color: colors.textMuted,
-                  fontWeight: 700,
-                  minWidth: 80,
+                  display: "grid",
+                  gridTemplateColumns: "auto 1fr auto auto",
+                  gap: 16,
+                  padding: "12px 16px",
+                  alignItems: "center",
                 }}
               >
-                {m.category?.toUpperCase() ?? "OTHER"}
-              </span>
-              <span style={{ fontSize: 13, color: colors.text }}>
-                {m.brand ? <strong>{m.brand}</strong> : null}{" "}
-                {formatModName(m.name)}
-                {m.notes ? (
-                  <span style={{ color: colors.textMuted }}> — {m.notes}</span>
-                ) : null}
-              </span>
-              <span
-                style={{
-                  fontFamily: fonts.mono,
-                  fontSize: 11,
-                  color: m.hpDelta && m.hpDelta > 0 ? colors.accent : colors.textDim,
-                }}
-              >
-                {m.hpDelta != null ? `${m.hpDelta > 0 ? "+" : ""}${m.hpDelta} hp` : ""}
-              </span>
-              <button
-                onClick={() => handleDeleteMod(m.id)}
-                disabled={actionPending}
-                style={{
-                  padding: "4px 8px",
-                  background: "transparent",
-                  color: colors.textMuted,
-                  border: `0.5px solid ${colors.border}`,
-                  fontFamily: fonts.mono,
-                  fontSize: 9,
-                  cursor: "pointer",
-                }}
-                title="Remove mod"
-              >
-                🗑
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+                <span
+                  className="ug-mono"
+                  style={{
+                    fontSize: 9,
+                    letterSpacing: "0.3em",
+                    color: colors.textMuted,
+                    fontWeight: 700,
+                    minWidth: 80,
+                  }}
+                >
+                  {m.category?.toUpperCase() ?? "OTHER"}
+                </span>
+                <span style={{ fontSize: 13, color: colors.text }}>
+                  {m.brand ? <strong>{m.brand}</strong> : null}{" "}
+                  {formatModName(m.name)}
+                  {m.notes ? (
+                    <span style={{ color: colors.textMuted }}> — {m.notes}</span>
+                  ) : null}
+                </span>
+                <span
+                  className="ug-list-meta"
+                  style={{
+                    color: m.hpDelta && m.hpDelta > 0 ? colors.accent : colors.textDim,
+                  }}
+                >
+                  {m.hpDelta != null ? `${m.hpDelta > 0 ? "+" : ""}${m.hpDelta} hp` : ""}
+                </span>
+                <button
+                  onClick={() => handleDeleteMod(m.id)}
+                  disabled={actionPending}
+                  className="ug-mono"
+                  style={{
+                    padding: "4px 8px",
+                    background: "transparent",
+                    color: colors.textMuted,
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: 6,
+                    fontSize: 9,
+                    cursor: "pointer",
+                  }}
+                  title="Remove mod"
+                >
+                  🗑
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {showModModal ? (
         <AddModModal
@@ -431,11 +415,9 @@ export default function VehicleOwnerPanel({
 function SectionHeader({
   title,
   action,
-  topGap,
 }: {
   title: string;
   action?: React.ReactNode;
-  topGap?: number;
 }) {
   return (
     <div
@@ -443,22 +425,21 @@ function SectionHeader({
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        marginTop: topGap ?? 0,
         marginBottom: 12,
       }}
     >
       <h2
+        className="ug-mono"
         style={{
           fontSize: 11,
           letterSpacing: "0.4em",
           color: colors.textMuted,
-          fontFamily: fonts.mono,
           fontWeight: 700,
           margin: 0,
           textTransform: "uppercase",
         }}
       >
-        {title}
+        // {title}
       </h2>
       {action}
     </div>
@@ -469,12 +450,14 @@ function EmptyBox({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
-        background: colors.bgElevated,
-        border: `0.5px dashed ${colors.border}`,
+        background: "rgba(255,255,255,0.02)",
+        border: `1px dashed ${colors.border}`,
+        borderRadius: 10,
         padding: 24,
         textAlign: "center",
         color: colors.textMuted,
         fontSize: 13,
+        fontFamily: fonts.sans,
       }}
     >
       {children}

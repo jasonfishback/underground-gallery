@@ -82,23 +82,23 @@ export default async function ProfilePage({
   return (
     <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
-        <header style={{ marginBottom: 40 }}>
-          <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
-            MEMBER PROFILE
+        <header className="ug-glass" style={{ marginBottom: 40, padding: 28 }}>
+          <div className="ug-mono" style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
+            ∕∕ MEMBER PROFILE
           </div>
           <h1 style={{ fontSize: 36, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 16 }}>
             <CallsignWithBadge callsign={profile.callsign} isAdmin={profile.isModerator} size="lg" />
             {isMe && (
               <Link
                 href="/me"
+                className="ug-pill ug-mono"
                 style={{
                   fontSize: 10,
                   letterSpacing: '0.3em',
                   color: colors.textMuted,
                   textDecoration: 'none',
-                  border: `0.5px solid ${colors.border}`,
-                  padding: '4px 10px',
-                  fontFamily: fonts.mono,
+                  border: `1px solid ${colors.border}`,
+                  background: 'rgba(255,255,255,0.03)',
                 }}
               >
                 EDIT →
@@ -106,7 +106,7 @@ export default async function ProfilePage({
             )}
           </h1>
           {profile.regionLabel && (
-            <div style={{ fontSize: 13, color: colors.textMuted, fontFamily: fonts.mono }}>
+            <div className="ug-mono" style={{ fontSize: 13, color: colors.textMuted }}>
               {profile.regionLabel}
             </div>
           )}
@@ -118,12 +118,12 @@ export default async function ProfilePage({
           <div style={{ marginTop: 16 }}>
             <Link
               href={`/u/${profile.callsign}/races`}
+              className="ug-mono"
               style={{
                 fontSize: 11,
                 letterSpacing: '0.3em',
                 color: colors.textMuted,
                 textDecoration: 'none',
-                fontFamily: fonts.mono,
               }}
             >
               VIEW RACE LOG →
@@ -131,19 +131,18 @@ export default async function ProfilePage({
           </div>
         </header>
 
-        <div style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, marginBottom: 16, fontFamily: fonts.mono, fontWeight: 700 }}>
-          {cars.length} {cars.length === 1 ? 'VEHICLE' : 'VEHICLES'}
+        <div className="ug-mono" style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, marginBottom: 16, fontWeight: 700 }}>
+          ∕∕ {cars.length} {cars.length === 1 ? 'VEHICLE' : 'VEHICLES'}
         </div>
 
         {cars.length === 0 ? (
           <div
+            className="ug-card"
             style={{
               textAlign: 'center',
               padding: 64,
               color: colors.textMuted,
               fontSize: 13,
-              border: `0.5px solid ${colors.border}`,
-              background: '#111',
             }}
           >
             No vehicles yet.
@@ -157,20 +156,20 @@ export default async function ProfilePage({
                 <Link
                   key={c.id}
                   href={`/v/${c.id}`}
+                  className="ug-card"
                   style={{
-                    background: '#111',
-                    border: `0.5px solid ${c.isPrimary ? colors.accent : colors.border}`,
                     color: colors.text,
                     textDecoration: 'none',
                     overflow: 'hidden',
                     display: 'block',
+                    borderColor: c.isPrimary ? colors.accentBorder : undefined,
                   }}
                 >
                   <div
                     style={{
                       aspectRatio: '16 / 9',
-                      background: c.thumbUrl ? `url(${c.thumbUrl}) center/cover` : '#0d0d0d',
-                      borderBottom: `0.5px solid ${colors.border}`,
+                      background: c.thumbUrl ? `url(${c.thumbUrl}) center/cover` : 'rgba(255,255,255,0.02)',
+                      borderBottom: `1px solid ${colors.border}`,
                     }}
                   />
                   <div style={{ padding: 14 }}>
@@ -178,11 +177,11 @@ export default async function ProfilePage({
                       {c.year} {c.make} {c.model}
                     </div>
                     {c.trim && (
-                      <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2, fontFamily: fonts.mono }}>
+                      <div className="ug-mono" style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>
                         {c.trim}
                       </div>
                     )}
-                    <div style={{ marginTop: 10, display: 'flex', gap: 12, fontSize: 11, fontFamily: fonts.mono, color: colors.textMuted }}>
+                    <div className="ug-mono" style={{ marginTop: 10, display: 'flex', gap: 12, fontSize: 11, color: colors.textMuted }}>
                       {hp != null && <span style={{ color: colors.text }}>{hp} hp</span>}{tq != null && tq > 0 && <span style={{ color: colors.text }}>{tq} tq</span>}
                       {c.drivetrain && <span>{c.drivetrain}</span>}
                     </div>

@@ -193,7 +193,7 @@ export default async function PublicRacePage({
       <header
         style={{
           padding: '20px 24px',
-          borderBottom: `0.5px solid ${colors.border}`,
+          borderBottom: `1px solid ${colors.border}`,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -201,28 +201,21 @@ export default async function PublicRacePage({
       >
         <a
           href="/"
+          className="ug-mono"
           style={{
             fontSize: 11,
             letterSpacing: '0.4em',
             color: colors.accent,
             textDecoration: 'none',
             fontWeight: 700,
-            fontFamily: fonts.mono,
           }}
         >
-          UNDERGROUND GALLERY
+          ∕∕ UNDERGROUND GALLERY
         </a>
         <a
           href="/"
-          style={{
-            fontSize: 10,
-            letterSpacing: '0.3em',
-            color: colors.textMuted,
-            textDecoration: 'none',
-            fontFamily: fonts.mono,
-            border: `0.5px solid ${colors.border}`,
-            padding: '6px 12px',
-          }}
+          className="ug-btn ug-btn-ghost ug-pill"
+          style={{ textDecoration: 'none', fontFamily: fonts.mono }}
         >
           REQUEST INVITE →
         </a>
@@ -231,10 +224,10 @@ export default async function PublicRacePage({
       {/* Main: animation + result */}
       <main style={{ flex: 1, padding: '32px 16px', maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{ fontSize: 9, letterSpacing: '0.5em', color: colors.textMuted, marginBottom: 4 }}>
+          <div className="ug-mono" style={{ fontSize: 9, letterSpacing: '0.5em', color: colors.textMuted, marginBottom: 4 }}>
             VIRTUAL RACE · LIVE REPLAY
           </div>
-          <div style={{ fontSize: 11, letterSpacing: '0.3em', color: colors.accent, fontFamily: fonts.mono }}>
+          <div className="ug-mono" style={{ fontSize: 11, letterSpacing: '0.3em', color: colors.accent }}>
             {RACE_LABEL[r.raceType]?.toUpperCase() ?? r.raceType.toUpperCase()}
           </div>
         </div>
@@ -269,12 +262,12 @@ export default async function PublicRacePage({
       <footer
         style={{
           padding: '40px 24px 60px',
-          borderTop: `0.5px solid ${colors.border}`,
+          borderTop: `1px solid ${colors.border}`,
           textAlign: 'center',
         }}
       >
-        <div style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, marginBottom: 12, fontFamily: fonts.mono }}>
-          INVITE ONLY
+        <div className="ug-mono" style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, marginBottom: 12, fontWeight: 700 }}>
+          ∕∕ INVITE ONLY
         </div>
         <h2 style={{ fontSize: 24, margin: '0 0 16px', letterSpacing: '0.03em', maxWidth: 600, marginInline: 'auto' }}>
           A members-only garage for serious car people.
@@ -285,19 +278,10 @@ export default async function PublicRacePage({
         </p>
         <a
           href="/"
-          style={{
-            display: 'inline-block',
-            padding: '14px 32px',
-            background: colors.accent,
-            color: '#fff',
-            textDecoration: 'none',
-            fontSize: 12,
-            letterSpacing: '0.4em',
-            fontFamily: fonts.mono,
-            fontWeight: 700,
-          }}
+          className="ug-btn ug-btn-primary"
+          style={{ textDecoration: 'none', fontFamily: fonts.mono, letterSpacing: '0.4em' }}
         >
-          REQUEST AN INVITE
+          REQUEST AN INVITE →
         </a>
       </footer>
     </div>

@@ -22,6 +22,7 @@ import { WatchButton } from '@/components/market/WatchButton';
 import { OfferModal } from '@/components/market/OfferModal';
 import { SellerOfferList } from '@/components/market/OfferList';
 import { incrementViewCount } from '@/app/market/actions';
+import { colors, fonts } from '@/lib/design';
 
 export const dynamic = 'force-dynamic';
 
@@ -99,8 +100,8 @@ export default async function ListingDetailPage({
         padding: '24px 20px 80px',
         maxWidth: 1280,
         margin: '0 auto',
-        color: '#fff',
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: colors.text,
+        fontFamily: fonts.sans,
       }}
     >
       {/* Back crumb */}
@@ -134,7 +135,7 @@ export default async function ListingDetailPage({
           <div
             style={{
               fontSize: 16,
-              color: 'rgba(245,246,247,0.65)',
+              color: colors.textMuted,
               fontWeight: 500,
             }}
           >
@@ -147,7 +148,7 @@ export default async function ListingDetailPage({
             style={{
               fontSize: 'clamp(28px, 3.6vw, 40px)',
               fontWeight: 800,
-              color: '#ff3030',
+              color: colors.accent,
               lineHeight: 1,
               letterSpacing: '-0.02em',
             }}
@@ -157,10 +158,10 @@ export default async function ListingDetailPage({
           <div
             style={{
               fontSize: 11,
-              color: 'rgba(245,246,247,0.5)',
+              color: colors.textDim,
               letterSpacing: '0.18em',
               marginTop: 4,
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontFamily: fonts.mono,
             }}
           >
             {PRICE_TYPE_LABELS[l.priceType]?.toUpperCase()}
@@ -192,12 +193,12 @@ export default async function ListingDetailPage({
         <div style={{ minWidth: 0 }}>
           {l.description && (
             <section style={sectionStyle}>
-              <h2 style={sectionHeadingStyle}>About this {isCar ? 'car' : 'part'}</h2>
+              <h2 style={sectionHeadingStyle}>∕∕ About this {isCar ? 'car' : 'part'}</h2>
               <p
                 style={{
                   whiteSpace: 'pre-wrap',
                   lineHeight: 1.7,
-                  color: 'rgba(245,246,247,0.88)',
+                  color: colors.text,
                   fontSize: 16,
                   margin: 0,
                 }}
@@ -209,12 +210,12 @@ export default async function ListingDetailPage({
 
           {l.modsSummary && isCar && (
             <section style={sectionStyle}>
-              <h2 style={sectionHeadingStyle}>Modifications</h2>
+              <h2 style={sectionHeadingStyle}>∕∕ Modifications</h2>
               <p
                 style={{
                   whiteSpace: 'pre-wrap',
                   lineHeight: 1.7,
-                  color: 'rgba(245,246,247,0.88)',
+                  color: colors.text,
                   fontSize: 16,
                   margin: 0,
                 }}
@@ -225,7 +226,7 @@ export default async function ListingDetailPage({
           )}
 
           <section style={sectionStyle}>
-            <h2 style={sectionHeadingStyle}>{isCar ? 'Vehicle' : 'Part'} details</h2>
+            <h2 style={sectionHeadingStyle}>∕∕ {isCar ? 'Vehicle' : 'Part'} details</h2>
             <div style={specCardStyle}>
               <dl style={dlStyle}>
                 {isCar ? (
@@ -275,7 +276,7 @@ export default async function ListingDetailPage({
 
           {isOwner && (
             <section style={sectionStyle} id="offers">
-              <h2 style={sectionHeadingStyle}>Offers</h2>
+              <h2 style={sectionHeadingStyle}>∕∕ Offers</h2>
               <SellerOfferList
                 offers={offers.map((o: any) => ({
                   id: o.offer.id,
@@ -293,29 +294,25 @@ export default async function ListingDetailPage({
 
         {/* RIGHT: sticky seller / actions (collapses above content on mobile) */}
         <aside
+          className="ug-glass"
           style={{
             display: 'flex',
             flexDirection: 'column',
             gap: 16,
-            background: 'linear-gradient(180deg, rgba(28,30,40,0.65), rgba(18,20,28,0.65))',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 16,
             padding: 20,
-            backdropFilter: 'blur(8px)',
           }}
         >
           {/* Seller card */}
           <Link
             href={l.sellerCallsign ? `/u/${l.sellerCallsign}` : '#'}
+            className="ug-card"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 12,
               padding: 12,
-              background: 'rgba(255,255,255,0.04)',
-              borderRadius: 12,
               textDecoration: 'none',
-              color: '#fff',
+              color: colors.text,
             }}
           >
             <div
@@ -327,11 +324,11 @@ export default async function ListingDetailPage({
                   ? `url(${l.sellerImage}) center/cover`
                   : 'linear-gradient(135deg, #ff3030, #6a0000)',
                 flexShrink: 0,
-                border: '1px solid rgba(255,255,255,0.12)',
+                border: `1px solid ${colors.borderStrong}`,
               }}
             />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 10, letterSpacing: '0.18em', color: 'rgba(245,246,247,0.5)', fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.18em', color: colors.textDim, fontFamily: fonts.mono }}>
                 SELLER
               </div>
               <div
@@ -347,7 +344,7 @@ export default async function ListingDetailPage({
                 {l.sellerCallsign ?? 'Member'}
               </div>
               {l.sellerRegion && (
-                <div style={{ fontSize: 12, color: 'rgba(245,246,247,0.55)' }}>
+                <div style={{ fontSize: 12, color: colors.textMuted }}>
                   {l.sellerRegion}
                 </div>
               )}
@@ -375,12 +372,12 @@ export default async function ListingDetailPage({
               <div style={{ display: 'flex', gap: 8 }}>
                 <WatchButton listingId={l.id} initialWatching={watching} />
                 {l.status === 'active' && !isOwner && (
-                  <Link href={`/market/messages/${l.id}-${l.sellerId}`} className="ug-btn" style={{ flex: 1, textAlign: 'center' }}>
+                  <Link href={`/market/messages/${l.id}-${l.sellerId}`} className="ug-btn ug-btn-ghost" style={{ flex: 1, textAlign: 'center' }}>
                     Open thread
                   </Link>
                 )}
                 {isOwner && (
-                  <Link href={`/market/${l.id}/edit`} className="ug-btn" style={{ flex: 1, textAlign: 'center' }}>
+                  <Link href={`/market/${l.id}/edit`} className="ug-btn ug-btn-ghost" style={{ flex: 1, textAlign: 'center' }}>
                     Edit
                   </Link>
                 )}
@@ -390,7 +387,7 @@ export default async function ListingDetailPage({
                   href={`/market/${l.id}/flag`}
                   style={{
                     fontSize: 11,
-                    color: 'rgba(245,246,247,0.4)',
+                    color: colors.textDim,
                     textAlign: 'center',
                     textDecoration: 'underline',
                   }}
@@ -400,8 +397,8 @@ export default async function ListingDetailPage({
               )}
             </>
           ) : (
-            <div style={{ fontSize: 13, color: 'rgba(245,246,247,0.65)', lineHeight: 1.5 }}>
-              <Link href="/auth/signin" style={{ color: '#ff3030', textDecoration: 'none', fontWeight: 600 }}>
+            <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.5 }}>
+              <Link href="/auth/signin" style={{ color: colors.accent, textDecoration: 'none', fontWeight: 600 }}>
                 Sign in
               </Link>{' '}
               to contact the seller.
@@ -412,9 +409,9 @@ export default async function ListingDetailPage({
             style={{
               fontSize: 10,
               letterSpacing: '0.2em',
-              color: 'rgba(245,246,247,0.4)',
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              borderTop: '1px solid rgba(255,255,255,0.08)',
+              color: colors.textDim,
+              fontFamily: fonts.mono,
+              borderTop: `1px solid ${colors.border}`,
               paddingTop: 12,
               display: 'flex',
               justifyContent: 'space-between',
@@ -432,8 +429,8 @@ export default async function ListingDetailPage({
 const crumbStyle: React.CSSProperties = {
   fontSize: 11,
   letterSpacing: '0.22em',
-  color: 'rgba(245,246,247,0.55)',
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+  color: colors.textMuted,
+  fontFamily: fonts.mono,
   textDecoration: 'none',
   fontWeight: 600,
 };
@@ -441,8 +438,8 @@ const crumbStyle: React.CSSProperties = {
 const kickerStyle: React.CSSProperties = {
   fontSize: 10,
   letterSpacing: '0.24em',
-  color: '#ff3030',
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+  color: colors.accent,
+  fontFamily: fonts.mono,
   fontWeight: 700,
 };
 
@@ -453,8 +450,8 @@ const sectionStyle: React.CSSProperties = {
 const sectionHeadingStyle: React.CSSProperties = {
   fontSize: 11,
   letterSpacing: '0.3em',
-  color: 'rgba(245,246,247,0.65)',
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+  color: colors.textMuted,
+  fontFamily: fonts.mono,
   fontWeight: 700,
   marginBottom: 14,
   textTransform: 'uppercase',
@@ -466,16 +463,16 @@ const pillStyle: React.CSSProperties = {
   padding: '6px 12px',
   borderRadius: 999,
   background: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.1)',
+  border: `1px solid ${colors.border}`,
   fontSize: 12,
-  color: 'rgba(245,246,247,0.85)',
+  color: colors.text,
   fontWeight: 500,
   letterSpacing: '0.02em',
 };
 
 const specCardStyle: React.CSSProperties = {
   background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.06)',
+  border: `1px solid ${colors.border}`,
   borderRadius: 12,
   padding: '18px 22px',
 };
@@ -493,8 +490,8 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   if (value === null || value === undefined || value === '') return null;
   return (
     <>
-      <dt style={{ color: 'rgba(245,246,247,0.55)', fontSize: 13, fontWeight: 500 }}>{label}</dt>
-      <dd style={{ margin: 0, color: '#fff', fontSize: 14, fontWeight: 500 }}>{value as React.ReactNode}</dd>
+      <dt style={{ color: colors.textMuted, fontSize: 13, fontWeight: 500 }}>{label}</dt>
+      <dd style={{ margin: 0, color: colors.text, fontSize: 14, fontWeight: 500 }}>{value as React.ReactNode}</dd>
     </>
   );
 }

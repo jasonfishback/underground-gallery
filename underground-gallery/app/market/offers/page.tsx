@@ -6,6 +6,7 @@ import { Metadata } from 'next';
 import { getAuthContext } from '@/lib/auth/gates';
 import { getOffersFromBuyer } from '@/lib/market/queries';
 import { BuyerOfferList } from '@/components/market/OfferList';
+import { colors, fonts } from '@/lib/design';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'My offers' };
@@ -41,36 +42,34 @@ export default async function OffersPage() {
         padding: '32px 24px 64px',
         maxWidth: 880,
         margin: '0 auto',
-        color: '#fff',
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: colors.text,
+        fontFamily: fonts.sans,
       }}
     >
       <div
         style={{
           fontSize: 11,
           letterSpacing: '0.4em',
-          color: '#ff3030',
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          color: colors.accent,
+          fontFamily: fonts.mono,
           fontWeight: 700,
         }}
       >
-        UNDERGROUND · MY OFFERS
+        ∕∕ UNDERGROUND · MY OFFERS
       </div>
       <h1 style={{ fontSize: 28, margin: '4px 0 22px' }}>Offers you've sent</h1>
 
       {byListing.size === 0 ? (
         <div
+          className="ug-card"
           style={{
             padding: '40px 20px',
             textAlign: 'center',
-            color: 'rgba(245,246,247,0.55)',
-            background: 'rgba(20,22,30,0.4)',
-            border: '1px dashed rgba(255,255,255,0.12)',
-            borderRadius: 12,
+            color: colors.textMuted,
           }}
         >
           You haven't sent any offers yet.{' '}
-          <Link href="/market" style={{ color: '#ff5252' }}>
+          <Link href="/market" style={{ color: colors.accent }}>
             Browse the market →
           </Link>
         </div>
@@ -79,11 +78,9 @@ export default async function OffersPage() {
           {Array.from(byListing.entries()).map(([listingId, group]) => (
             <section
               key={listingId}
+              className="ug-card"
               style={{
                 padding: 18,
-                background: 'rgba(20,22,30,0.5)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 12,
               }}
             >
               <div
@@ -99,7 +96,7 @@ export default async function OffersPage() {
                   style={{
                     fontSize: 16,
                     fontWeight: 600,
-                    color: '#fff',
+                    color: colors.text,
                     textDecoration: 'none',
                   }}
                 >
@@ -109,8 +106,8 @@ export default async function OffersPage() {
                   style={{
                     fontSize: 10,
                     letterSpacing: '0.2em',
-                    color: group.status === 'active' ? '#7ee787' : '#888',
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    color: group.status === 'active' ? colors.success : colors.textDim,
+                    fontFamily: fonts.mono,
                     fontWeight: 700,
                   }}
                 >

@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import { MarketCard } from './MarketCard';
 import type { ListingCard } from '@/lib/market/queries';
+import { colors, fonts } from '@/lib/design';
 
 export function MarketGrid({
   rows,
@@ -26,17 +27,15 @@ export function MarketGrid({
   if (rows.length === 0) {
     return (
       <div
+        className="ug-card"
         style={{
           padding: '48px 20px',
           textAlign: 'center',
-          color: 'rgba(245,246,247,0.55)',
-          fontFamily: "'Inter Tight', system-ui, sans-serif",
-          background: 'rgba(20,22,30,0.4)',
-          border: '1px dashed rgba(255,255,255,0.12)',
-          borderRadius: 12,
+          color: colors.textMuted,
+          fontFamily: fonts.sans,
         }}
       >
-        <div style={{ fontSize: 16, marginBottom: 6, color: '#fff' }}>Nothing here yet.</div>
+        <div style={{ fontSize: 16, marginBottom: 6, color: colors.text }}>Nothing here yet.</div>
         <div style={{ fontSize: 13 }}>
           {emptyHint ?? 'Try clearing filters or check back soon.'}
         </div>
@@ -77,11 +76,11 @@ export function MarketGrid({
             gap: 8,
             justifyContent: 'center',
             marginTop: 24,
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontFamily: fonts.mono,
           }}
         >
           {page > 1 && (
-            <Link href={pageHref(page - 1)} className="ug-btn">
+            <Link href={pageHref(page - 1)} className="ug-btn ug-btn-ghost">
               ← Prev
             </Link>
           )}
@@ -90,13 +89,13 @@ export function MarketGrid({
               padding: '8px 14px',
               fontSize: 11,
               letterSpacing: '0.18em',
-              color: 'rgba(245,246,247,0.6)',
+              color: colors.textMuted,
             }}
           >
             {page} / {totalPages}
           </span>
           {page < totalPages && (
-            <Link href={pageHref(page + 1)} className="ug-btn">
+            <Link href={pageHref(page + 1)} className="ug-btn ug-btn-ghost">
               Next →
             </Link>
           )}

@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { resolveFlag, adminRemoveListing } from '@/app/admin/market/actions';
+import { colors, fonts } from '@/lib/design';
 
 type Listing = {
   id: string;
@@ -47,11 +48,10 @@ export function AdminFlagRow({
 
   return (
     <li
+      className="ug-card"
       style={{
         padding: 14,
-        background: 'rgba(20,22,30,0.55)',
-        border: '1px solid rgba(255,42,42,0.25)',
-        borderRadius: 12,
+        borderColor: colors.accentBorder,
         display: 'flex',
         flexDirection: 'column',
         gap: 8,
@@ -63,8 +63,8 @@ export function AdminFlagRow({
             style={{
               fontSize: 10,
               letterSpacing: '0.22em',
-              color: '#ff5252',
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              color: colors.accent,
+              fontFamily: fonts.mono,
               fontWeight: 700,
             }}
           >
@@ -73,21 +73,21 @@ export function AdminFlagRow({
           {listing ? (
             <Link
               href={`/market/${listing.id}`}
-              style={{ fontSize: 16, fontWeight: 600, color: '#fff', textDecoration: 'none' }}
+              style={{ fontSize: 16, fontWeight: 600, color: colors.text, textDecoration: 'none' }}
             >
               {listing.title}
             </Link>
           ) : (
-            <div style={{ fontSize: 14, color: 'rgba(245,246,247,0.6)' }}>
+            <div style={{ fontSize: 14, color: colors.textMuted }}>
               Listing {listingId} (deleted?)
             </div>
           )}
-          <div style={{ fontSize: 12, color: 'rgba(245,246,247,0.6)', marginTop: 2 }}>
+          <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>
             By {listing?.sellerCallsign ?? '?'} · Reported by {reporterCallsign ?? 'someone'} ·{' '}
             {new Date(createdAt).toLocaleDateString()}
           </div>
           {details && (
-            <p style={{ fontSize: 13, color: 'rgba(245,246,247,0.85)', marginTop: 6, lineHeight: 1.5 }}>
+            <p style={{ fontSize: 13, color: colors.text, marginTop: 6, lineHeight: 1.5 }}>
               "{details}"
             </p>
           )}
@@ -110,14 +110,14 @@ export function AdminFlagRow({
         </button>
         <button
           type="button"
-          className="ug-btn"
+          className="ug-btn ug-btn-ghost"
           disabled={isPending}
           onClick={() => run(() => resolveFlag(flagId, 'dismissed', 'No action'))}
         >
           Dismiss report
         </button>
         {listing && (
-          <Link href={`/market/${listing.id}`} className="ug-btn">
+          <Link href={`/market/${listing.id}`} className="ug-btn ug-btn-ghost">
             View listing
           </Link>
         )}

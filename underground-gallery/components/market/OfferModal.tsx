@@ -1,12 +1,13 @@
 // components/market/OfferModal.tsx
 //
-// Buyer-side: "Make an offer" expandable panel.
+// Buyer-side: "Make an offer" expandable modal.
 
 'use client';
 
 import { useState, useTransition } from 'react';
 import { makeOffer } from '@/app/market/actions';
 import { formatPrice } from '@/lib/market/types';
+import { colors } from '@/lib/design';
 
 export function OfferModal({
   listingId,
@@ -47,74 +48,75 @@ export function OfferModal({
     });
   }
 
-  if (!open) {
-    return (
+  return (
+    <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="ug-btn"
-        style={{ width: '100%', textAlign: 'center' }}
+        className="ug-btn ug-btn-ghost ug-btn-block"
       >
         {success ? '✓ Offer sent — try again?' : 'Make an offer'}
       </button>
-    );
-  }
 
-  return (
-    <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <label style={labelStyle}>YOUR OFFER (USD)</label>
-        <input
-          type="number"
-          inputMode="numeric"
-          min={1}
-          value={amount}
-          onChange={(e) => setAmount(Number(e.target.value))}
-          style={inputStyle}
-        />
-        <div style={{ fontSize: 11, color: 'rgba(245,246,247,0.5)', marginTop: 2 }}>
-          Asking: {formatPrice(askingPriceCents)} · Offer expires in 7 days.
+      {open && (
+        <div
+          className="ug-modal-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setOpen(false);
+          }}
+        >
+          <div className="ug-modal" role="dialog" aria-label="Make an offer">
+            <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: colors.text }}>
+                  Make an offer
+                </h2>
+                <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 4 }}>
+                  Asking: {formatPrice(askingPriceCents)} · Offer expires in 7 days.
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="ug-label" htmlFor="offer-amount">Your offer (USD)</label>
+                <input
+                  id="offer-amount"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  value={amount}
+                  onChange={(e) => setAmount(Number(e.target.value))}
+                  className="ug-input"
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="ug-label" htmlFor="offer-note">Note (optional)</label>
+                <textarea
+                  id="offer-note"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={3}
+                  maxLength={500}
+                  placeholder="Pickup ready, can wire today, etc."
+                  className="ug-input"
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+
+              {error && <div className="ug-banner ug-banner-error">{error}</div>}
+
+              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                <button type="submit" disabled={isPending} className="ug-btn ug-btn-primary">
+                  {isPending ? 'Sending…' : 'Send offer'}
+                </button>
+                <button type="button" onClick={() => setOpen(false)} className="ug-btn ug-btn-ghost">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <label style={labelStyle}>NOTE (optional)</label>
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={3}
-          maxLength={500}
-          placeholder="Pickup ready, can wire today, etc."
-          style={{ ...inputStyle, resize: 'vertical' }}
-        />
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button type="submit" disabled={isPending} className="ug-btn ug-btn-primary">
-          {isPending ? 'Sending…' : 'Send offer'}
-        </button>
-        <button type="button" onClick={() => setOpen(false)} className="ug-btn">
-          Cancel
-        </button>
-        {error && <span style={{ fontSize: 12, color: '#ff5252', alignSelf: 'center' }}>{error}</span>}
-      </div>
-    </form>
+      )}
+    </>
   );
 }
-
-const labelStyle: React.CSSProperties = {
-  fontSize: 10,
-  letterSpacing: '0.22em',
-  color: 'rgba(245,246,247,0.55)',
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontWeight: 700,
-};
-
-const inputStyle: React.CSSProperties = {
-  background: '#0a0c12',
-  border: '1px solid rgba(255,255,255,0.12)',
-  color: '#fff',
-  borderRadius: 8,
-  padding: '10px 12px',
-  fontSize: 14,
-  fontFamily: "'Inter Tight', system-ui, sans-serif",
-  width: '100%',
-};

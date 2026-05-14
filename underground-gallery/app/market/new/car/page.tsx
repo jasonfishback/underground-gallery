@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { vehicles } from '@/lib/db/schema';
 import { getAuthContext } from '@/lib/auth/gates';
 import { CarListingForm } from '@/components/market/CarListingForm';
+import { colors, fonts } from '@/lib/design';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'List a car' };
@@ -35,23 +36,23 @@ export default async function NewCarListingPage() {
         padding: '32px 24px 64px',
         maxWidth: 880,
         margin: '0 auto',
-        color: '#fff',
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: colors.text,
+        fontFamily: fonts.sans,
       }}
     >
       <div
         style={{
           fontSize: 11,
           letterSpacing: '0.4em',
-          color: '#ff3030',
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          color: colors.accent,
+          fontFamily: fonts.mono,
           fontWeight: 700,
         }}
       >
-        UNDERGROUND · LIST A CAR
+        ∕∕ UNDERGROUND · LIST A CAR
       </div>
       <h1 style={{ fontSize: 28, margin: '8px 0 4px' }}>Tell us about it</h1>
-      <p style={{ color: 'rgba(245,246,247,0.6)', marginBottom: 24, fontSize: 14 }}>
+      <p style={{ color: colors.textMuted, marginBottom: 24, fontSize: 14 }}>
         We'll save a draft. You'll add photos and publish on the next screen.
       </p>
       <CarListingForm mode="create" garageVehicles={myGarage} />

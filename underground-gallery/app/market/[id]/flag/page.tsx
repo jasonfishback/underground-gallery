@@ -5,6 +5,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { flagListing } from '@/app/market/actions';
+import { colors, fonts } from '@/lib/design';
 
 const REASONS = [
   { value: 'spam', label: 'Spam or duplicate' },
@@ -40,12 +41,12 @@ export default function FlagListingPage() {
           padding: '40px 24px',
           maxWidth: 540,
           margin: '0 auto',
-          color: '#fff',
-          fontFamily: "'Inter Tight', system-ui, sans-serif",
+          color: colors.text,
+          fontFamily: fonts.sans,
         }}
       >
         <h1 style={{ fontSize: 24 }}>Thanks for the report</h1>
-        <p style={{ color: 'rgba(245,246,247,0.7)' }}>
+        <p style={{ color: colors.textMuted }}>
           We'll review the listing. Reports are confidential.
         </p>
         <button
@@ -65,21 +66,21 @@ export default function FlagListingPage() {
         padding: '40px 24px',
         maxWidth: 540,
         margin: '0 auto',
-        color: '#fff',
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: colors.text,
+        fontFamily: fonts.sans,
       }}
     >
-      <div style={{ fontSize: 11, letterSpacing: '0.4em', color: '#ff3030', fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontWeight: 700 }}>
-        UNDERGROUND · REPORT
+      <div style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, fontFamily: fonts.mono, fontWeight: 700 }}>
+        ∕∕ UNDERGROUND · REPORT
       </div>
       <h1 style={{ fontSize: 24, margin: '4px 0 16px' }}>Report this listing</h1>
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={labelStyle}>REASON</span>
+          <span className="ug-label">Reason</span>
           <select
             value={reason}
             onChange={(e) => setReason(e.target.value as any)}
-            style={inputStyle}
+            className="ug-input"
           >
             {REASONS.map((r) => (
               <option key={r.value} value={r.value}>
@@ -89,22 +90,23 @@ export default function FlagListingPage() {
           </select>
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={labelStyle}>DETAILS (OPTIONAL)</span>
+          <span className="ug-label">Details (optional)</span>
           <textarea
             value={details}
             onChange={(e) => setDetails(e.target.value)}
             rows={4}
             maxLength={500}
-            style={{ ...inputStyle, resize: 'vertical' }}
+            className="ug-input"
+            style={{ resize: 'vertical' }}
             placeholder="What about this seemed off?"
           />
         </label>
-        {error && <span style={{ color: '#ff5252', fontSize: 13 }}>{error}</span>}
+        {error && <div className="ug-banner ug-banner-error">{error}</div>}
         <div style={{ display: 'flex', gap: 8 }}>
           <button type="submit" disabled={isPending} className="ug-btn ug-btn-primary">
             {isPending ? 'Sending…' : 'Submit report'}
           </button>
-          <button type="button" className="ug-btn" onClick={() => router.back()}>
+          <button type="button" className="ug-btn ug-btn-ghost" onClick={() => router.back()}>
             Cancel
           </button>
         </div>
@@ -112,21 +114,3 @@ export default function FlagListingPage() {
     </main>
   );
 }
-
-const labelStyle: React.CSSProperties = {
-  fontSize: 10,
-  letterSpacing: '0.22em',
-  color: 'rgba(245,246,247,0.55)',
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontWeight: 700,
-};
-const inputStyle: React.CSSProperties = {
-  background: '#0a0c12',
-  border: '1px solid rgba(255,255,255,0.12)',
-  color: '#fff',
-  borderRadius: 8,
-  padding: '10px 12px',
-  fontSize: 14,
-  fontFamily: "'Inter Tight', system-ui, sans-serif",
-  width: '100%',
-};

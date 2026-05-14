@@ -19,6 +19,7 @@ import {
   TITLE_STATUS_LABELS,
 } from '@/lib/market/types';
 import { GarageLinkPicker } from './GarageLinkPicker';
+import { colors, fonts } from '@/lib/design';
 
 type GarageVehicle = {
   id: string;
@@ -162,7 +163,7 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
             maxLength={140}
             placeholder="e.g. 2008 BMW M3 — 65k mi, clean title"
             required
-            style={inputStyle}
+            className="ug-input"
           />
         </Field>
 
@@ -176,14 +177,14 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
               required
               min={1900}
               max={2100}
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
           <Field label="Color">
             <input
               value={s.color}
               onChange={(e) => set('color', e.target.value)}
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
         </Two>
@@ -194,7 +195,7 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
               value={s.make}
               onChange={(e) => set('make', e.target.value)}
               required
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
           <Field label="Model" required>
@@ -202,7 +203,7 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
               value={s.model}
               onChange={(e) => set('model', e.target.value)}
               required
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
         </Two>
@@ -212,7 +213,7 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
             <input
               value={s.trim}
               onChange={(e) => set('trim', e.target.value)}
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
           <Field label="Body style">
@@ -220,7 +221,7 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
               value={s.bodyStyle}
               onChange={(e) => set('bodyStyle', e.target.value)}
               placeholder="Coupe, Sedan, etc."
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
         </Two>
@@ -232,14 +233,14 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
               inputMode="numeric"
               value={s.mileage}
               onChange={(e) => set('mileage', e.target.value)}
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
           <Field label="Condition" required>
             <select
               value={s.condition}
               onChange={(e) => set('condition', e.target.value as any)}
-              style={inputStyle}
+              className="ug-input"
             >
               {LISTING_CONDITIONS.map((c) => (
                 <option key={c} value={c}>
@@ -256,7 +257,7 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
               value={s.transmission}
               onChange={(e) => set('transmission', e.target.value)}
               placeholder="Manual, Auto, DCT"
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
           <Field label="Drivetrain">
@@ -264,7 +265,7 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
               value={s.drivetrain}
               onChange={(e) => set('drivetrain', e.target.value)}
               placeholder="RWD, AWD, FWD"
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
         </Two>
@@ -274,7 +275,7 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
             <select
               value={s.titleStatus}
               onChange={(e) => set('titleStatus', e.target.value as any)}
-              style={inputStyle}
+              className="ug-input"
             >
               <option value="">— Not specified —</option>
               {LISTING_TITLE_STATUSES.map((t) => (
@@ -289,7 +290,7 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
               value={s.vin}
               onChange={(e) => set('vin', e.target.value)}
               maxLength={20}
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
         </Two>
@@ -304,14 +305,14 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
               value={s.priceCents}
               onChange={(e) => set('priceCents', e.target.value)}
               disabled={s.priceType === 'free'}
-              style={inputStyle}
+              className="ug-input"
             />
           </Field>
           <Field label="Price type">
             <select
               value={s.priceType}
               onChange={(e) => set('priceType', e.target.value as any)}
-              style={inputStyle}
+              className="ug-input"
             >
               {LISTING_PRICE_TYPES.map((p) => (
                 <option key={p} value={p}>
@@ -331,7 +332,8 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
             rows={6}
             maxLength={8000}
             placeholder="Tell the story. Service history, known issues, why you're selling."
-            style={{ ...inputStyle, resize: 'vertical' }}
+            className="ug-input"
+            style={{ resize: 'vertical' }}
           />
         </Field>
         <Field label="Mods (short summary)">
@@ -341,7 +343,8 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
             rows={4}
             maxLength={2000}
             placeholder="Stage 2 tune, Cobb AP, Mishimoto IC..."
-            style={{ ...inputStyle, resize: 'vertical' }}
+            className="ug-input"
+            style={{ resize: 'vertical' }}
           />
         </Field>
         <Field label="Location (city, state)">
@@ -349,16 +352,12 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
             value={s.locationLabel}
             onChange={(e) => set('locationLabel', e.target.value)}
             placeholder={initial?.locationLabel ?? 'Defaults to your member region'}
-            style={inputStyle}
+            className="ug-input"
           />
         </Field>
       </Section>
 
-      {error && (
-        <div style={{ color: '#ff5252', fontSize: 13, padding: '8px 12px', background: 'rgba(255,42,42,0.1)', borderRadius: 8 }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="ug-banner ug-banner-error">{error}</div>}
 
       <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
         <button type="submit" disabled={isPending} className="ug-btn ug-btn-primary">
@@ -367,7 +366,7 @@ export function CarListingForm({ mode, listingId, garageVehicles, initial }: Pro
         {mode === 'edit' && (
           <button
             type="button"
-            className="ug-btn"
+            className="ug-btn ug-btn-ghost"
             onClick={() => router.push('/market/mine')}
           >
             Done
@@ -382,42 +381,29 @@ const formStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: 22,
-  fontFamily: "'Inter Tight', system-ui, sans-serif",
-};
-
-const inputStyle: React.CSSProperties = {
-  background: '#0a0c12',
-  border: '1px solid rgba(255,255,255,0.12)',
-  color: '#fff',
-  borderRadius: 8,
-  padding: '10px 12px',
-  fontSize: 14,
-  fontFamily: "'Inter Tight', system-ui, sans-serif",
-  width: '100%',
+  fontFamily: fonts.sans,
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <fieldset
+      className="ug-card"
       style={{
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 12,
         padding: '18px 18px 22px',
         margin: 0,
-        background: 'rgba(20,22,30,0.4)',
       }}
     >
       <legend
         style={{
           fontSize: 11,
           letterSpacing: '0.3em',
-          color: 'rgba(245,246,247,0.6)',
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          color: colors.textMuted,
+          fontFamily: fonts.mono,
           fontWeight: 700,
           padding: '0 8px',
         }}
       >
-        {title.toUpperCase()}
+        ∕∕ {title.toUpperCase()}
       </legend>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>
     </fieldset>
@@ -449,17 +435,9 @@ function Field({
 }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <span
-        style={{
-          fontSize: 10,
-          letterSpacing: '0.22em',
-          color: 'rgba(245,246,247,0.55)',
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontWeight: 700,
-        }}
-      >
-        {label.toUpperCase()}
-        {required && <span style={{ color: '#ff5252' }}> *</span>}
+      <span className="ug-label">
+        {label}
+        {required && <span style={{ color: colors.accent }}> *</span>}
       </span>
       {children}
     </label>
