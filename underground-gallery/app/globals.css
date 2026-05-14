@@ -533,3 +533,33 @@ header nav::-webkit-scrollbar {
     text-align: left !important;
   }
 }
+
+/* ──────────────────────────────────────────────────────────
+   Market listing detail: sticky bottom action bar (mobile only).
+   Hidden ≥880px (the sidebar takes over). Always reserves space
+   so content isn't hidden behind the bar.
+   ────────────────────────────────────────────────────────── */
+.ug-market-mobile-bar {
+  display: none;
+}
+@media (max-width: 879px) {
+  .ug-market-mobile-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    z-index: 90;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(24,26,34,0.96), rgba(14,16,22,0.96));
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+  }
+  /* Reserve bottom space so the spec card / report link isn't hidden */
+  .ug-market-detail-padded { padding-bottom: 108px; }
+}
