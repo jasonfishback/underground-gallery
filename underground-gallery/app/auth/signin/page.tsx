@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
+import { colors, fonts } from '@/lib/design';
 
 function SignInForm() {
   const params = useSearchParams();
@@ -38,10 +39,11 @@ function SignInForm() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#05060a',
+        background: colors.bg,
         backgroundImage:
           'radial-gradient(ellipse at 50% 30%, rgba(255,42,42,0.10), transparent 55%), radial-gradient(ellipse at 50% 90%, rgba(255,42,42,0.05), transparent 60%)',
-        color: '#f5f6f7',
+        color: colors.text,
+        fontFamily: fonts.sans,
         padding: 24,
         display: 'flex',
         alignItems: 'center',
@@ -64,20 +66,20 @@ function SignInForm() {
               width: 7,
               height: 7,
               borderRadius: 999,
-              background: '#ff2a2a',
+              background: colors.accent,
               boxShadow: '0 0 8px rgba(255,42,42,0.8)',
             }}
           />
           <span
+            className="ug-mono"
             style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
               fontSize: 11,
               letterSpacing: '0.4em',
-              color: '#ff2a2a',
+              color: colors.accent,
               fontWeight: 700,
             }}
           >
-            ACCESS RESTRICTED · SIGN IN
+            ∕∕ ACCESS RESTRICTED · SIGN IN
           </span>
         </div>
 
@@ -91,13 +93,13 @@ function SignInForm() {
             lineHeight: 1.05,
           }}
         >
-          Members <span style={{ color: '#ff2a2a' }}>only.</span>
+          Members <span style={{ color: colors.accent }}>only.</span>
         </h1>
 
         <p
           style={{
             fontSize: 14,
-            color: 'rgba(245,246,247,0.65)',
+            color: colors.textMuted,
             textAlign: 'center',
             margin: '0 0 28px',
             lineHeight: 1.5,
@@ -116,8 +118,9 @@ function SignInForm() {
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <label className="ug-label">Email</label>
+            <label className="ug-label" htmlFor="signin-email">Email</label>
             <input
+              id="signin-email"
               type="email"
               name="email"
               autoComplete="email"
@@ -149,20 +152,20 @@ function SignInForm() {
         )}
 
         <p
+          className="ug-mono"
           style={{
             marginTop: 28,
             fontSize: 11,
-            color: 'rgba(245,246,247,0.4)',
+            color: colors.textDim,
             textAlign: 'center',
             letterSpacing: '0.18em',
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
             textTransform: 'uppercase',
           }}
         >
           <a
             href="/"
             style={{
-              color: 'rgba(245,246,247,0.55)',
+              color: colors.textMuted,
               textDecoration: 'none',
             }}
           >

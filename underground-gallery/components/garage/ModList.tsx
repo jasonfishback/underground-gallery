@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { addModFromCatalog, addCustomMod, deleteMod, updateMod } from '@/app/garage/actions';
-import { styles, colors, fonts } from '@/lib/design';
+import { colors, fonts } from '@/lib/design';
 
 type Mod = {
   id: string;
@@ -62,11 +62,14 @@ export function ModList({ vehicleId, mods, catalog, readOnly = false }: Props) {
   }
 
   return (
-    <div style={styles.panel}>
+    <div className="ug-card" style={{ padding: 24 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
-          <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 4 }}>
-            MODIFICATIONS
+          <div
+            className="ug-mono"
+            style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 4 }}
+          >
+            // MODIFICATIONS
           </div>
           <div style={{ fontSize: 11, color: colors.textMuted }}>
             {mods.length} {mods.length === 1 ? 'mod' : 'mods'}
@@ -74,7 +77,7 @@ export function ModList({ vehicleId, mods, catalog, readOnly = false }: Props) {
           </div>
         </div>
         {!readOnly && (
-          <button onClick={() => setShowAddModal(true)} style={styles.buttonPrimary}>
+          <button onClick={() => setShowAddModal(true)} className="ug-btn ug-btn-primary">
             + ADD MOD
           </button>
         )}
@@ -85,111 +88,114 @@ export function ModList({ vehicleId, mods, catalog, readOnly = false }: Props) {
           {readOnly ? 'No mods listed.' : 'No mods yet. Add tunes, intake, exhaust, anything that affects performance.'}
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: 4 }}>
+        <div style={{ display: 'grid', gap: 12 }}>
           {[...byCategory.entries()].map(([cat, items]) => (
-            <div key={cat} style={{ marginBottom: 12 }}>
+            <div key={cat}>
               <div
+                className="ug-mono"
                 style={{
                   fontSize: 10,
                   letterSpacing: '0.3em',
                   color: colors.textDim,
                   padding: '6px 0',
-                  borderBottom: `0.5px solid ${colors.borderStrong}`,
+                  borderBottom: `1px solid ${colors.borderStrong}`,
                   marginBottom: 4,
                 }}
               >
                 {cat.toUpperCase()}
               </div>
-              {items.map((m) => {
-                const preset = catalog.find((c) => c.id === m.modCatalogId);
-                const name = m.customName ?? preset?.name ?? '(unnamed)';
-                return (
-                  <div
-                    key={m.id}
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1fr auto auto',
-                      gap: 12,
-                      padding: '10px 0',
-                      borderBottom: `0.5px solid ${colors.border}`,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 13, color: colors.text, fontWeight: 600 }}>
-                        {name}
-                        {m.verified && (
-                          <span
-                            style={{
-                              fontSize: 8,
-                              letterSpacing: '0.2em',
-                              color: colors.success,
-                              border: `0.5px solid ${colors.success}`,
-                              padding: '2px 5px',
-                              marginLeft: 8,
-                              fontFamily: fonts.mono,
-                            }}
-                          >
-                            DYNO ✓
-                          </span>
-                        )}
-                      </div>
-                      {m.notes && (
-                        <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 3 }}>{m.notes}</div>
-                      )}
-                    </div>
-                    <div
+              <ul className="ug-list">
+                {items.map((m) => {
+                  const preset = catalog.find((c) => c.id === m.modCatalogId);
+                  const name = m.customName ?? preset?.name ?? '(unnamed)';
+                  return (
+                    <li
+                      key={m.id}
                       style={{
-                        display: 'flex',
-                        gap: 8,
-                        fontSize: 11,
-                        fontFamily: fonts.mono,
-                        color: colors.textMuted,
-                        whiteSpace: 'nowrap',
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto auto',
+                        gap: 12,
+                        padding: '10px 14px',
+                        alignItems: 'center',
                       }}
                     >
-                      {(m.hpGain ?? 0) !== 0 && <span>{(m.hpGain ?? 0) > 0 ? '+' : ''}{m.hpGain}hp</span>}
-                      {(m.torqueGain ?? 0) !== 0 && <span>{(m.torqueGain ?? 0) > 0 ? '+' : ''}{m.torqueGain}lb-ft</span>}
-                      {(m.weightChange ?? 0) !== 0 && <span>{(m.weightChange ?? 0) > 0 ? '+' : ''}{m.weightChange}lb</span>}
-                    </div>
-                    {!readOnly && (
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button
-                          onClick={() => handleToggleVerified(m)}
-                          disabled={busy === m.id}
-                          title={m.verified ? 'Unmark as dyno-verified' : 'Mark as dyno-verified'}
-                          style={{
-                            background: 'transparent',
-                            border: `0.5px solid ${m.verified ? colors.success : colors.border}`,
-                            color: m.verified ? colors.success : colors.textDim,
-                            padding: '4px 8px',
-                            fontSize: 9,
-                            letterSpacing: '0.2em',
-                            cursor: 'pointer',
-                            fontFamily: fonts.mono,
-                          }}
-                        >
-                          {m.verified ? '✓' : 'DYNO?'}
-                        </button>
-                        <button
-                          onClick={() => handleDelete(m.id)}
-                          disabled={busy === m.id}
-                          style={{
-                            background: 'transparent',
-                            border: `0.5px solid ${colors.border}`,
-                            color: colors.accent,
-                            padding: '4px 10px',
-                            fontSize: 11,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          ×
-                        </button>
+                      <div>
+                        <div style={{ fontSize: 13, color: colors.text, fontWeight: 600 }}>
+                          {name}
+                          {m.verified && (
+                            <span
+                              className="ug-mono"
+                              style={{
+                                fontSize: 8,
+                                letterSpacing: '0.2em',
+                                color: colors.success,
+                                border: `1px solid ${colors.success}`,
+                                borderRadius: 4,
+                                padding: '2px 5px',
+                                marginLeft: 8,
+                              }}
+                            >
+                              DYNO ✓
+                            </span>
+                          )}
+                        </div>
+                        {m.notes && (
+                          <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 3 }}>{m.notes}</div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+                      <div
+                        className="ug-list-meta"
+                        style={{
+                          display: 'flex',
+                          gap: 8,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {(m.hpGain ?? 0) !== 0 && <span>{(m.hpGain ?? 0) > 0 ? '+' : ''}{m.hpGain}hp</span>}
+                        {(m.torqueGain ?? 0) !== 0 && <span>{(m.torqueGain ?? 0) > 0 ? '+' : ''}{m.torqueGain}lb-ft</span>}
+                        {(m.weightChange ?? 0) !== 0 && <span>{(m.weightChange ?? 0) > 0 ? '+' : ''}{m.weightChange}lb</span>}
+                      </div>
+                      {!readOnly && (
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <button
+                            onClick={() => handleToggleVerified(m)}
+                            disabled={busy === m.id}
+                            title={m.verified ? 'Unmark as dyno-verified' : 'Mark as dyno-verified'}
+                            className="ug-mono"
+                            style={{
+                              background: 'transparent',
+                              border: `1px solid ${m.verified ? colors.success : colors.border}`,
+                              borderRadius: 6,
+                              color: m.verified ? colors.success : colors.textDim,
+                              padding: '4px 8px',
+                              fontSize: 9,
+                              letterSpacing: '0.2em',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {m.verified ? '✓' : 'DYNO?'}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(m.id)}
+                            disabled={busy === m.id}
+                            style={{
+                              background: 'transparent',
+                              border: `1px solid ${colors.border}`,
+                              borderRadius: 6,
+                              color: colors.accent,
+                              padding: '4px 10px',
+                              fontSize: 11,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           ))}
         </div>
@@ -305,43 +311,33 @@ function AddModModal({
 
   return (
     <div
+      className="ug-modal-backdrop"
       onClick={(e) => e.target === e.currentTarget && onClose()}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.85)',
-        zIndex: 100,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 20,
-      }}
     >
-      <div
-        style={{
-          background: colors.bg,
-          border: `0.5px solid ${colors.border}`,
-          padding: 32,
-          maxWidth: 720,
-          width: '100%',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-        }}
-      >
-        <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
-          ADD MODIFICATION
+      <div className="ug-modal" style={{ maxWidth: 720 }}>
+        <div
+          className="ug-mono"
+          style={{
+            fontSize: 10,
+            letterSpacing: '0.4em',
+            color: colors.accent,
+            marginBottom: 8,
+          }}
+        >
+          // ADD MODIFICATION
         </div>
 
         <div style={{ display: 'flex', gap: 4, marginBottom: 24 }}>
           <button
             onClick={() => setTab('preset')}
+            className="ug-mono"
             style={{
               flex: 1,
               padding: '10px',
               background: tab === 'preset' ? colors.accentSoft : 'transparent',
-              border: `0.5px solid ${tab === 'preset' ? colors.accentBorder : colors.border}`,
+              border: `1px solid ${tab === 'preset' ? colors.accentBorder : colors.border}`,
+              borderRadius: 8,
               color: tab === 'preset' ? colors.accent : colors.textMuted,
-              fontFamily: fonts.mono,
               fontSize: 10,
               letterSpacing: '0.2em',
               cursor: 'pointer',
@@ -352,13 +348,14 @@ function AddModModal({
           </button>
           <button
             onClick={() => setTab('custom')}
+            className="ug-mono"
             style={{
               flex: 1,
               padding: '10px',
               background: tab === 'custom' ? colors.accentSoft : 'transparent',
-              border: `0.5px solid ${tab === 'custom' ? colors.accentBorder : colors.border}`,
+              border: `1px solid ${tab === 'custom' ? colors.accentBorder : colors.border}`,
+              borderRadius: 8,
               color: tab === 'custom' ? colors.accent : colors.textMuted,
-              fontFamily: fonts.mono,
               fontSize: 10,
               letterSpacing: '0.2em',
               cursor: 'pointer',
@@ -373,68 +370,68 @@ function AddModModal({
           <>
             {!chosenPreset ? (
               <>
+                <label className="ug-label" htmlFor="presetSearch">Search</label>
                 <input
+                  id="presetSearch"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search mods…"
-                  style={{ ...styles.input, marginBottom: 16 }}
+                  className="ug-input"
+                  style={{ marginBottom: 16 }}
                 />
-                <div style={{ display: 'grid', gap: 4, maxHeight: 400, overflowY: 'auto' }}>
+                <div style={{ display: 'grid', gap: 8, maxHeight: 400, overflowY: 'auto' }}>
                   {[...grouped.entries()].map(([cat, items]) => (
-                    <div key={cat} style={{ marginBottom: 8 }}>
+                    <div key={cat}>
                       <div
+                        className="ug-mono"
                         style={{
                           fontSize: 10,
                           letterSpacing: '0.3em',
                           color: colors.textDim,
                           padding: '6px 0',
-                          borderBottom: `0.5px solid ${colors.borderStrong}`,
+                          borderBottom: `1px solid ${colors.borderStrong}`,
                           marginBottom: 4,
                         }}
                       >
                         {cat.toUpperCase()}
                       </div>
-                      {items.map((p) => (
-                        <button
-                          key={p.id}
-                          onClick={() => setChosenPreset(p)}
-                          style={{
-                            display: 'block',
-                            width: '100%',
-                            padding: '10px 12px',
-                            background: 'transparent',
-                            border: `0.5px solid ${colors.border}`,
-                            color: colors.text,
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                            fontFamily: fonts.mono,
-                            marginBottom: 4,
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                            <span style={{ fontSize: 13, fontWeight: 700 }}>{p.name}</span>
-                            <span style={{ fontSize: 10, color: colors.textMuted }}>
-                              {(p.defaultHpGain ?? 0) !== 0 && `+${p.defaultHpGain}hp`}
-                              {(p.defaultTorqueGain ?? 0) !== 0 && ` +${p.defaultTorqueGain}lb-ft`}
-                              {(p.defaultWeightChange ?? 0) !== 0 && ` ${(p.defaultWeightChange ?? 0) > 0 ? '+' : ''}${p.defaultWeightChange}lb`}
-                            </span>
-                          </div>
-                          {p.description && (
-                            <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 3 }}>
-                              {p.description}
-                            </div>
-                          )}
-                        </button>
-                      ))}
+                      <ul className="ug-list">
+                        {items.map((p) => (
+                          <li key={p.id}>
+                            <button
+                              onClick={() => setChosenPreset(p)}
+                              className="ug-list-row"
+                              style={{ display: 'block', textAlign: 'left' }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                <span style={{ fontSize: 13, fontWeight: 700 }}>{p.name}</span>
+                                <span className="ug-list-meta">
+                                  {(p.defaultHpGain ?? 0) !== 0 && `+${p.defaultHpGain}hp`}
+                                  {(p.defaultTorqueGain ?? 0) !== 0 && ` +${p.defaultTorqueGain}lb-ft`}
+                                  {(p.defaultWeightChange ?? 0) !== 0 && ` ${(p.defaultWeightChange ?? 0) > 0 ? '+' : ''}${p.defaultWeightChange}lb`}
+                                </span>
+                              </div>
+                              {p.description && (
+                                <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 3 }}>
+                                  {p.description}
+                                </div>
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   ))}
                 </div>
               </>
             ) : (
               <>
-                <div style={{ ...styles.panel, marginBottom: 16 }}>
-                  <div style={{ fontSize: 11, letterSpacing: '0.3em', color: colors.textMuted, marginBottom: 4 }}>
-                    SELECTED
+                <div className="ug-card" style={{ padding: 16, marginBottom: 16 }}>
+                  <div
+                    className="ug-mono"
+                    style={{ fontSize: 11, letterSpacing: '0.3em', color: colors.textMuted, marginBottom: 4 }}
+                  >
+                    // SELECTED
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{chosenPreset.name}</div>
                   <div style={{ fontSize: 11, color: colors.textMuted }}>
@@ -444,44 +441,48 @@ function AddModModal({
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
                   <div>
-                    <label style={styles.label}>HP gain (override)</label>
+                    <label className="ug-label" htmlFor="hpOverride">HP gain (override)</label>
                     <input
+                      id="hpOverride"
                       type="number"
                       value={hpOverride}
                       onChange={(e) => setHpOverride(e.target.value)}
                       placeholder={`${chosenPreset.defaultHpGain ?? 0}`}
-                      style={styles.input}
+                      className="ug-input"
                     />
                   </div>
                   <div>
-                    <label style={styles.label}>Torque (override)</label>
+                    <label className="ug-label" htmlFor="torqueOverride">Torque (override)</label>
                     <input
+                      id="torqueOverride"
                       type="number"
                       value={torqueOverride}
                       onChange={(e) => setTorqueOverride(e.target.value)}
                       placeholder={`${chosenPreset.defaultTorqueGain ?? 0}`}
-                      style={styles.input}
+                      className="ug-input"
                     />
                   </div>
                   <div>
-                    <label style={styles.label}>Weight (override)</label>
+                    <label className="ug-label" htmlFor="weightOverride">Weight (override)</label>
                     <input
+                      id="weightOverride"
                       type="number"
                       value={weightOverride}
                       onChange={(e) => setWeightOverride(e.target.value)}
                       placeholder={`${chosenPreset.defaultWeightChange ?? 0}`}
-                      style={styles.input}
+                      className="ug-input"
                     />
                   </div>
                 </div>
 
                 <div style={{ marginBottom: 16 }}>
-                  <label style={styles.label}>Notes (optional)</label>
+                  <label className="ug-label" htmlFor="presetNotes">Notes (optional)</label>
                   <input
+                    id="presetNotes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Shop name, tune number, dyno result, etc."
-                    style={styles.input}
+                    className="ug-input"
                   />
                 </div>
 
@@ -494,6 +495,7 @@ function AddModModal({
                     color: colors.textMuted,
                     marginBottom: 16,
                     cursor: 'pointer',
+                    fontFamily: fonts.sans,
                   }}
                 >
                   <input
@@ -505,13 +507,13 @@ function AddModModal({
                 </label>
 
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => setChosenPreset(null)} style={styles.buttonGhost}>
-                    ← BACK TO LIST
+                  <button onClick={() => setChosenPreset(null)} className="ug-btn ug-btn-ghost">
+                    ← BACK
                   </button>
                   <button
                     onClick={submitPreset}
                     disabled={submitting}
-                    style={{ ...styles.buttonPrimary, opacity: submitting ? 0.5 : 1 }}
+                    className="ug-btn ug-btn-primary"
                   >
                     {submitting ? 'ADDING…' : 'ADD MOD'}
                   </button>
@@ -524,21 +526,23 @@ function AddModModal({
         {tab === 'custom' && (
           <>
             <div style={{ marginBottom: 12 }}>
-              <label style={styles.label}>Mod name *</label>
+              <label className="ug-label" htmlFor="customName">Mod name *</label>
               <input
+                id="customName"
                 value={custom.customName}
                 onChange={(e) => setCustom({ ...custom, customName: e.target.value })}
                 placeholder="e.g. Garrett G35-900 turbo + custom manifold"
-                style={styles.input}
+                className="ug-input"
               />
             </div>
 
             <div style={{ marginBottom: 12 }}>
-              <label style={styles.label}>Category</label>
+              <label className="ug-label" htmlFor="customCategory">Category</label>
               <select
+                id="customCategory"
                 value={custom.category}
                 onChange={(e) => setCustom({ ...custom, category: e.target.value as any })}
-                style={styles.input}
+                className="ug-input"
               >
                 {['Tune', 'Turbo', 'Intake', 'Exhaust', 'Downpipes', 'Headers', 'Fuel',
                   'Intercooler', 'Transmission', 'Tires', 'Suspension', 'Brakes',
@@ -552,42 +556,45 @@ function AddModModal({
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
               <div>
-                <label style={styles.label}>HP gain</label>
+                <label className="ug-label" htmlFor="customHp">HP gain</label>
                 <input
+                  id="customHp"
                   type="number"
                   value={custom.hpGain}
                   onChange={(e) => setCustom({ ...custom, hpGain: Number(e.target.value) || 0 })}
-                  style={styles.input}
+                  className="ug-input"
                 />
               </div>
               <div>
-                <label style={styles.label}>Torque gain</label>
+                <label className="ug-label" htmlFor="customTq">Torque gain</label>
                 <input
+                  id="customTq"
                   type="number"
                   value={custom.torqueGain}
                   onChange={(e) => setCustom({ ...custom, torqueGain: Number(e.target.value) || 0 })}
-                  style={styles.input}
+                  className="ug-input"
                 />
               </div>
               <div>
-                <label style={styles.label}>Weight change</label>
+                <label className="ug-label" htmlFor="customWeight">Weight change</label>
                 <input
+                  id="customWeight"
                   type="number"
                   value={custom.weightChange}
                   onChange={(e) => setCustom({ ...custom, weightChange: Number(e.target.value) || 0 })}
-                  style={styles.input}
+                  className="ug-input"
                 />
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={onClose} style={styles.buttonGhost}>
+              <button onClick={onClose} className="ug-btn ug-btn-ghost">
                 CANCEL
               </button>
               <button
                 onClick={submitCustom}
                 disabled={submitting}
-                style={{ ...styles.buttonPrimary, opacity: submitting ? 0.5 : 1 }}
+                className="ug-btn ug-btn-primary"
               >
                 {submitting ? 'ADDING…' : 'ADD CUSTOM MOD'}
               </button>
@@ -596,7 +603,7 @@ function AddModModal({
         )}
 
         {error && (
-          <div style={{ padding: '10px 14px', border: `0.5px solid ${colors.accent}`, color: colors.accent, fontSize: 12, marginTop: 16 }}>
+          <div className="ug-banner ug-banner-error" style={{ marginTop: 16 }}>
             {error}
           </div>
         )}

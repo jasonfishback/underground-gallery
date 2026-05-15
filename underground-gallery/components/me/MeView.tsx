@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import AddCarWizard from '@/components/garage/AddCarWizard';
-import { styles, colors, fonts } from '@/lib/design';
+import { colors, fonts } from '@/lib/design';
 
 type Car = {
   id: string;
@@ -39,9 +39,26 @@ export function MeView({ cars, modCounts, modGains }: Props) {
   return (
     <div>
       {/* Action bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, fontFamily: fonts.mono, fontWeight: 700 }}>
-          {cars.length} {cars.length === 1 ? 'VEHICLE' : 'VEHICLES'}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 24,
+          gap: 12,
+          flexWrap: 'wrap',
+        }}
+      >
+        <div
+          className="ug-mono"
+          style={{
+            fontSize: 11,
+            letterSpacing: '0.4em',
+            color: colors.accent,
+            fontWeight: 700,
+          }}
+        >
+          // {cars.length} {cars.length === 1 ? 'VEHICLE' : 'VEHICLES'}
         </div>
         <button
           onClick={() => setWizardOpen(true)}
@@ -53,14 +70,17 @@ export function MeView({ cars, modCounts, modGains }: Props) {
 
       {/* Car list */}
       {cars.length === 0 ? (
-        <div className="ug-card" style={{
-          padding: 48,
-          textAlign: 'center',
-          color: colors.textMuted,
-          fontFamily: fonts.mono,
-          fontSize: 12,
-          letterSpacing: '0.18em',
-        }}>
+        <div
+          className="ug-card"
+          style={{
+            padding: 48,
+            textAlign: 'center',
+            color: colors.textMuted,
+            fontFamily: fonts.mono,
+            fontSize: 12,
+            letterSpacing: '0.18em',
+          }}
+        >
           NO VEHICLES YET. ADD ONE TO START RACING.
         </div>
       ) : (
@@ -82,34 +102,58 @@ export function MeView({ cars, modCounts, modGains }: Props) {
                   color: colors.text,
                 }}
               >
-                <div style={{
-                  width: 88,
-                  height: 88,
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 10,
-                  flexShrink: 0,
-                  backgroundImage: c.thumbUrl ? `url(${c.thumbUrl})` : undefined,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                }} />
+                <div
+                  style={{
+                    width: 88,
+                    height: 88,
+                    background: 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: 10,
+                    flexShrink: 0,
+                    backgroundImage: c.thumbUrl ? `url(${c.thumbUrl})` : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                  }}
+                />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: fonts.mono, fontSize: 13, fontWeight: 700, letterSpacing: '0.05em', marginBottom: 4 }}>
+                  <div
+                    className="ug-mono"
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
+                      marginBottom: 4,
+                    }}
+                  >
                     {label.toUpperCase()}
                   </div>
-                  <div style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted, letterSpacing: '0.15em' }}>
-                    {c.stockHp ? `${c.stockHp + (modGains?.[c.id]?.hp ?? 0)} HP` : ''}{(c.stockTorque ?? 0) + (modGains?.[c.id]?.tq ?? 0) > 0 ? ` • ${(c.stockTorque ?? 0) + (modGains?.[c.id]?.tq ?? 0)} TQ` : ''}{c.drivetrain ? ` • ${c.drivetrain}` : ''}{modCount > 0 ? ` • ${modCount} MOD${modCount === 1 ? '' : 'S'}` : ''}
+                  <div
+                    className="ug-mono"
+                    style={{
+                      fontSize: 10,
+                      color: colors.textMuted,
+                      letterSpacing: '0.15em',
+                    }}
+                  >
+                    {c.stockHp ? `${c.stockHp + (modGains?.[c.id]?.hp ?? 0)} HP` : ''}
+                    {(c.stockTorque ?? 0) + (modGains?.[c.id]?.tq ?? 0) > 0
+                      ? ` • ${(c.stockTorque ?? 0) + (modGains?.[c.id]?.tq ?? 0)} TQ`
+                      : ''}
+                    {c.drivetrain ? ` • ${c.drivetrain}` : ''}
+                    {modCount > 0 ? ` • ${modCount} MOD${modCount === 1 ? '' : 'S'}` : ''}
                   </div>
                 </div>
                 {c.isPrimary && (
-                  <div style={{
-                    fontSize: 9,
-                    letterSpacing: '0.25em',
-                    color: colors.accent,
-                    fontFamily: fonts.mono,
-                    fontWeight: 700,
-                  }}>
+                  <div
+                    className="ug-mono"
+                    style={{
+                      fontSize: 9,
+                      letterSpacing: '0.25em',
+                      color: colors.accent,
+                      fontWeight: 700,
+                    }}
+                  >
                     ★ PRIMARY
                   </div>
                 )}

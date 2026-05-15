@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { colors, fonts } from '@/lib/design';
 
 type Photo = {
   id: string;
@@ -32,10 +33,10 @@ export function ListingGallery({ photos, fallback }: { photos: Photo[]; fallback
         style={{
           aspectRatio: '16 / 10',
           background: fallback
-            ? `#0a0c12 url(${fallback}) center / cover no-repeat`
+            ? `${colors.bgElevated} url(${fallback}) center / cover no-repeat`
             : 'linear-gradient(135deg, #1a1d28, #0f1119)',
           borderRadius: 16,
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: `1px solid ${colors.border}`,
         }}
       />
     );
@@ -51,9 +52,9 @@ export function ListingGallery({ photos, fallback }: { photos: Photo[]; fallback
         style={{
           position: 'relative',
           aspectRatio: '16 / 10',
-          background: `#0a0c12 url(${current.urlFull}) center / cover no-repeat`,
+          background: `${colors.bgElevated} url(${current.urlFull}) center / cover no-repeat`,
           borderRadius: 16,
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: `1px solid ${colors.border}`,
           overflow: 'hidden',
         }}
       >
@@ -103,11 +104,11 @@ export function ListingGallery({ photos, fallback }: { photos: Photo[]; fallback
                 flex: '0 0 auto',
                 width: 110,
                 height: 70,
-                background: `#0a0c12 url(${p.urlThumb}) center / cover no-repeat`,
+                background: `${colors.bgElevated} url(${p.urlThumb}) center / cover no-repeat`,
                 border:
                   i === active
-                    ? '2px solid #ff3030'
-                    : '1px solid rgba(255,255,255,0.12)',
+                    ? `2px solid ${colors.accent}`
+                    : `1px solid ${colors.border}`,
                 borderRadius: 8,
                 cursor: 'pointer',
                 padding: 0,
@@ -134,6 +135,7 @@ function navBtnStyle(side: 'left' | 'right'): React.CSSProperties {
     border: 'none',
     background: 'rgba(0,0,0,0.55)',
     backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
     color: '#fff',
     fontSize: 26,
     lineHeight: 1,
@@ -151,9 +153,10 @@ const counterStyle: React.CSSProperties = {
   right: 14,
   background: 'rgba(0,0,0,0.6)',
   backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
   color: '#fff',
   fontSize: 11,
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+  fontFamily: fonts.mono,
   letterSpacing: '0.18em',
   padding: '6px 10px',
   borderRadius: 999,

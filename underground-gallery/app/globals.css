@@ -533,3 +533,147 @@ header nav::-webkit-scrollbar {
     text-align: left !important;
   }
 }
+
+/* ──────────────────────────────────────────────────────────
+   Boot-up intro overlay (ported from public/landing.html).
+   Cinematic flicker reveal, ~4.5s total. Plays once per session.
+   Tap anywhere to skip. Honors prefers-reduced-motion.
+   ────────────────────────────────────────────────────────── */
+@keyframes ugBootEnvelope {
+    0%   { opacity: 0; }
+    6%   { opacity: 1; }
+   90%   { opacity: 1; }
+  100%   { opacity: 0; }
+}
+@keyframes ugBootLogo {
+    0%   { opacity: 0;    }
+    4%   { opacity: 0.85; }
+    6%   { opacity: 0.1;  }
+    9%   { opacity: 0.95; }
+   11%   { opacity: 0.2;  }
+   14%   { opacity: 1;    }
+   17%   { opacity: 0.7;  }
+   20%   { opacity: 1;    }
+   45%   { opacity: 1;    }
+   46%   { opacity: 0.4;  }
+   47%   { opacity: 1;    }
+   65%   { opacity: 1;    }
+   66%   { opacity: 0.2;  }
+   68%   { opacity: 1;    }
+   80%   { opacity: 0.3;  }
+   82%   { opacity: 0.95; }
+   85%   { opacity: 0.1;  }
+   88%   { opacity: 0.7;  }
+   91%   { opacity: 0;    }
+   94%   { opacity: 0.5;  }
+  100%   { opacity: 0;    }
+}
+@keyframes ugBootWordmark {
+    0%   { opacity: 0;    }
+   12%   { opacity: 0;    }
+   15%   { opacity: 0.6;  }
+   17%   { opacity: 0.1;  }
+   21%   { opacity: 0.9;  }
+   24%   { opacity: 0.3;  }
+   27%   { opacity: 1;    }
+   38%   { opacity: 1;    }
+   39%   { opacity: 0;    }
+   41%   { opacity: 1;    }
+   58%   { opacity: 1;    }
+   60%   { opacity: 0.2;  }
+   61%   { opacity: 1;    }
+   74%   { opacity: 1;    }
+   76%   { opacity: 0.1;  }
+   78%   { opacity: 0.6;  }
+   81%   { opacity: 0;    }
+   85%   { opacity: 0.3;  }
+   88%   { opacity: 0;    }
+  100%   { opacity: 0;    }
+}
+@keyframes ugBootStatus {
+    0%   { opacity: 0;    }
+   22%   { opacity: 0;    }
+   26%   { opacity: 1;    }
+   28%   { opacity: 0;    }
+   31%   { opacity: 0.8;  }
+   33%   { opacity: 0.2;  }
+   36%   { opacity: 1;    }
+   50%   { opacity: 1;    }
+   51%   { opacity: 0;    }
+   52%   { opacity: 1;    }
+   70%   { opacity: 1;    }
+   72%   { opacity: 0.3;  }
+   74%   { opacity: 0;    }
+   76%   { opacity: 0.5;  }
+   78%   { opacity: 0;    }
+  100%   { opacity: 0;    }
+}
+@keyframes ugBootGlitch {
+    0%   { opacity: 0; transform: translateY(-100%); }
+    8%   { opacity: 0.6; transform: translateY(20vh); }
+   16%   { opacity: 0; transform: translateY(60vh); }
+   74%   { opacity: 0; transform: translateY(60vh); }
+   78%   { opacity: 0.7; transform: translateY(30vh); }
+   86%   { opacity: 0.3; transform: translateY(80vh); }
+   92%   { opacity: 0.8; transform: translateY(50vh); }
+  100%   { opacity: 0; transform: translateY(110vh); }
+}
+@keyframes ugBootLogoPulse {
+    0%   { transform: scale(0.94); }
+   20%   { transform: scale(1.01); }
+   50%   { transform: scale(1);    }
+   85%   { transform: scale(0.99); }
+  100%   { transform: scale(0.97); }
+}
+
+#ug-boot {
+  position: fixed; inset: 0; z-index: 100;
+  background: #000;
+  display: flex; align-items: center; justify-content: center;
+  animation: ugBootEnvelope 4.5s ease-in-out forwards;
+  cursor: pointer;
+  overflow: hidden;
+}
+#ug-boot .ug-boot-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 28px;
+  text-align: center;
+  position: relative; z-index: 2;
+}
+#ug-boot .ug-boot-logo {
+  animation:
+    ugBootLogo 4.5s steps(45, end) forwards,
+    ugBootLogoPulse 4.5s ease-in-out forwards;
+  filter: drop-shadow(0 0 16px rgba(255, 42, 42, 0.5));
+  will-change: opacity, transform;
+}
+#ug-boot .ug-boot-wordmark {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 700;
+  font-size: clamp(14px, 3.2vw, 20px);
+  letter-spacing: 0.22em;
+  color: #f5f6f7;
+  animation: ugBootWordmark 4.5s steps(40, end) forwards;
+  will-change: opacity;
+}
+#ug-boot .ug-boot-line {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px; letter-spacing: 0.4em; font-weight: 700;
+  color: #ff2a2a;
+  text-transform: uppercase;
+  animation: ugBootStatus 4.5s steps(40, end) forwards;
+  will-change: opacity;
+}
+#ug-boot .ug-boot-glitch {
+  position: absolute; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,42,42,0.8), rgba(255,255,255,0.6), rgba(255,42,42,0.8), transparent);
+  box-shadow: 0 0 24px rgba(255,42,42,0.6);
+  animation: ugBootGlitch 4.5s steps(50, end) forwards;
+  pointer-events: none;
+  z-index: 1;
+  will-change: opacity, transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  #ug-boot { display: none !important; animation: none !important; }
+}

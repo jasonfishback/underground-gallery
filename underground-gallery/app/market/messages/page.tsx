@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { getAuthContext } from '@/lib/auth/gates';
 import { getThreadsForUser } from '@/lib/market/queries';
+import { colors, fonts } from '@/lib/design';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Messages' };
@@ -22,35 +23,33 @@ export default async function MarketMessagesPage() {
         padding: '32px 24px 64px',
         maxWidth: 880,
         margin: '0 auto',
-        color: '#fff',
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: colors.text,
+        fontFamily: fonts.sans,
       }}
     >
       <div
         style={{
           fontSize: 11,
           letterSpacing: '0.4em',
-          color: '#ff3030',
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          color: colors.accent,
+          fontFamily: fonts.mono,
           fontWeight: 700,
         }}
       >
-        UNDERGROUND · MESSAGES
+        ∕∕ UNDERGROUND · MESSAGES
       </div>
       <h1 style={{ fontSize: 28, margin: '4px 0 22px' }}>Conversations</h1>
 
       {threads.length === 0 ? (
         <div
+          className="ug-card"
           style={{
             padding: '40px 20px',
             textAlign: 'center',
-            color: 'rgba(245,246,247,0.55)',
-            background: 'rgba(20,22,30,0.4)',
-            border: '1px dashed rgba(255,255,255,0.12)',
-            borderRadius: 12,
+            color: colors.textMuted,
           }}
         >
-          No conversations yet. <Link href="/market" style={{ color: '#ff5252' }}>Browse the market →</Link>
+          No conversations yet. <Link href="/market" style={{ color: colors.accent }}>Browse the market →</Link>
         </div>
       ) : (
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -60,19 +59,17 @@ export default async function MarketMessagesPage() {
               <li key={slug}>
                 <Link
                   href={`/market/messages/${slug}`}
+                  className="ug-card"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: 14,
                     padding: 14,
-                    background:
-                      t.unreadCount > 0
-                        ? 'rgba(255,42,42,0.08)'
-                        : 'rgba(20,22,30,0.5)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 12,
                     textDecoration: 'none',
                     color: 'inherit',
+                    background:
+                      t.unreadCount > 0 ? colors.accentSoft : undefined,
+                    borderColor: t.unreadCount > 0 ? colors.accentBorder : undefined,
                   }}
                 >
                   <div
@@ -81,25 +78,25 @@ export default async function MarketMessagesPage() {
                       height: 56,
                       flexShrink: 0,
                       background: t.listingPhotoUrl
-                        ? `#0a0c12 url(${t.listingPhotoUrl}) center/cover`
+                        ? `${colors.bgElevated} url(${t.listingPhotoUrl}) center/cover`
                         : 'linear-gradient(135deg, #1a1d28, #0f1119)',
                       borderRadius: 8,
                     }}
                   />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                      <strong style={{ color: '#fff', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <strong style={{ color: colors.text, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {t.listingTitle}
                       </strong>
                       {t.unreadCount > 0 && (
                         <span
                           style={{
-                            background: '#ff3030',
+                            background: colors.accent,
                             color: '#fff',
                             padding: '2px 8px',
                             fontSize: 11,
                             borderRadius: 999,
-                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontFamily: fonts.mono,
                             fontWeight: 700,
                           }}
                         >
@@ -107,14 +104,14 @@ export default async function MarketMessagesPage() {
                         </span>
                       )}
                     </div>
-                    <div style={{ fontSize: 12, color: 'rgba(245,246,247,0.55)', marginTop: 2 }}>
+                    <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>
                       {t.isSeller ? 'From' : 'To'} {t.otherCallsign ?? 'Member'} ·{' '}
                       {new Date(t.lastMessageAt).toLocaleDateString()}
                     </div>
                     <div
                       style={{
                         fontSize: 13,
-                        color: 'rgba(245,246,247,0.75)',
+                        color: colors.text,
                         marginTop: 4,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',

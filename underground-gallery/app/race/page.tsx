@@ -72,8 +72,8 @@ export default async function RacePage() {
     <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px' }}>
         <header style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
-            VIRTUAL RACE
+          <div className="ug-mono" style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
+            ∕∕ VIRTUAL RACE
           </div>
           <h1 style={{ fontSize: 32, margin: 0, letterSpacing: '0.05em' }}>Pick your fight.</h1>
           <p style={{ fontSize: 14, color: colors.textMuted, marginTop: 8, maxWidth: 600 }}>
@@ -89,14 +89,14 @@ export default async function RacePage() {
         <div style={{ marginTop: 64, textAlign: 'center' }}>
           <a
             href="/race/history"
+            className="ug-mono"
             style={{
               fontSize: 11,
               letterSpacing: '0.3em',
               color: colors.textMuted,
               textDecoration: 'none',
-              borderBottom: `0.5px solid ${colors.border}`,
+              borderBottom: `1px solid ${colors.border}`,
               paddingBottom: 4,
-              fontFamily: fonts.mono,
             }}
           >
             VIEW RACE HISTORY →

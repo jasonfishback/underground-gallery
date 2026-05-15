@@ -12,6 +12,7 @@ import {
   PART_CATEGORIES,
 } from '@/lib/db/schema';
 import { CONDITION_LABELS } from '@/lib/market/types';
+import { fonts } from '@/lib/design';
 
 type Props = {
   type?: 'car' | 'part' | undefined;
@@ -45,7 +46,7 @@ export function MarketFilters({ type }: Props) {
       {/* Mobile toggle */}
       <button
         type="button"
-        className="ug-btn"
+        className="ug-btn ug-btn-ghost"
         onClick={() => setOpen(!open)}
         style={{
           display: 'inline-block',
@@ -56,15 +57,13 @@ export function MarketFilters({ type }: Props) {
       </button>
 
       <aside
+        className="ug-glass"
         style={{
           display: open ? 'flex' : 'none',
           flexDirection: 'column',
           gap: 18,
           padding: 18,
-          background: 'rgba(20,22,30,0.5)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 12,
-          fontFamily: "'Inter Tight', system-ui, sans-serif",
+          fontFamily: fonts.sans,
           opacity: isPending ? 0.6 : 1,
           transition: 'opacity 0.15s',
         }}
@@ -73,7 +72,7 @@ export function MarketFilters({ type }: Props) {
           <select
             value={get('sort') || 'newest'}
             onChange={(e) => update({ sort: e.target.value })}
-            style={inputStyle}
+            className="ug-input"
           >
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
@@ -86,7 +85,7 @@ export function MarketFilters({ type }: Props) {
           <select
             value={get('condition')}
             onChange={(e) => update({ condition: e.target.value })}
-            style={inputStyle}
+            className="ug-input"
           >
             <option value="">Any condition</option>
             {LISTING_CONDITIONS.map((c) => (
@@ -105,7 +104,7 @@ export function MarketFilters({ type }: Props) {
               placeholder="min"
               defaultValue={get('priceMin')}
               onBlur={(e) => update({ priceMin: e.target.value })}
-              style={inputStyle}
+              className="ug-input"
             />
             <input
               type="number"
@@ -113,7 +112,7 @@ export function MarketFilters({ type }: Props) {
               placeholder="max"
               defaultValue={get('priceMax')}
               onBlur={(e) => update({ priceMax: e.target.value })}
-              style={inputStyle}
+              className="ug-input"
             />
           </div>
         </FilterRow>
@@ -125,7 +124,7 @@ export function MarketFilters({ type }: Props) {
                 placeholder="e.g. Nissan"
                 defaultValue={get('make')}
                 onBlur={(e) => update({ make: e.target.value })}
-                style={inputStyle}
+                className="ug-input"
               />
             </FilterRow>
             <FilterRow label="Model">
@@ -133,7 +132,7 @@ export function MarketFilters({ type }: Props) {
                 placeholder="e.g. Skyline"
                 defaultValue={get('model')}
                 onBlur={(e) => update({ model: e.target.value })}
-                style={inputStyle}
+                className="ug-input"
               />
             </FilterRow>
             <FilterRow label="Year range">
@@ -144,7 +143,7 @@ export function MarketFilters({ type }: Props) {
                   placeholder="from"
                   defaultValue={get('yearMin')}
                   onBlur={(e) => update({ yearMin: e.target.value })}
-                  style={inputStyle}
+                  className="ug-input"
                 />
                 <input
                   type="number"
@@ -152,7 +151,7 @@ export function MarketFilters({ type }: Props) {
                   placeholder="to"
                   defaultValue={get('yearMax')}
                   onBlur={(e) => update({ yearMax: e.target.value })}
-                  style={inputStyle}
+                  className="ug-input"
                 />
               </div>
             </FilterRow>
@@ -164,7 +163,7 @@ export function MarketFilters({ type }: Props) {
             <select
               value={get('category')}
               onChange={(e) => update({ category: e.target.value })}
-              style={inputStyle}
+              className="ug-input"
             >
               <option value="">All categories</option>
               {PART_CATEGORIES.map((c) => (
@@ -179,7 +178,7 @@ export function MarketFilters({ type }: Props) {
         <button
           type="button"
           onClick={clear}
-          className="ug-btn"
+          className="ug-btn ug-btn-ghost"
           style={{ alignSelf: 'flex-start' }}
         >
           Clear all
@@ -198,29 +197,8 @@ function FilterRow({
 }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span
-        style={{
-          fontSize: 10,
-          letterSpacing: '0.22em',
-          color: 'rgba(245,246,247,0.55)',
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontWeight: 700,
-        }}
-      >
-        {label.toUpperCase()}
-      </span>
+      <span className="ug-label">{label}</span>
       {children}
     </label>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  background: '#0a0c12',
-  border: '1px solid rgba(255,255,255,0.12)',
-  color: '#fff',
-  borderRadius: 8,
-  padding: '8px 12px',
-  fontSize: 14,
-  fontFamily: "'Inter Tight', system-ui, sans-serif",
-  width: '100%',
-};

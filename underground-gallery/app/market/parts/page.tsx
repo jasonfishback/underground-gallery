@@ -5,6 +5,7 @@ import { browseListings } from '@/lib/market/queries';
 import { MarketSearchBar } from '@/components/market/MarketSearchBar';
 import { MarketFilters } from '@/components/market/MarketFilters';
 import { MarketGrid } from '@/components/market/MarketGrid';
+import { colors, fonts } from '@/lib/design';
 
 export const metadata: Metadata = { title: 'Parts for sale' };
 export const dynamic = 'force-dynamic';
@@ -47,8 +48,8 @@ export default async function PartsPage({
         padding: '40px 24px 80px',
         maxWidth: 1320,
         margin: '0 auto',
-        color: '#fff',
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: colors.text,
+        fontFamily: fonts.sans,
       }}
     >
       <header style={{ marginBottom: 32, maxWidth: 760 }}>
@@ -56,13 +57,13 @@ export default async function PartsPage({
           style={{
             fontSize: 11,
             letterSpacing: '0.4em',
-            color: '#ff3030',
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            color: colors.accent,
+            fontFamily: fonts.mono,
             fontWeight: 700,
             marginBottom: 12,
           }}
         >
-          UNDERGROUND · PARTS
+          ∕∕ UNDERGROUND · PARTS
         </div>
         <h1
           style={{
@@ -75,7 +76,7 @@ export default async function PartsPage({
         >
           Parts for sale
         </h1>
-        <p style={{ fontSize: 17, color: 'rgba(245,246,247,0.65)', margin: 0, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 17, color: colors.textMuted, margin: 0, lineHeight: 1.5 }}>
           {total.toLocaleString()} part{total === 1 ? '' : 's'} from members — ready to bolt on, no platform fees.
         </p>
       </header>

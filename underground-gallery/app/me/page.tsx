@@ -81,48 +81,91 @@ export default async function MePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
-      <Link
-        href="/invites"
-        style={{
-          display: 'block',
-          background: '#ff2a2a',
-          color: '#0a0a0a',
-          padding: '14px 20px',
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 12,
-          fontWeight: 700,
-          letterSpacing: '0.3em',
-          textDecoration: 'none',
-          textAlign: 'center',
-          margin: '0 0 16px',
-        }}
-      >
-        + INVITE A FRIEND →
-      </Link>
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px 48px' }}>
+        <Link
+          href="/invites"
+          className="ug-glass-tinted"
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            height: 52,
+            padding: '0 22px',
+            marginBottom: 32,
+            fontFamily: fonts.mono,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.32em',
+            color: '#f5f6f7',
+            textDecoration: 'none',
+            textTransform: 'uppercase',
+            overflow: 'hidden',
+          }}
+        >
+          <span style={{ position: 'relative', zIndex: 2 }}>+ Invite a friend →</span>
+          <span className="ug-shimmer" />
+        </Link>
+
         <header style={{ marginBottom: 40 }}>
-          <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
-            YOUR GARAGE
+          <div
+            style={{
+              fontFamily: fonts.mono,
+              fontSize: 10,
+              letterSpacing: '0.4em',
+              color: colors.accent,
+              marginBottom: 10,
+              fontWeight: 700,
+            }}
+          >
+            ∕∕ YOUR GARAGE
           </div>
-          <h1 style={{ fontSize: 36, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 16 }}>
+          <h1
+            style={{
+              fontSize: 'clamp(36px, 6vw, 48px)',
+              margin: '0 0 10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              letterSpacing: '-0.02em',
+              fontWeight: 800,
+              lineHeight: 1.0,
+            }}
+          >
             <CallsignWithBadge callsign={me.callsign} isAdmin={me.isModerator} size="lg" />
           </h1>
           {me.regionLabel && (
-            <div style={{ fontSize: 13, color: colors.textMuted, fontFamily: fonts.mono }}>
+            <div
+              style={{
+                fontSize: 11,
+                color: colors.textMuted,
+                fontFamily: fonts.mono,
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+              }}
+            >
               {me.regionLabel}
             </div>
           )}
           {me.bio && (
-            <p style={{ fontSize: 14, color: colors.text, marginTop: 16, maxWidth: 600, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 15, color: colors.textMuted, marginTop: 18, maxWidth: 620, lineHeight: 1.65 }}>
               {me.bio}
             </p>
           )}
-          <div style={{ marginTop: 16, display: 'flex', gap: 16, fontSize: 11, color: colors.textMuted, fontFamily: fonts.mono, letterSpacing: '0.2em' }}>
-            <Link href={`/u/${me.callsign}`} style={{ color: colors.textMuted, textDecoration: 'none' }}>
-              VIEW PUBLIC PROFILE →
+          <div
+            style={{
+              marginTop: 20,
+              display: 'flex',
+              gap: 10,
+              flexWrap: 'wrap',
+            }}
+          >
+            <Link href={`/u/${me.callsign}`} className="ug-btn ug-btn-ghost" style={{ padding: '10px 16px', fontSize: 11 }}>
+              View public profile →
             </Link>
-            <Link href={`/u/${me.callsign}/races`} style={{ color: colors.textMuted, textDecoration: 'none' }}>
-              RACE LOG →
+            <Link href={`/u/${me.callsign}/races`} className="ug-btn ug-btn-ghost" style={{ padding: '10px 16px', fontSize: 11 }}>
+              Race log →
             </Link>
           </div>
         </header>

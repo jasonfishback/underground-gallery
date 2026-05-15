@@ -7,6 +7,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { colors, fonts } from '@/lib/design';
 
 export function MarketSearchBar({
   showTabs = true,
@@ -31,22 +32,23 @@ export function MarketSearchBar({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 22 }}>
+    <div
+      className="ug-glass"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+        marginBottom: 22,
+        padding: 14,
+      }}
+    >
       <form onSubmit={submit} style={{ display: 'flex', gap: 8 }}>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search cars, parts, brands..."
-          style={{
-            flex: 1,
-            background: '#0a0c12',
-            border: '1px solid rgba(255,255,255,0.12)',
-            color: '#fff',
-            borderRadius: 999,
-            padding: '12px 18px',
-            fontSize: 15,
-            fontFamily: "'Inter Tight', system-ui, sans-serif",
-          }}
+          className="ug-input"
+          style={{ flex: 1, borderRadius: 999 }}
         />
         <button type="submit" className="ug-btn ug-btn-primary ug-pill">
           {isPending ? '…' : 'SEARCH'}
@@ -58,7 +60,7 @@ export function MarketSearchBar({
           style={{
             display: 'flex',
             gap: 6,
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontFamily: fonts.mono,
             flexWrap: 'wrap',
             alignItems: 'center',
           }}
@@ -103,7 +105,7 @@ const subLinkStyle: React.CSSProperties = {
   letterSpacing: '0.22em',
   fontWeight: 700,
   textDecoration: 'none',
-  color: 'rgba(245,246,247,0.6)',
+  color: colors.textMuted,
 };
 
 function Tab({
@@ -125,9 +127,9 @@ function Tab({
         letterSpacing: '0.22em',
         fontWeight: 700,
         textDecoration: 'none',
-        background: active ? 'rgba(255,42,42,0.18)' : 'rgba(255,255,255,0.04)',
-        color: active ? '#ff5252' : 'rgba(245,246,247,0.65)',
-        border: active ? '1px solid rgba(255,42,42,0.35)' : '1px solid transparent',
+        background: active ? colors.accentSoft : 'rgba(255,255,255,0.04)',
+        color: active ? colors.accent : colors.textMuted,
+        border: active ? `1px solid ${colors.accentBorder}` : '1px solid transparent',
       }}
     >
       {children}

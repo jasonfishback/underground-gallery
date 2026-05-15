@@ -7,6 +7,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { colors, fonts } from '@/lib/design';
 
 type Photo = { id: string; urlFull: string; urlThumb: string };
 
@@ -74,12 +75,12 @@ export function MarketPhotoUploader({
             key={p.id}
             style={{
               aspectRatio: '4 / 3',
-              background: `#0a0c12 url(${p.urlThumb}) center / cover no-repeat`,
+              background: `${colors.bgElevated} url(${p.urlThumb}) center / cover no-repeat`,
               borderRadius: 8,
               border:
                 p.id === primaryPhotoId
-                  ? '2px solid #ff3030'
-                  : '1px solid rgba(255,255,255,0.1)',
+                  ? `2px solid ${colors.accent}`
+                  : `1px solid ${colors.border}`,
               position: 'relative',
             }}
           >
@@ -91,11 +92,11 @@ export function MarketPhotoUploader({
                   left: 4,
                   fontSize: 9,
                   letterSpacing: '0.18em',
-                  background: '#ff3030',
+                  background: colors.accent,
                   color: '#fff',
                   padding: '2px 6px',
                   borderRadius: 4,
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontFamily: fonts.mono,
                   fontWeight: 700,
                 }}
               >
@@ -111,12 +112,12 @@ export function MarketPhotoUploader({
             disabled={uploading}
             style={{
               aspectRatio: '4 / 3',
-              border: '1px dashed rgba(255,255,255,0.2)',
+              border: `1px dashed ${colors.borderStrong}`,
               borderRadius: 8,
               background: 'rgba(255,255,255,0.02)',
-              color: 'rgba(245,246,247,0.65)',
+              color: colors.textMuted,
               fontSize: 12,
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontFamily: fonts.mono,
               letterSpacing: '0.18em',
               cursor: 'pointer',
               fontWeight: 700,
@@ -134,10 +135,8 @@ export function MarketPhotoUploader({
         style={{ display: 'none' }}
         onChange={(e) => onFiles(e.target.files)}
       />
-      {error && (
-        <div style={{ fontSize: 12, color: '#ff5252' }}>{error}</div>
-      )}
-      <div style={{ fontSize: 11, color: 'rgba(245,246,247,0.45)' }}>
+      {error && <div className="ug-banner ug-banner-error">{error}</div>}
+      <div style={{ fontSize: 11, color: colors.textDim }}>
         Up to {maxPhotos} photos. JPEG, PNG, or WebP, max 12 MB each. First photo is the cover.
       </div>
     </div>

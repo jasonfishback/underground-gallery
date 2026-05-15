@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { getAuthContext } from '@/lib/auth/gates';
 import { getRecentNotifications } from '@/lib/notifications/fetch';
 import { NotificationBell } from '@/components/NotificationBell';
+import { colors, fonts } from '@/lib/design';
 
 export async function SiteHeader() {
   const ctx = await getAuthContext();
@@ -24,31 +25,32 @@ export async function SiteHeader() {
           'linear-gradient(180deg, rgba(10,12,18,0.85) 0%, rgba(10,12,18,0.65) 100%)',
         backdropFilter: 'blur(22px) saturate(160%)',
         WebkitBackdropFilter: 'blur(22px) saturate(160%)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.35)',
+        borderBottom: `1px solid ${colors.border}`,
+        boxShadow:
+          '0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.35)',
         padding: '14px 20px',
         display: 'flex',
         flexWrap: 'wrap',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 12,
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        fontFamily: fonts.sans,
         maxWidth: '100vw',
         boxSizing: 'border-box',
       }}
     >
       <Link
         href="/me"
+        className="ug-mono"
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: 8,
           fontSize: 12,
           letterSpacing: '0.22em',
-          color: '#ffffff',
+          color: colors.text,
           textDecoration: 'none',
           fontWeight: 700,
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
           flexShrink: 0,
           whiteSpace: 'nowrap',
         }}
@@ -59,11 +61,13 @@ export async function SiteHeader() {
             width: 8,
             height: 8,
             borderRadius: 999,
-            background: '#ff2a2a',
+            background: colors.accent,
             boxShadow: '0 0 8px rgba(255,42,42,0.8)',
           }}
         />
-        UNDERGROUND<span style={{ color: '#ff2a2a', padding: '0 4px' }}>·</span>GALLERY
+        UNDERGROUND
+        <span style={{ color: colors.accent, padding: '0 4px' }}>·</span>
+        GALLERY
       </Link>
 
       <nav
@@ -81,7 +85,11 @@ export async function SiteHeader() {
         <NavLink href="/race">RACE</NavLink>
         <NavLink href="/market">MARKET</NavLink>
         <NavLink href="/members">MEMBERS</NavLink>
-        <Link href="/invites" className="ug-btn ug-btn-primary ug-pill" style={{ marginLeft: 6 }}>
+        <Link
+          href="/invites"
+          className="ug-btn ug-btn-primary ug-pill"
+          style={{ marginLeft: 6 }}
+        >
           + INVITE
         </Link>
         {ctx.isModerator && <NavLink href="/admin">ADMIN</NavLink>}
@@ -96,16 +104,14 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link
       href={href}
+      className="ug-pill ug-mono"
       style={{
-        padding: '8px 12px',
-        borderRadius: 999,
         fontSize: 10,
         letterSpacing: '0.22em',
-        color: 'rgba(245,246,247,0.65)',
+        color: colors.textMuted,
         whiteSpace: 'nowrap',
         flexShrink: 0,
         textDecoration: 'none',
-        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
         fontWeight: 700,
         transition: 'background 0.15s ease, color 0.15s ease',
       }}

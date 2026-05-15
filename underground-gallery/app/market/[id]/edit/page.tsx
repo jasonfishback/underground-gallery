@@ -13,6 +13,7 @@ import { PartListingForm } from '@/components/market/PartListingForm';
 import { MarketPhotoUploader } from '@/components/market/MarketPhotoUploader';
 import { ListingLifecyclePanel } from '@/components/market/ListingLifecyclePanel';
 import { MAX_PHOTOS_PER_LISTING } from '@/lib/market/types';
+import { colors, fonts } from '@/lib/design';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,8 +103,8 @@ export default async function EditListingPage({
         padding: '32px 24px 64px',
         maxWidth: 1080,
         margin: '0 auto',
-        color: '#fff',
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: colors.text,
+        fontFamily: fonts.sans,
       }}
     >
       <div style={{ marginBottom: 18 }}>
@@ -112,8 +113,8 @@ export default async function EditListingPage({
           style={{
             fontSize: 11,
             letterSpacing: '0.22em',
-            color: 'rgba(245,246,247,0.55)',
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            color: colors.textMuted,
+            fontFamily: fonts.mono,
             textDecoration: 'none',
           }}
         >
@@ -124,15 +125,15 @@ export default async function EditListingPage({
       <h1 style={{ fontSize: 26, margin: '0 0 4px' }}>
         Edit listing
       </h1>
-      <p style={{ color: 'rgba(245,246,247,0.6)', fontSize: 14, marginBottom: 18 }}>
-        Status: <strong style={{ color: '#fff' }}>{listing.status.toUpperCase()}</strong>
+      <p style={{ color: colors.textMuted, fontSize: 14, marginBottom: 18 }}>
+        Status: <strong style={{ color: colors.text }}>{listing.status.toUpperCase()}</strong>
         {sp.just_created && ' · Draft saved. Add photos and publish below.'}
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(280px, 1fr)', gap: 28, alignItems: 'start' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <section>
-            <h2 style={sectionHeadingStyle}>Photos</h2>
+            <h2 style={sectionHeadingStyle}>∕∕ Photos</h2>
             <MarketPhotoUploader
               listingId={listing.id}
               initialPhotos={photos.map((p) => ({ id: p.id, urlFull: p.urlFull, urlThumb: p.urlThumb }))}
@@ -142,7 +143,7 @@ export default async function EditListingPage({
           </section>
 
           <section>
-            <h2 style={sectionHeadingStyle}>Listing details</h2>
+            <h2 style={sectionHeadingStyle}>∕∕ Listing details</h2>
             {listing.listingType === 'car' ? (
               <CarListingForm
                 mode="edit"
@@ -170,8 +171,8 @@ export default async function EditListingPage({
 const sectionHeadingStyle: React.CSSProperties = {
   fontSize: 11,
   letterSpacing: '0.3em',
-  color: 'rgba(245,246,247,0.6)',
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+  color: colors.textMuted,
+  fontFamily: fonts.mono,
   fontWeight: 700,
   marginBottom: 12,
   textTransform: 'uppercase',

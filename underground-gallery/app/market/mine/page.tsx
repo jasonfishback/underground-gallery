@@ -6,6 +6,7 @@ import { Metadata } from 'next';
 import { getAuthContext } from '@/lib/auth/gates';
 import { getMyListings } from '@/lib/market/queries';
 import { MarketCard } from '@/components/market/MarketCard';
+import { colors, fonts } from '@/lib/design';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'My listings' };
@@ -43,8 +44,8 @@ export default async function MyListingsPage({
         padding: '32px 24px 64px',
         maxWidth: 1200,
         margin: '0 auto',
-        color: '#fff',
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: colors.text,
+        fontFamily: fonts.sans,
       }}
     >
       <header
@@ -62,18 +63,18 @@ export default async function MyListingsPage({
             style={{
               fontSize: 11,
               letterSpacing: '0.4em',
-              color: '#ff3030',
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              color: colors.accent,
+              fontFamily: fonts.mono,
               fontWeight: 700,
             }}
           >
-            UNDERGROUND · MY LISTINGS
+            ∕∕ UNDERGROUND · MY LISTINGS
           </div>
           <h1 style={{ fontSize: 28, margin: '4px 0' }}>What you're selling</h1>
-          <p style={{ fontSize: 14, color: 'rgba(245,246,247,0.55)', margin: 0 }}>
+          <p style={{ fontSize: 14, color: colors.textMuted, margin: 0 }}>
             {all.length.toLocaleString()} listing{all.length === 1 ? '' : 's'} total ·
             {' '}
-            <Link href="/market/messages" style={{ color: '#ff5252' }}>
+            <Link href="/market/messages" style={{ color: colors.accent }}>
               View buyer messages →
             </Link>
           </p>
@@ -88,7 +89,7 @@ export default async function MyListingsPage({
           display: 'flex',
           gap: 6,
           marginBottom: 22,
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontFamily: fonts.mono,
           flexWrap: 'wrap',
         }}
       >
@@ -105,9 +106,9 @@ export default async function MyListingsPage({
                 letterSpacing: '0.22em',
                 fontWeight: 700,
                 textDecoration: 'none',
-                background: active ? 'rgba(255,42,42,0.18)' : 'rgba(255,255,255,0.04)',
-                color: active ? '#ff5252' : 'rgba(245,246,247,0.65)',
-                border: active ? '1px solid rgba(255,42,42,0.35)' : '1px solid transparent',
+                background: active ? colors.accentSoft : 'rgba(255,255,255,0.04)',
+                color: active ? colors.accent : colors.textMuted,
+                border: active ? `1px solid ${colors.accentBorder}` : '1px solid transparent',
               }}
             >
               {t.label.toUpperCase()} ({counts[t.key] ?? 0})
@@ -118,21 +119,19 @@ export default async function MyListingsPage({
 
       {filtered.length === 0 ? (
         <div
+          className="ug-card"
           style={{
             padding: '48px 20px',
             textAlign: 'center',
-            color: 'rgba(245,246,247,0.55)',
-            background: 'rgba(20,22,30,0.4)',
-            border: '1px dashed rgba(255,255,255,0.12)',
-            borderRadius: 12,
+            color: colors.textMuted,
           }}
         >
-          <div style={{ fontSize: 16, marginBottom: 6, color: '#fff' }}>
+          <div style={{ fontSize: 16, marginBottom: 6, color: colors.text }}>
             Nothing in {TABS.find((t) => t.key === tab)?.label}.
           </div>
           {tab === 'active' && (
             <div>
-              <Link href="/market/new" style={{ color: '#ff5252' }}>
+              <Link href="/market/new" style={{ color: colors.accent }}>
                 List something →
               </Link>
             </div>
@@ -151,17 +150,13 @@ export default async function MyListingsPage({
               <MarketCard listing={l} />
               <Link
                 href={`/market/${l.id}/edit`}
-                className="ug-btn"
+                className="ug-btn ug-btn-ghost ug-pill"
                 style={{
                   position: 'absolute',
                   top: 10,
                   left: 10,
                   fontSize: 10,
                   letterSpacing: '0.18em',
-                  padding: '4px 10px',
-                  background: 'rgba(0,0,0,0.7)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  fontWeight: 700,
                 }}
               >
                 EDIT
