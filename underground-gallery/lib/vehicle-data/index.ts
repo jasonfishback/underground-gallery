@@ -10,9 +10,14 @@
 
 import { cacheProvider } from './cache';
 import { nhtsaProvider } from './nhtsa';
+import { llmProvider } from './llm';
 import type { VehicleDataProvider, Make, Model, Trim, ProviderSpecs, VinDecodeResult } from './provider';
 
-const providers: VehicleDataProvider[] = [cacheProvider, nhtsaProvider];
+// Order matters. Cache wins because it's free and has community-verified data.
+// LLM sits in front of NHTSA because NHTSA returns null for getSpecs (no HP /
+// torque / weight in their dataset), so the LLM is what actually gives us
+// stock numbers for any Y/M/M not yet in the cache.
+const providers: VehicleDataProvider[] = [cacheProvider, llmProvider, nhtsaProvider];
 
 export async function listYears(): Promise<number[]> {
   for (const p of providers) {

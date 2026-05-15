@@ -28,6 +28,7 @@ import {
   searchVehicleSpecs,
   addCarFromSpec,
   addCarFromManual,
+  addCarFromYmm,
   type SpecSearchResult,
 } from "@/app/garage/actions";
 import { colors } from "@/lib/design";
@@ -204,13 +205,12 @@ export default function AddCarWizard({ open, onClose }: Props) {
             name: cleanName || undefined,
           })) as { ok: boolean; error?: string };
         } else if (picked?.kind === "nhtsa") {
-          res = (await addCarFromManual({
-            manualSpecs: {
-              year: picked.year,
-              make: picked.make,
-              model: picked.model,
-              trim: "",
-            },
+          // NHTSA gives Y/M/M only — addCarFromYmm looks up specs via the
+          // LLM provider (and caches them) before creating the vehicle.
+          res = (await addCarFromYmm({
+            year: picked.year,
+            make: picked.make,
+            model: picked.model,
             name: cleanName || undefined,
           })) as { ok: boolean; error?: string };
         } else if (picked?.kind === "manual") {
@@ -353,7 +353,16 @@ export default function AddCarWizard({ open, onClose }: Props) {
         {step === "confirm" && picked && picked.kind !== "manual" && (
           <div>
             <p className="ug-label" style={{ marginBottom: 4 }}>You picked</p>
-            <p style={{ fontSize: 20, fontWeight: 700, margin: "0 0 24px" }}>{picked.label}</p>
+            <p style={{ fontSize: 20, fontWeight: 700, margin: "0 0 12px" }}>{picked.label}</p>
+            {picked.kind === "nhtsa" && (
+              <p style={{ fontSize: 12, color: colors.textMuted, margin: "0 0 24px", letterSpacing: "0.04em" }}>
+                ∕∕ Stock HP, torque, weight and drivetrain will be auto-filled
+                when you add it. May take a moment.
+              </p>
+            )}
+            {picked.kind === "catalog" && (
+              <div style={{ marginBottom: 24 }} />
+            )}
 
             <label className="ug-label">Name this car (optional)</label>
             <input
@@ -378,7 +387,11 @@ export default function AddCarWizard({ open, onClose }: Props) {
                 className="ug-btn ug-btn-primary ug-btn-block"
                 style={{ flex: 1, minWidth: 200 }}
               >
-                {submitting ? "Adding…" : "Add to garage →"}
+                {submitting
+                  ? picked?.kind === "nhtsa"
+                    ? "Looking up specs…"
+                    : "Adding…"
+                  : "Add to garage →"}
               </button>
               <button
                 onClick={() => setStep("search")}
