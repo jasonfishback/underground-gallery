@@ -42,9 +42,11 @@ type Mode = 'practice' | 'challenge';
 type Props = {
   myCars: Car[];
   communityCars: CommunityCar[];
+  myUserId: string;
+  myCallsign: string | null;
 };
 
-export function RaceUI({ myCars, communityCars }: Props) {
+export function RaceUI({ myCars, communityCars, myUserId, myCallsign }: Props) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>('practice');
   const [myCarId, setMyCarId] = useState<string | null>(myCars[0]?.id ?? null);
@@ -59,8 +61,26 @@ export function RaceUI({ myCars, communityCars }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Own-garage cars become eligible opponents too (minus whichever one is the challenger).
+  const myCarsAsOpponents: CommunityCar[] = useMemo(
+    () =>
+      myCars
+        .filter((c) => c.id !== myCarId)
+        .map((c) => ({ ...c, ownerUserId: myUserId, ownerCallsign: myCallsign })),
+    [myCars, myCarId, myUserId, myCallsign],
+  );
+
   const myCar = useMemo(() => myCars.find((c) => c.id === myCarId) ?? null, [myCars, myCarId]);
-  const oppCar = useMemo(() => communityCars.find((c) => c.id === oppCarId) ?? null, [communityCars, oppCarId]);
+  const oppCar = useMemo(() => {
+    if (!oppCarId) return null;
+    return (
+      myCarsAsOpponents.find((c) => c.id === oppCarId) ??
+      communityCars.find((c) => c.id === oppCarId) ??
+      null
+    );
+  }, [oppCarId, myCarsAsOpponents, communityCars]);
+
+  const oppIsMine = oppCar?.ownerUserId === myUserId;
 
   const filteredOpponents = useMemo(() => {
     if (!search.trim()) return communityCars.slice(0, 60);
@@ -222,6 +242,40 @@ export function RaceUI({ myCars, communityCars }: Props) {
       </Section>
 
       <Section title="STEP 2 · OPPONENT">
+        {myCarsAsOpponents.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <div
+              style={{
+                fontSize: 10,
+                letterSpacing: '0.3em',
+                color: colors.textMuted,
+                fontFamily: fonts.mono,
+                fontWeight: 700,
+                marginBottom: 8,
+              }}
+            >
+              MY GARAGE
+            </div>
+            <CarGrid
+              cars={myCarsAsOpponents}
+              selectedId={oppCarId}
+              onSelect={setOppCarId}
+              mineBadge
+            />
+          </div>
+        )}
+        <div
+          style={{
+            fontSize: 10,
+            letterSpacing: '0.3em',
+            color: colors.textMuted,
+            fontFamily: fonts.mono,
+            fontWeight: 700,
+            marginBottom: 8,
+          }}
+        >
+          COMMUNITY
+        </div>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -287,18 +341,25 @@ export function RaceUI({ myCars, communityCars }: Props) {
             {submitting ? 'CALCULATING…' : 'RUN THE RACE →'}
           </button>
         ) : (
-          <button
-            onClick={submitChallenge}
-            disabled={!myCarId || !oppCarId || submitting}
-            style={{
-              ...styles.buttonPrimary,
-              opacity: !myCarId || !oppCarId || submitting ? 0.4 : 1,
-              fontSize: 14,
-              padding: '16px 32px',
-            }}
-          >
-            {submitting ? 'SENDING…' : 'SEND CHALLENGE →'}
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button
+              onClick={submitChallenge}
+              disabled={!myCarId || !oppCarId || submitting || oppIsMine}
+              style={{
+                ...styles.buttonPrimary,
+                opacity: !myCarId || !oppCarId || submitting || oppIsMine ? 0.4 : 1,
+                fontSize: 14,
+                padding: '16px 32px',
+              }}
+            >
+              {submitting ? 'SENDING…' : 'SEND CHALLENGE →'}
+            </button>
+            {oppIsMine && (
+              <div style={{ fontSize: 11, color: colors.textMuted, fontFamily: fonts.mono, letterSpacing: '0.05em' }}>
+                Can&apos;t challenge yourself — use PRACTICE to race your own cars.
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
@@ -339,12 +400,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function CarGrid({
-  cars, selectedId, onSelect, showCallsign,
+  cars, selectedId, onSelect, showCallsign, mineBadge,
 }: {
   cars: any[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   showCallsign?: boolean;
+  mineBadge?: boolean;
 }) {
   if (cars.length === 0) {
     return <div style={{ color: colors.textMuted, fontSize: 13, padding: 16 }}>No vehicles available.</div>;
@@ -385,6 +447,11 @@ function CarGrid({
               <div style={{ width: 48, height: 48, background: '#1a1a1a', flexShrink: 0 }} />
             )}
             <div style={{ minWidth: 0, flex: 1 }}>
+              {mineBadge && (
+                <div style={{ fontSize: 9, letterSpacing: '0.25em', color: colors.accent, marginBottom: 2 }}>
+                  MINE
+                </div>
+              )}
               {showCallsign && c.ownerCallsign && (
                 <div style={{ fontSize: 9, letterSpacing: '0.25em', color: colors.accent, marginBottom: 2 }}>
                   @{c.ownerCallsign}
