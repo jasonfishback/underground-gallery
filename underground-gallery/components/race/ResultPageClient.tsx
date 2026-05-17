@@ -123,6 +123,7 @@ export function ResultPageClient(props: Props) {
             drivetrain: props.opponentDrivetrain,
             callsign: props.opponentCallsign ?? undefined,
           }}
+          raceType={props.raceType as any}
           autoStart
           onFinish={() => setStage('card')}
         />
