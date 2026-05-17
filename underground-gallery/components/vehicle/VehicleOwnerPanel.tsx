@@ -60,48 +60,77 @@ export default function VehicleOwnerPanel({
   const [showModModal, setShowModModal] = useState(false);
 
   const [uploadErr, setUploadErr] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
+  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [actionPending, startAction] = useTransition();
+  const uploading = uploadProgress !== null;
 
-  async function onFilesPicked(files: FileList | null) {
-    if (!files || files.length === 0) return;
-    setUploadErr(null);
-    setUploading(true);
-
+  async function uploadOne(original: File): Promise<{ ok: true; photo: { id: string; url: string; isHero: boolean } } | { ok: false; error: string }> {
     try {
-      for (const original of Array.from(files)) {
-        const file = await resizeImage(original);
-        const fd = new FormData();
-        fd.append("vehicleId", vehicleId);
-        fd.append("file", file);
-
-        const res = await fetch("/api/photos/upload", {
-          method: "POST",
-          body: fd,
-        });
-        const data = await res.json();
-        if (!res.ok || !data?.ok) {
-          setUploadErr(data?.error ?? "Upload failed.");
-          break;
-        }
-        setPhotos((prev) => [
-          ...prev,
-          { id: data.photo.id, urlFull: data.photo.url, urlThumb: data.photo.url },
-        ]);
-        if (data.photo.isHero) {
-          setHeroId(data.photo.id);
-        }
-      }
+      const file = await resizeImage(original);
+      const fd = new FormData();
+      fd.append("vehicleId", vehicleId);
+      fd.append("file", file);
+      const res = await fetch("/api/photos/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) return { ok: false, error: data?.error ?? "Upload failed." };
+      return { ok: true, photo: { id: data.photo.id, url: data.photo.url, isHero: !!data.photo.isHero } };
     } catch (err) {
-      console.error(err);
-      setUploadErr("Upload failed.");
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      router.refresh();
+      return { ok: false, error: err instanceof Error ? err.message : "Upload failed." };
     }
+  }
+
+  async function onFilesPicked(files: FileList | File[] | null) {
+    if (!files) return;
+    const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (arr.length === 0) return;
+    setUploadErr(null);
+    setUploadProgress({ done: 0, total: arr.length });
+
+    // Parallel uploader with concurrency cap of 3
+    const CONCURRENCY = 3;
+    let cursor = 0;
+    let firstError: string | null = null;
+
+    async function worker() {
+      while (cursor < arr.length) {
+        const myIdx = cursor++;
+        const result = await uploadOne(arr[myIdx]);
+        if (result.ok) {
+          setPhotos((prev) => [
+            ...prev,
+            { id: result.photo.id, urlFull: result.photo.url, urlThumb: result.photo.url },
+          ]);
+          if (result.photo.isHero) setHeroId(result.photo.id);
+        } else if (!firstError) {
+          firstError = result.error;
+        }
+        setUploadProgress((p) => (p ? { done: p.done + 1, total: p.total } : null));
+      }
+    }
+
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, arr.length) }, worker));
+
+    if (firstError) setUploadErr(firstError);
+    setUploadProgress(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    router.refresh();
+  }
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragOver(false);
+    onFilesPicked(e.dataTransfer.files);
+  }
+  function onDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    if (!dragOver) setDragOver(true);
+  }
+  function onDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    setDragOver(false);
   }
 
   function handleSetHero(photoId: string) {
@@ -158,7 +187,12 @@ export default function VehicleOwnerPanel({
   }
 
   return (
-    <div style={{ marginTop: 32 }}>
+    <div
+      style={{ marginTop: 32 }}
+      onDrop={onDrop}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+    >
       {/* PHOTOS */}
       <SectionHeader
         title="Photos"
@@ -188,7 +222,9 @@ export default function VehicleOwnerPanel({
                 opacity: uploading ? 0.6 : 1,
               }}
             >
-              {uploading ? "UPLOADING…" : "+ ADD PHOTOS"}
+              {uploadProgress
+                ? `UPLOADING ${uploadProgress.done} / ${uploadProgress.total}…`
+                : "+ ADD PHOTOS"}
             </button>
           </>
         }
@@ -201,10 +237,32 @@ export default function VehicleOwnerPanel({
       )}
 
       {photos.length === 0 ? (
-        <EmptyBox>
-          No photos yet. Click <strong>+ ADD PHOTOS</strong> to upload. Your
-          first photo becomes the hero automatically.
-        </EmptyBox>
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            width: '100%',
+            padding: '40px 24px',
+            background: dragOver ? 'rgba(255,48,48,0.12)' : 'rgba(255,255,255,0.02)',
+            border: dragOver
+              ? '2px dashed #ff3030'
+              : '2px dashed rgba(255,255,255,0.18)',
+            borderRadius: 14,
+            color: 'rgba(245,246,247,0.85)',
+            cursor: 'pointer',
+            textAlign: 'center',
+            transition: 'background 120ms ease, border-color 120ms ease',
+            fontFamily: fonts.sans,
+          }}
+        >
+          <div style={{ fontSize: 30, marginBottom: 10 }}>📷</div>
+          <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>
+            {dragOver ? 'Drop to upload' : 'Drag photos here, or click to browse'}
+          </div>
+          <div style={{ fontSize: 12, color: 'rgba(245,246,247,0.55)' }}>
+            JPEG / PNG / WebP up to 12 MB · multi-select supported · first one becomes the hero
+          </div>
+        </button>
       ) : (
         <div
           style={{

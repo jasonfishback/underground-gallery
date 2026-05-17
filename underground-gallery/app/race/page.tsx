@@ -69,16 +69,43 @@ export default async function RacePage() {
     .limit(20);
 
   return (
-    <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px' }}>
-        <header style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
-            VIRTUAL RACE
+    <div style={{ minHeight: '100dvh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 80px' }}>
+        <header style={{ marginBottom: 36, maxWidth: 720 }}>
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: '0.4em',
+              color: colors.accent,
+              fontFamily: fonts.mono,
+              fontWeight: 700,
+              marginBottom: 12,
+            }}
+          >
+            UNDERGROUND · RACE
           </div>
-          <h1 style={{ fontSize: 32, margin: 0, letterSpacing: '0.05em' }}>Pick your fight.</h1>
-          <p style={{ fontSize: 14, color: colors.textMuted, marginTop: 8, maxWidth: 600 }}>
-            Race any car instantly in practice mode, or send a formal challenge to another driver.
-            Challenges run side-by-side with a live light tree and ¼-mile simulation.
+          <h1
+            style={{
+              fontSize: 'clamp(36px, 5vw, 56px)',
+              fontWeight: 800,
+              margin: '0 0 14px',
+              lineHeight: 1.05,
+              letterSpacing: '-0.025em',
+            }}
+          >
+            Pick your fight.
+          </h1>
+          <p
+            style={{
+              fontSize: 17,
+              color: 'rgba(245,246,247,0.65)',
+              margin: 0,
+              lineHeight: 1.5,
+            }}
+          >
+            Race any car instantly in practice mode, or send a formal challenge.
+            Side-by-side ¼-mile simulation with a live light tree — outcomes use real
+            HP, weight, drivetrain, tires, and your installed mods.
           </p>
         </header>
 

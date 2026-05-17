@@ -78,6 +78,7 @@ export async function SiteHeader() {
         }}
       >
         <NavLink href="/me">GARAGE</NavLink>
+        <NavLink href="/discover">DISCOVER</NavLink>
         <NavLink href="/race">RACE</NavLink>
         <NavLink href="/market">MARKET</NavLink>
         <NavLink href="/members">MEMBERS</NavLink>
