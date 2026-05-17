@@ -11,7 +11,7 @@ import { db } from '@/lib/db';
 import { raceResults, vehicles, users } from '@/lib/db/schema';
 import { getAuthContext } from '@/lib/auth/gates';
 import { CallsignWithBadge } from '@/components/AdminBadge';
-import { colors, fonts, styles } from '@/lib/design';
+import { colors, fonts } from '@/lib/design';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,6 +93,7 @@ export default async function UserRacesPage({
         <div style={{ marginBottom: 8 }}>
           <Link
             href={`/u/${profile.callsign}`}
+            className="ug-mono"
             style={{ fontSize: 11, letterSpacing: '0.3em', color: colors.textMuted, textDecoration: 'none' }}
           >
             ← BACK TO PROFILE
@@ -103,7 +104,7 @@ export default async function UserRacesPage({
           <CallsignWithBadge callsign={profile.callsign} isAdmin={profile.isModerator} size="lg" />
         </h1>
 
-        <div style={{ display: 'flex', gap: 24, marginBottom: 32, fontFamily: fonts.mono, fontSize: 13 }}>
+        <div className="ug-mono" style={{ display: 'flex', gap: 24, marginBottom: 32, fontSize: 13 }}>
           <span style={{ color: colors.success }}>{wins}W</span>
           <span style={{ color: colors.textMuted }}>{losses}L</span>
           <span style={{ color: colors.textMuted }}>{ties}T</span>
@@ -111,7 +112,7 @@ export default async function UserRacesPage({
         </div>
 
         {rows.length === 0 ? (
-          <div style={{ ...styles.panel, textAlign: 'center', padding: 48, color: colors.textMuted }}>
+          <div className="ug-card" style={{ textAlign: 'center', padding: 48, color: colors.textMuted }}>
             No races logged yet.
           </div>
         ) : (
@@ -132,13 +133,12 @@ export default async function UserRacesPage({
                 <Link
                   key={r.id}
                   href={`/race/result/${r.id}`}
+                  className="ug-card"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: '60px 1fr auto',
                     gap: 16,
                     padding: '14px 20px',
-                    background: '#111',
-                    border: `0.5px solid ${colors.border}`,
                     color: colors.text,
                     textDecoration: 'none',
                     fontFamily: fonts.mono,

@@ -8,6 +8,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { sendMessage } from '@/app/market/actions';
+import { colors } from '@/lib/design';
 
 export function ContactSheet({
   listingId,
@@ -29,16 +30,14 @@ export function ContactSheet({
   if (isOwner) {
     return (
       <div
+        className="ug-card"
         style={{
           padding: 14,
           fontSize: 13,
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 10,
-          color: 'rgba(245,246,247,0.65)',
+          color: colors.textMuted,
         }}
       >
-        This is your listing. <a href="/market/messages" style={{ color: '#ff5252' }}>View messages →</a>
+        This is your listing. <a href="/market/messages" style={{ color: colors.accent }}>View messages →</a>
       </div>
     );
   }
@@ -66,16 +65,8 @@ export function ContactSheet({
         placeholder={`Message ${sellerCallsign ?? 'the seller'}…`}
         rows={4}
         maxLength={2000}
-        style={{
-          background: '#0a0c12',
-          border: '1px solid rgba(255,255,255,0.12)',
-          color: '#fff',
-          borderRadius: 8,
-          padding: '10px 12px',
-          fontSize: 14,
-          fontFamily: "'Inter Tight', system-ui, sans-serif",
-          resize: 'vertical',
-        }}
+        className="ug-input"
+        style={{ resize: 'vertical' }}
       />
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <button
@@ -85,10 +76,10 @@ export function ContactSheet({
         >
           {isPending ? 'Sending…' : 'Send message'}
         </button>
-        {success && <span style={{ fontSize: 12, color: '#7ee787' }}>Sent.</span>}
-        {error && <span style={{ fontSize: 12, color: '#ff5252' }}>{error}</span>}
+        {success && <span style={{ fontSize: 12, color: colors.success }}>Sent.</span>}
+        {error && <span style={{ fontSize: 12, color: colors.danger }}>{error}</span>}
       </div>
-      <div style={{ fontSize: 11, color: 'rgba(245,246,247,0.45)' }}>
+      <div style={{ fontSize: 11, color: colors.textDim }}>
         Stay in-app — links and phone numbers in messages are flagged for review.
       </div>
     </form>

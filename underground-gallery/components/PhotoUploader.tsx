@@ -4,6 +4,7 @@
 import { useCallback, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
+import { colors, fonts } from "@/lib/design";
 
 type Props = {
   subjectType: "user" | "vehicle";
@@ -102,17 +103,18 @@ export function PhotoUploader(props: Props) {
       <button
         type="button"
         onClick={pickFile}
+        className="ug-card ug-mono"
         style={{
-          padding: "12px 20px",
-          background: "rgba(255,42,42,0.08)",
-          border: "0.5px solid rgba(255,42,42,0.5)",
-          color: "#ff2a2a",
-          fontFamily: "'JetBrains Mono', monospace",
+          padding: "14px 20px",
+          color: colors.accent,
           fontSize: 11,
           fontWeight: 700,
           letterSpacing: "0.25em",
           textTransform: "uppercase",
           cursor: "pointer",
+          border: `1px dashed ${colors.accentBorder}`,
+          background: colors.accentSoft,
+          fontFamily: fonts.mono,
         }}
       >
         {props.buttonLabel ?? "+ Add photo"}
@@ -120,16 +122,11 @@ export function PhotoUploader(props: Props) {
 
       {src && (
         <div
+          className="ug-modal-backdrop"
           style={{
-            position: "fixed",
-            inset: 0,
             background: "rgba(0,0,0,0.92)",
-            zIndex: 1000,
-            display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20,
+            zIndex: 1000,
           }}
         >
           <div
@@ -139,6 +136,9 @@ export function PhotoUploader(props: Props) {
               maxWidth: 600,
               aspectRatio: String(aspect),
               background: "#000",
+              borderRadius: 12,
+              overflow: "hidden",
+              border: `1px solid ${colors.border}`,
             }}
           >
             <Cropper
@@ -159,19 +159,13 @@ export function PhotoUploader(props: Props) {
             step={0.01}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
+            aria-label="Zoom"
             style={{ width: 240, marginTop: 20 }}
           />
           {error && (
             <div
-              style={{
-                marginTop: 12,
-                padding: "8px 14px",
-                border: "0.5px solid #ff2a2a",
-                color: "#ff2a2a",
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 11,
-                letterSpacing: "0.1em",
-              }}
+              className="ug-banner ug-banner-error"
+              style={{ marginTop: 12 }}
             >
               {error}
             </div>
@@ -181,18 +175,7 @@ export function PhotoUploader(props: Props) {
               type="button"
               onClick={cancel}
               disabled={uploading}
-              style={{
-                padding: "12px 24px",
-                background: "transparent",
-                border: "0.5px solid rgba(255,255,255,0.2)",
-                color: "rgba(201,204,209,0.7)",
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.3em",
-                textTransform: "uppercase",
-                cursor: uploading ? "wait" : "pointer",
-              }}
+              className="ug-btn ug-btn-ghost"
             >
               Cancel
             </button>
@@ -200,19 +183,7 @@ export function PhotoUploader(props: Props) {
               type="button"
               onClick={confirm}
               disabled={uploading || !croppedArea}
-              style={{
-                padding: "12px 24px",
-                background: "#ff2a2a",
-                border: "none",
-                color: "#05060a",
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.3em",
-                textTransform: "uppercase",
-                opacity: uploading || !croppedArea ? 0.5 : 1,
-                cursor: uploading || !croppedArea ? "wait" : "pointer",
-              }}
+              className="ug-btn ug-btn-primary"
             >
               {uploading ? "Uploading…" : "Upload →"}
             </button>

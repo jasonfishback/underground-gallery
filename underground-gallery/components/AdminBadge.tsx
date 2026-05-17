@@ -22,12 +22,15 @@ export function AdminBadge({ size = 'md' }: { size?: Size } = {}) {
         fontSize: c.fontSize,
         letterSpacing: c.letterSpacing,
         color: colors.accent,
-        border: `0.5px solid ${colors.accent}`,
+        border: `1px solid ${colors.accentBorder}`,
+        borderRadius: 6,
         padding: c.padding,
         fontFamily: fonts.mono,
         fontWeight: 700,
         verticalAlign: 'middle',
         background: colors.accentSoft,
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)' as any,
       }}
     >
       ADMIN

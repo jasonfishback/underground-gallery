@@ -8,6 +8,7 @@
 import { useTransition } from 'react';
 import { respondToOffer, withdrawOffer } from '@/app/market/actions';
 import { formatPrice } from '@/lib/market/types';
+import { colors, fonts } from '@/lib/design';
 
 type OfferRow = {
   id: string;
@@ -26,7 +27,7 @@ export function SellerOfferList({ offers }: { offers: SellerOffer[] }) {
 
   if (offers.length === 0) {
     return (
-      <p style={{ fontSize: 13, color: 'rgba(245,246,247,0.55)' }}>
+      <p style={{ fontSize: 13, color: colors.textMuted }}>
         No offers yet. They'll show up here as buyers send them.
       </p>
     );
@@ -35,14 +36,14 @@ export function SellerOfferList({ offers }: { offers: SellerOffer[] }) {
   return (
     <ul style={listStyle}>
       {offers.map((o) => (
-        <li key={o.id} style={itemStyle}>
+        <li key={o.id} className="ug-card" style={itemStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: colors.text }}>
                 {formatPrice(o.amountCents)}{' '}
                 <span style={statusStyle(o.status)}>· {o.status}</span>
               </div>
-              <div style={{ fontSize: 12, color: 'rgba(245,246,247,0.6)', marginTop: 2 }}>
+              <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>
                 {o.buyerCallsign ?? 'A buyer'} · {new Date(o.createdAt).toLocaleDateString()}
               </div>
               {o.message && (
@@ -50,7 +51,7 @@ export function SellerOfferList({ offers }: { offers: SellerOffer[] }) {
                   style={{
                     fontSize: 13,
                     marginTop: 6,
-                    color: 'rgba(245,246,247,0.85)',
+                    color: colors.text,
                     lineHeight: 1.5,
                   }}
                 >
@@ -70,7 +71,7 @@ export function SellerOfferList({ offers }: { offers: SellerOffer[] }) {
                 </button>
                 <button
                   type="button"
-                  className="ug-btn"
+                  className="ug-btn ug-btn-ghost"
                   disabled={isPending}
                   onClick={() => start(async () => { await respondToOffer({ offerId: o.id, decision: 'decline' }); })}
                 >
@@ -91,21 +92,21 @@ export function BuyerOfferList({ offers }: { offers: BuyerOffer[] }) {
   return (
     <ul style={listStyle}>
       {offers.map((o) => (
-        <li key={o.id} style={itemStyle}>
+        <li key={o.id} className="ug-card" style={itemStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div>
               <div style={{ fontSize: 15, fontWeight: 700 }}>
                 {formatPrice(o.amountCents)}{' '}
                 <span style={statusStyle(o.status)}>· {o.status}</span>
               </div>
-              <div style={{ fontSize: 12, color: 'rgba(245,246,247,0.55)' }}>
+              <div style={{ fontSize: 12, color: colors.textMuted }}>
                 Sent {new Date(o.createdAt).toLocaleDateString()}
               </div>
             </div>
             {o.status === 'pending' && (
               <button
                 type="button"
-                className="ug-btn"
+                className="ug-btn ug-btn-ghost"
                 disabled={isPending}
                 onClick={() => start(async () => { await withdrawOffer(o.id); })}
               >
@@ -121,14 +122,14 @@ export function BuyerOfferList({ offers }: { offers: BuyerOffer[] }) {
 
 function statusStyle(s: OfferRow['status']): React.CSSProperties {
   const color =
-    s === 'accepted' ? '#7ee787' :
-    s === 'declined' || s === 'withdrawn' || s === 'expired' ? '#888' :
-    '#ff9'; // pending
+    s === 'accepted' ? colors.success :
+    s === 'declined' || s === 'withdrawn' || s === 'expired' ? colors.textDim :
+    colors.warning; // pending
   return {
     fontSize: 11,
     letterSpacing: '0.18em',
     color,
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+    fontFamily: fonts.mono,
     fontWeight: 700,
     textTransform: 'uppercase',
   };
@@ -145,7 +146,4 @@ const listStyle: React.CSSProperties = {
 
 const itemStyle: React.CSSProperties = {
   padding: 14,
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 10,
-  background: 'rgba(20,22,30,0.4)',
 };

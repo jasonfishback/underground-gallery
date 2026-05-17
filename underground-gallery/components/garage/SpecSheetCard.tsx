@@ -3,7 +3,7 @@
 // Displays a vehicle's stock spec sheet with current modified numbers
 // alongside. Pure presentation — receives a pre-calculated BuildSummary.
 
-import { styles, colors } from '@/lib/design';
+import { colors, fonts } from '@/lib/design';
 import type { BuildSummary } from '@/lib/race/build';
 
 type Props = {
@@ -37,7 +37,7 @@ export function SpecSheetCard({ label, build, estimates }: Props) {
         gridTemplateColumns: '1.2fr 1fr 1fr 0.8fr',
         gap: 8,
         padding: '8px 0',
-        borderBottom: `0.5px solid ${colors.border}`,
+        borderBottom: `1px solid ${colors.border}`,
         fontSize: 12,
       }}
     >
@@ -64,8 +64,9 @@ export function SpecSheetCard({ label, build, estimates }: Props) {
   );
 
   return (
-    <div style={styles.panel}>
+    <div className="ug-card" style={{ padding: 24 }}>
       <div
+        className="ug-mono"
         style={{
           fontSize: 10,
           letterSpacing: '0.4em',
@@ -73,11 +74,12 @@ export function SpecSheetCard({ label, build, estimates }: Props) {
           marginBottom: 8,
         }}
       >
-        SPEC SHEET
+        // SPEC SHEET
       </div>
       <h3 style={{ fontSize: 18, margin: '0 0 16px', letterSpacing: '0.05em' }}>{label}</h3>
 
       <div
+        className="ug-mono"
         style={{
           display: 'grid',
           gridTemplateColumns: '1.2fr 1fr 1fr 0.8fr',
@@ -86,7 +88,7 @@ export function SpecSheetCard({ label, build, estimates }: Props) {
           fontSize: 9,
           letterSpacing: '0.3em',
           color: colors.textDim,
-          borderBottom: `0.5px solid ${colors.borderStrong}`,
+          borderBottom: `1px solid ${colors.borderStrong}`,
         }}
       >
         <div></div>
@@ -111,23 +113,24 @@ export function SpecSheetCard({ label, build, estimates }: Props) {
       {estimates && (
         <>
           <div
+            className="ug-mono"
             style={{
               marginTop: 16,
               fontSize: 10,
               letterSpacing: '0.4em',
               color: colors.textMuted,
               paddingBottom: 6,
-              borderBottom: `0.5px solid ${colors.borderStrong}`,
+              borderBottom: `1px solid ${colors.borderStrong}`,
             }}
           >
-            PERFORMANCE ESTIMATES
+            // PERFORMANCE ESTIMATES
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, padding: '12px 0' }}>
             <Stat label="0–60" value={estimates.zeroToSixty.toFixed(1)} unit="sec" />
             <Stat label="¼ Mile" value={estimates.quarterMile.toFixed(1)} unit="sec" />
             <Stat label="Trap Speed" value={estimates.trapSpeed.toFixed(0)} unit="mph" />
           </div>
-          <div style={{ fontSize: 10, color: colors.textDim, marginTop: 4 }}>
+          <div style={{ fontSize: 10, color: colors.textDim, marginTop: 4, fontFamily: fonts.sans }}>
             Estimates assume average conditions. Real results vary with weather, surface, gearing, and driver.
           </div>
         </>
@@ -139,7 +142,10 @@ export function SpecSheetCard({ label, build, estimates }: Props) {
 function Stat({ label, value, unit }: { label: string; value: string; unit: string }) {
   return (
     <div>
-      <div style={{ fontSize: 9, letterSpacing: '0.3em', color: colors.textDim, marginBottom: 4 }}>
+      <div
+        className="ug-mono"
+        style={{ fontSize: 9, letterSpacing: '0.3em', color: colors.textDim, marginBottom: 4 }}
+      >
         {label}
       </div>
       <div style={{ fontSize: 22, fontWeight: 700, color: colors.text }}>

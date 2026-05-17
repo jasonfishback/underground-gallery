@@ -1,7 +1,11 @@
 // components/race/RaceTicket.tsx
 //
-// Dragstrip timeslip-style result ticket. White paper, monospace, two
-// columns of times. Brand at top + bottom.
+// Dragstrip timeslip-style result ticket. Cream paper, monospace, two
+// columns of times. Brand at top + bottom. The off-white surface is
+// intentional — this is the "share card" that visually contrasts the
+// frosted-glass UI around it, like an actual printed slip.
+
+import { fonts } from '@/lib/design';
 
 type Props = {
   challengerLabel: string;
@@ -50,12 +54,13 @@ export function RaceTicket(props: Props) {
       margin: '24px auto',
       background: '#f5f1e6',
       color: '#1a1a1a',
-      fontFamily: 'ui-monospace, "JetBrains Mono", "Courier New", monospace',
+      fontFamily: fonts.mono,
       fontSize: 13,
       lineHeight: 1.6,
-      padding: '24px 28px',
-      boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-      borderRadius: 2,
+      padding: '28px 32px',
+      boxShadow:
+        '0 1px 0 rgba(255,255,255,0.04) inset, 0 12px 40px -8px rgba(0,0,0,0.65), 0 2px 6px rgba(0,0,0,0.45)',
+      borderRadius: 4,
     }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 16 }}>

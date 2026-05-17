@@ -3,7 +3,7 @@
 // Final result card displayed after the animation completes (or when
 // viewing a saved result).
 
-import { styles, colors, fonts } from '@/lib/design';
+import { colors, fonts } from '@/lib/design';
 import { RaceTicket } from './RaceTicket';
 
 type Props = {
@@ -53,16 +53,15 @@ export function RaceResultCard({
   return (
     <div style={{ width: '100%', maxWidth: 900, margin: '0 auto' }}>
       <div
+        className={isTie ? 'ug-card' : 'ug-glass-tinted'}
         style={{
-          background: isTie ? '#222' : colors.accentSoft,
-          border: `1px solid ${isTie ? colors.border : colors.accent}`,
-          padding: '24px 32px',
+          padding: '28px 32px',
           marginBottom: 16,
           textAlign: 'center',
         }}
       >
-        <div style={{ fontSize: 11, letterSpacing: '0.5em', color: colors.accent, marginBottom: 8 }}>
-          {RACE_LABELS[raceType] ?? raceType.toUpperCase()}
+        <div className="ug-mono" style={{ fontSize: 11, letterSpacing: '0.5em', color: colors.accent, marginBottom: 8 }}>
+          ∕∕ {RACE_LABELS[raceType] ?? raceType.toUpperCase()}
           {source && (
             <span style={{ marginLeft: 16, color: colors.textMuted }}>
               · {source === 'challenge' ? 'CHALLENGE' : 'PRACTICE'}
@@ -75,7 +74,7 @@ export function RaceResultCard({
             : `${challengerWon ? challengerCallsign ?? challengerLabel : opponentCallsign ?? opponentLabel} WINS`}
         </div>
         {!isTie && (
-          <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 8, fontFamily: fonts.mono, letterSpacing: '0.2em' }}>
+          <div className="ug-mono" style={{ fontSize: 12, color: colors.textMuted, marginTop: 8, letterSpacing: '0.2em' }}>
             BY {estimatedGap < 0.2 ? 'A FENDER' : `${estimatedGap.toFixed(2)} SECONDS`}
           </div>
         )}
@@ -98,10 +97,8 @@ export function RaceResultCard({
         />
       </div>
 
-      <div style={{ ...styles.panel, marginTop: 16 }}>
-        <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.textMuted, marginBottom: 8 }}>
-          SUMMARY
-        </div>
+      <div className="ug-card" style={{ marginTop: 16, padding: 24 }}>
+        <div className="ug-label">SUMMARY</div>
         <div style={{ fontSize: 14, color: colors.text, lineHeight: 1.7 }}>{summary}</div>
         <div style={{ fontSize: 10, color: colors.textDim, marginTop: 16, fontStyle: 'italic' }}>
           Estimates only — based on power-to-weight, drivetrain, transmission, and tires.
@@ -138,14 +135,15 @@ function SideCard({
 }) {
   return (
     <div
+      className="ug-card"
       style={{
         padding: 20,
-        background: '#111',
-        border: `0.5px solid ${isWinner ? colors.accent : colors.border}`,
+        borderColor: isWinner ? colors.accentBorder : undefined,
+        boxShadow: isWinner ? '0 0 24px rgba(255, 42, 42, 0.18), inset 0 1px 0 rgba(255,255,255,0.06)' : undefined,
       }}
     >
       {callsign && (
-        <div style={{ fontSize: 10, letterSpacing: '0.3em', color: colors.accent, marginBottom: 4 }}>
+        <div className="ug-mono" style={{ fontSize: 10, letterSpacing: '0.3em', color: colors.accent, marginBottom: 4 }}>
           @{callsign}
         </div>
       )}
@@ -153,7 +151,7 @@ function SideCard({
       <div style={{ display: 'flex', gap: 16 }}>
         {et !== null && (
           <div>
-            <div style={{ fontSize: 9, letterSpacing: '0.3em', color: colors.textDim }}>ET</div>
+            <div className="ug-mono" style={{ fontSize: 9, letterSpacing: '0.3em', color: colors.textDim }}>ET</div>
             <div style={{ fontSize: 22, fontWeight: 700, fontFamily: fonts.mono }}>
               {et.toFixed(2)}
               <span style={{ fontSize: 11, marginLeft: 4, color: colors.textMuted }}>s</span>
@@ -162,7 +160,7 @@ function SideCard({
         )}
         {trap !== null && (
           <div>
-            <div style={{ fontSize: 9, letterSpacing: '0.3em', color: colors.textDim }}>TRAP</div>
+            <div className="ug-mono" style={{ fontSize: 9, letterSpacing: '0.3em', color: colors.textDim }}>TRAP</div>
             <div style={{ fontSize: 22, fontWeight: 700, fontFamily: fonts.mono }}>
               {trap.toFixed(0)}
               <span style={{ fontSize: 11, marginLeft: 4, color: colors.textMuted }}>mph</span>
@@ -170,8 +168,6 @@ function SideCard({
           </div>
         )}
       </div>
-    
-
     </div>
   );
 }

@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
+import { BootIntro } from '@/components/landing/BootIntro';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +47,9 @@ export default async function LandingPage() {
         fontFamily: '"Inter Tight", system-ui, sans-serif',
       }}
     >
+      {/* Cinematic boot-up overlay. Plays once per browser session, then
+          unmounts so the landing below is interactive. Tap-to-skip. */}
+      <BootIntro />
       {/* Top bar */}
       <header
         style={{

@@ -73,6 +73,48 @@ async function approveAction(formData: FormData) {
   redirect(`/approve/${appId}?done=1`);
 }
 
+const pageStyle: React.CSSProperties = {
+  minHeight: '100vh',
+  background: colors.bg,
+  color: colors.text,
+  padding: 24,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontFamily: fonts.sans,
+};
+
+const cardStyle: React.CSSProperties = {
+  maxWidth: 460,
+  width: '100%',
+  textAlign: 'center',
+  padding: 32,
+};
+
+const kickerStyle = (color: string): React.CSSProperties => ({
+  fontSize: 11,
+  color,
+  fontFamily: fonts.mono,
+  letterSpacing: '0.4em',
+  marginBottom: 16,
+  fontWeight: 700,
+});
+
+const h1Style: React.CSSProperties = {
+  fontSize: 32,
+  fontWeight: 800,
+  margin: '0 0 16px',
+  letterSpacing: '-0.02em',
+  lineHeight: 1.1,
+};
+
+const bodyStyle: React.CSSProperties = {
+  fontSize: 14,
+  color: colors.textMuted,
+  marginBottom: 24,
+  lineHeight: 1.6,
+};
+
 export default async function ApprovePage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ done?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
@@ -80,12 +122,18 @@ export default async function ApprovePage({ params, searchParams }: { params: Pr
 
   if (!session?.user?.id) {
     return (
-      <main style={{ minHeight: '100vh', background: colors.bg, color: colors.text, padding: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fonts.sans }}>
-        <div style={{ maxWidth: 460, textAlign: 'center' }}>
-          <div style={{ fontSize: 11, color: colors.accent, fontFamily: fonts.mono, letterSpacing: '0.4em', marginBottom: 16 }}>SIGN IN REQUIRED</div>
-          <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 16px' }}>Sign in to approve.</h1>
-          <p style={{ fontSize: 14, color: colors.textMuted, marginBottom: 24 }}>You need to sign in with the email tied to your invite code first.</p>
-          <a href={`/auth/signin?next=/approve/${id}`} style={{ display: 'inline-block', padding: '14px 28px', background: colors.accent, color: '#0a0a0a', textDecoration: 'none', fontFamily: fonts.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.4em' }}>SIGN IN</a>
+      <main style={pageStyle}>
+        <div className="ug-card" style={cardStyle}>
+          <div style={kickerStyle(colors.accent)}>∕∕ SIGN IN REQUIRED</div>
+          <h1 style={h1Style}>Sign in to approve.</h1>
+          <p style={bodyStyle}>You need to sign in with the email tied to your invite code first.</p>
+          <a
+            href={`/auth/signin?next=/approve/${id}`}
+            className="ug-btn ug-btn-primary"
+            style={{ textDecoration: 'none' }}
+          >
+            SIGN IN
+          </a>
         </div>
       </main>
     );
@@ -95,10 +143,10 @@ export default async function ApprovePage({ params, searchParams }: { params: Pr
 
   if (!app) {
     return (
-      <main style={{ minHeight: '100vh', background: colors.bg, color: colors.text, padding: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fonts.sans }}>
-        <div style={{ maxWidth: 460, textAlign: 'center' }}>
-          <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 16px' }}>Link not found.</h1>
-          <p style={{ fontSize: 14, color: colors.textMuted }}>This approval link is invalid or expired.</p>
+      <main style={pageStyle}>
+        <div className="ug-card" style={cardStyle}>
+          <h1 style={h1Style}>Link not found.</h1>
+          <p style={bodyStyle}>This approval link is invalid or expired.</p>
         </div>
       </main>
     );
@@ -110,10 +158,10 @@ export default async function ApprovePage({ params, searchParams }: { params: Pr
 
   if (!isInviter && !isAdmin) {
     return (
-      <main style={{ minHeight: '100vh', background: colors.bg, color: colors.text, padding: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fonts.sans }}>
-        <div style={{ maxWidth: 460, textAlign: 'center' }}>
-          <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 16px' }}>Not your invite.</h1>
-          <p style={{ fontSize: 14, color: colors.textMuted }}>Only the original inviter or an admin can approve this user.</p>
+      <main style={pageStyle}>
+        <div className="ug-card" style={cardStyle}>
+          <h1 style={h1Style}>Not your invite.</h1>
+          <p style={bodyStyle}>Only the original inviter or an admin can approve this user.</p>
         </div>
       </main>
     );
@@ -123,12 +171,14 @@ export default async function ApprovePage({ params, searchParams }: { params: Pr
 
   if (sp.done === '1' || app.status === 'approved') {
     return (
-      <main style={{ minHeight: '100vh', background: colors.bg, color: colors.text, padding: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fonts.sans }}>
-        <div style={{ maxWidth: 460, textAlign: 'center' }}>
-          <div style={{ fontSize: 11, color: 'rgb(120,220,150)', fontFamily: fonts.mono, letterSpacing: '0.4em', marginBottom: 16 }}>APPROVED</div>
-          <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 16px' }}>{target?.email} is in.</h1>
-          <p style={{ fontSize: 14, color: colors.textMuted, marginBottom: 24 }}>They got the welcome email. Tell them to check their inbox.</p>
-          <a href="/me" style={{ display: 'inline-block', padding: '12px 24px', background: 'transparent', color: colors.text, border: `0.5px solid ${colors.border}`, textDecoration: 'none', fontFamily: fonts.mono, fontSize: 11, letterSpacing: '0.3em' }}>BACK TO GARAGE</a>
+      <main style={pageStyle}>
+        <div className="ug-card" style={cardStyle}>
+          <div style={kickerStyle(colors.success)}>∕∕ APPROVED</div>
+          <h1 style={h1Style}>{target?.email} is in.</h1>
+          <p style={bodyStyle}>They got the welcome email. Tell them to check their inbox.</p>
+          <a href="/me" className="ug-btn ug-btn-ghost" style={{ textDecoration: 'none' }}>
+            ← BACK TO GARAGE
+          </a>
         </div>
       </main>
     );
@@ -136,30 +186,36 @@ export default async function ApprovePage({ params, searchParams }: { params: Pr
 
   if (app.status === 'rejected') {
     return (
-      <main style={{ minHeight: '100vh', background: colors.bg, color: colors.text, padding: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fonts.sans }}>
-        <div style={{ maxWidth: 460, textAlign: 'center' }}>
-          <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 16px' }}>Already decided.</h1>
-          <p style={{ fontSize: 14, color: colors.textMuted }}>This application was rejected by an admin.</p>
+      <main style={pageStyle}>
+        <div className="ug-card" style={cardStyle}>
+          <h1 style={h1Style}>Already decided.</h1>
+          <p style={bodyStyle}>This application was rejected by an admin.</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: colors.bg, color: colors.text, padding: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fonts.sans }}>
-      <div style={{ maxWidth: 460, width: '100%', textAlign: 'center' }}>
-        <div style={{ fontSize: 11, color: colors.accent, fontFamily: fonts.mono, letterSpacing: '0.4em', marginBottom: 16 }}>VOUCH FOR YOUR INVITE</div>
-        <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 16px' }}>{target?.email}</h1>
-        <p style={{ fontSize: 14, color: colors.textMuted, marginBottom: 32, lineHeight: 1.6 }}>
+    <main style={pageStyle}>
+      <div className="ug-card" style={cardStyle}>
+        <div style={kickerStyle(colors.accent)}>∕∕ VOUCH FOR YOUR INVITE</div>
+        <h1 style={h1Style}>{target?.email}</h1>
+        <p style={{ ...bodyStyle, marginBottom: 32 }}>
           They used your invite code. Approving lets them into the garage immediately.
         </p>
         <form action={approveAction}>
           <input type="hidden" name="appId" value={id} />
-          <button type="submit" style={{ width: '100%', padding: '16px 24px', background: colors.accent, color: '#0a0a0a', border: 'none', fontFamily: fonts.mono, fontSize: 12, fontWeight: 700, letterSpacing: '0.4em', cursor: 'pointer', marginBottom: 16 }}>
+          <button type="submit" className="ug-btn ug-btn-primary ug-btn-block" style={{ marginBottom: 16 }}>
             APPROVE
           </button>
         </form>
-        <a href="/me" style={{ display: 'inline-block', padding: '12px 24px', color: colors.textMuted, textDecoration: 'none', fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.3em' }}>NOT NOW</a>
+        <a
+          href="/me"
+          className="ug-btn ug-btn-text"
+          style={{ textDecoration: 'none', fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.3em' }}
+        >
+          NOT NOW
+        </a>
       </div>
     </main>
   );

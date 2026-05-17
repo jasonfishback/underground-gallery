@@ -30,6 +30,7 @@ import {
   addCarFromManual,
   type SpecSearchResult,
 } from "@/app/garage/actions";
+import { colors } from "@/lib/design";
 
 type NhtsaResult = {
   source: "nhtsa";
@@ -258,18 +259,18 @@ export default function AddCarWizard({ open, onClose }: Props) {
       <div className="ug-modal" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, letterSpacing: "0.04em" }}>
-            ADD VEHICLE
+            // ADD VEHICLE
           </h2>
           <button
             onClick={onClose}
             aria-label="Close"
             style={{
               background: "rgba(255,255,255,0.04)",
-              border: "1px solid var(--ug-border)",
+              border: `1px solid ${colors.border}`,
               borderRadius: 999,
               width: 32,
               height: 32,
-              color: "var(--ug-fg-dim)",
+              color: colors.textMuted,
               fontSize: 16,
               cursor: "pointer",
               lineHeight: 1,
@@ -293,23 +294,23 @@ export default function AddCarWizard({ open, onClose }: Props) {
 
             <div style={{ marginTop: 16, minHeight: 200 }}>
               {query.trim().length < 2 ? (
-                <p style={{ fontSize: 13, color: "var(--ug-fg-muted)", margin: 0 }}>
+                <p style={{ fontSize: 13, color: colors.textMuted, margin: 0 }}>
                   Type a year, make, and model. We search a curated catalog plus
                   NHTSA's full database — every U.S. car ever sold.
                 </p>
               ) : searching ? (
-                <p style={{ fontSize: 13, color: "var(--ug-fg-muted)", margin: 0 }}>
+                <p style={{ fontSize: 13, color: colors.textMuted, margin: 0 }}>
                   Searching…
                 </p>
               ) : hits.length === 0 ? (
-                <p style={{ fontSize: 13, color: "var(--ug-fg-muted)", margin: 0 }}>
+                <p style={{ fontSize: 13, color: colors.textMuted, margin: 0 }}>
                   No matches. You can{" "}
                   <button
                     onClick={handleManual}
                     style={{
                       background: "transparent",
                       border: "none",
-                      color: "var(--ug-accent)",
+                      color: colors.accent,
                       textDecoration: "underline",
                       cursor: "pointer",
                       padding: 0,
@@ -392,7 +393,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
 
         {step === "manual" && (
           <div>
-            <p style={{ fontSize: 14, color: "var(--ug-fg-dim)", margin: "0 0 20px" }}>
+            <p style={{ fontSize: 14, color: colors.textMuted, margin: "0 0 20px" }}>
               Enter your vehicle details. You can refine HP, weight, and drivetrain
               later in the spec sheet.
             </p>

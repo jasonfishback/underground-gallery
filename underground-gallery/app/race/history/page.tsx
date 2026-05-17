@@ -7,7 +7,7 @@ import { alias } from 'drizzle-orm/pg-core';
 import { db } from '@/lib/db';
 import { raceResults, vehicles, users } from '@/lib/db/schema';
 import { getAuthContext } from '@/lib/auth/gates';
-import { colors, fonts, styles } from '@/lib/design';
+import { colors, fonts } from '@/lib/design';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,8 +82,8 @@ export default async function RaceHistoryPage({
   return (
     <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
-        <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
-          RACE HISTORY
+        <div className="ug-mono" style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
+          ∕∕ RACE HISTORY
         </div>
         <h1 style={{ fontSize: 32, margin: '0 0 16px', letterSpacing: '0.05em' }}>The Logbook.</h1>
         <p style={{ fontSize: 13, color: colors.textMuted, marginBottom: 32, maxWidth: 600 }}>
@@ -92,7 +92,7 @@ export default async function RaceHistoryPage({
         </p>
 
         {/* Filter bar */}
-        <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
           <FilterPill label="ALL TYPES" active={!sp.type} href="/race/history" />
           {Object.entries(RACE_LABEL).map(([k, v]) => (
             <FilterPill
@@ -114,7 +114,7 @@ export default async function RaceHistoryPage({
         )}
 
         {rows.length === 0 ? (
-          <div style={{ ...styles.panel, textAlign: 'center', padding: 48, color: colors.textMuted }}>
+          <div className="ug-card" style={{ textAlign: 'center', padding: 48, color: colors.textMuted }}>
             No races logged yet. Be the first.
           </div>
         ) : (
@@ -126,13 +126,12 @@ export default async function RaceHistoryPage({
                 <Link
                   key={r.id}
                   href={`/race/result/${r.id}`}
+                  className="ug-card"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr auto 1fr auto',
                     gap: 16,
                     padding: '14px 20px',
-                    background: '#111',
-                    border: `0.5px solid ${colors.border}`,
                     color: colors.text,
                     textDecoration: 'none',
                     fontFamily: fonts.mono,
@@ -182,15 +181,14 @@ function FilterPill({ label, active, href }: { label: string; active: boolean; h
   return (
     <Link
       href={href}
+      className="ug-pill ug-mono"
       style={{
-        padding: '6px 14px',
         fontSize: 10,
         letterSpacing: '0.3em',
-        background: active ? colors.accentSoft : 'transparent',
-        border: `0.5px solid ${active ? colors.accentBorder : colors.border}`,
+        background: active ? colors.accentSoft : 'rgba(255,255,255,0.03)',
+        border: `1px solid ${active ? colors.accentBorder : colors.border}`,
         color: active ? colors.accent : colors.textMuted,
         textDecoration: 'none',
-        fontFamily: fonts.mono,
         fontWeight: 700,
       }}
     >
@@ -235,7 +233,7 @@ function Side({
               fontSize: 7,
               letterSpacing: '0.2em',
               color: colors.accent,
-              border: `0.5px solid ${colors.accent}`,
+              border: `1px solid ${colors.accent}`,
               padding: '1px 4px',
             }}
           >

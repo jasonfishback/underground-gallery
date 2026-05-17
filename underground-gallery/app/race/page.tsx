@@ -116,14 +116,14 @@ export default async function RacePage() {
         <div style={{ marginTop: 64, textAlign: 'center' }}>
           <a
             href="/race/history"
+            className="ug-mono"
             style={{
               fontSize: 11,
               letterSpacing: '0.3em',
               color: colors.textMuted,
               textDecoration: 'none',
-              borderBottom: `0.5px solid ${colors.border}`,
+              borderBottom: `1px solid ${colors.border}`,
               paddingBottom: 4,
-              fontFamily: fonts.mono,
             }}
           >
             VIEW RACE HISTORY →

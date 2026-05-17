@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { colors, fonts } from '@/lib/design';
 
 export const metadata: Metadata = { title: 'Privacy Policy' };
 
@@ -50,7 +51,7 @@ export default function Privacy() {
 function Header() {
   return (
     <header style={headerStyle}>
-      <Link href="/" style={{ ...linkStyle, fontFamily: '"JetBrains Mono",monospace', fontSize: 11, letterSpacing: '0.3em', textDecoration: 'none', color: '#f5f6f7', fontWeight: 700 }}>
+      <Link href="/" style={{ fontFamily: fonts.mono, fontSize: 11, letterSpacing: '0.3em', textDecoration: 'none', color: colors.text, fontWeight: 700 }}>
         ∕∕ UNDERGROUND&nbsp;GALLERY
       </Link>
     </header>
@@ -69,45 +70,45 @@ function Footer() {
 }
 
 const pageStyle: React.CSSProperties = {
-  minHeight: '100vh', background: '#05060a', color: '#c9ccd1',
-  fontFamily: '"Inter Tight",system-ui,sans-serif',
+  minHeight: '100vh', background: colors.bg, color: colors.textMuted,
+  fontFamily: fonts.sans,
   padding: '40px 24px 80px',
 };
 const headerStyle: React.CSSProperties = {
   maxWidth: 720, margin: '0 auto 48px', paddingBottom: 24,
-  borderBottom: '0.5px solid rgba(255,255,255,0.1)',
+  borderBottom: `1px solid ${colors.border}`,
 };
 const articleStyle: React.CSSProperties = {
   maxWidth: 720, margin: '0 auto', lineHeight: 1.7, fontSize: 15,
 };
 const kickerStyle: React.CSSProperties = {
-  fontFamily: '"JetBrains Mono",monospace', fontSize: 11, color: '#ff2a2a',
+  fontFamily: fonts.mono, fontSize: 11, color: colors.accent,
   letterSpacing: '0.3em', fontWeight: 700, margin: '0 0 16px',
 };
 const h1Style: React.CSSProperties = {
-  fontSize: 40, fontWeight: 800, color: '#f5f6f7', letterSpacing: '-0.02em',
+  fontSize: 40, fontWeight: 800, color: colors.text, letterSpacing: '-0.02em',
   margin: '0 0 12px',
 };
 const h2Style: React.CSSProperties = {
-  fontSize: 18, fontWeight: 700, color: '#f5f6f7', letterSpacing: '-0.01em',
+  fontSize: 18, fontWeight: 700, color: colors.text, letterSpacing: '-0.01em',
   margin: '32px 0 12px',
 };
 const metaStyle: React.CSSProperties = {
-  fontFamily: '"JetBrains Mono",monospace', fontSize: 11, color: 'rgba(201,204,209,0.5)',
+  fontFamily: fonts.mono, fontSize: 11, color: colors.textDim,
   letterSpacing: '0.18em', textTransform: 'uppercase', margin: '0 0 24px',
 };
-const linkStyle: React.CSSProperties = { color: '#ff2a2a', textDecoration: 'underline' };
+const linkStyle: React.CSSProperties = { color: colors.accent, textDecoration: 'underline' };
 const codeStyle: React.CSSProperties = {
-  fontFamily: '"JetBrains Mono",monospace', fontSize: 13,
-  background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 2,
+  fontFamily: fonts.mono, fontSize: 13,
+  background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4,
 };
 const footerStyle: React.CSSProperties = {
   maxWidth: 720, margin: '64px auto 0', paddingTop: 32,
-  borderTop: '0.5px solid rgba(255,255,255,0.1)',
+  borderTop: `1px solid ${colors.border}`,
   display: 'flex', gap: 24, flexWrap: 'wrap',
-  fontFamily: '"JetBrains Mono",monospace', fontSize: 11, letterSpacing: '0.18em',
+  fontFamily: fonts.mono, fontSize: 11, letterSpacing: '0.18em',
   textTransform: 'uppercase',
 };
 const footerLinkStyle: React.CSSProperties = {
-  color: 'rgba(201,204,209,0.6)', textDecoration: 'none',
+  color: colors.textMuted, textDecoration: 'none',
 };

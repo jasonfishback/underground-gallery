@@ -170,73 +170,55 @@ export default function AddModModal({ vehicleId, open, onClose, existingCatalogI
   });
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.85)",
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-      }}
-    >
+    <div className="ug-modal-backdrop" onClick={onClose}>
       <div
+        className="ug-modal"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          background: colors.bgElevated,
-          border: `0.5px solid ${colors.border}`,
-          maxWidth: 640,
-          width: "100%",
-          maxHeight: "90vh",
-          overflow: "auto",
-          color: colors.text,
-          fontFamily: fonts.sans,
-        }}
+        style={{ maxWidth: 640, padding: 0, overflow: "hidden" }}
       >
         {/* Header */}
         <div
           style={{
             padding: "16px 20px",
-            borderBottom: `0.5px solid ${colors.border}`,
+            borderBottom: `1px solid ${colors.border}`,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
           }}
         >
           <h2
+            className="ug-mono"
             style={{
               margin: 0,
               fontSize: 11,
               letterSpacing: "0.4em",
               color: colors.accent,
-              fontFamily: fonts.mono,
               fontWeight: 700,
             }}
           >
-            ADD MODIFICATION
+            // ADD MODIFICATION
           </h2>
           <button
             onClick={onClose}
+            aria-label="Close"
             style={{
-              background: "transparent",
-              border: "none",
+              background: "rgba(255,255,255,0.04)",
+              border: `1px solid ${colors.border}`,
+              borderRadius: 999,
+              width: 32,
+              height: 32,
               color: colors.textMuted,
-              fontSize: 20,
+              fontSize: 16,
               cursor: "pointer",
               lineHeight: 1,
-              padding: 0,
             }}
-            aria-label="Close"
           >
             ×
           </button>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: "flex", borderBottom: `0.5px solid ${colors.border}` }}>
+        <div style={{ display: "flex", borderBottom: `1px solid ${colors.border}` }}>
           <TabBtn active={tab === "catalog"} onClick={() => setTab("catalog")}>
             FROM CATALOG
           </TabBtn>
@@ -245,138 +227,143 @@ export default function AddModModal({ vehicleId, open, onClose, existingCatalogI
           </TabBtn>
         </div>
 
-        <div style={{ padding: 20 }}>
+        <div style={{ padding: 20, maxHeight: "70vh", overflowY: "auto" }}>
           {err && (
-            <div
-              style={{
-                color: colors.danger,
-                fontSize: 12,
-                marginBottom: 12,
-                fontFamily: fonts.mono,
-              }}
-            >
+            <div className="ug-banner ug-banner-error" style={{ marginBottom: 12 }}>
               {err}
             </div>
           )}
 
           {tab === "catalog" ? (
             <div>
+              <label className="ug-label" htmlFor="modCatalogSearch">
+                Search catalog
+              </label>
               <input
+                id="modCatalogSearch"
                 type="text"
                 value={catalogQuery}
                 onChange={(e) => setCatalogQuery(e.target.value)}
                 placeholder="Search exhaust, BMW M3, etc."
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  background: colors.bg,
-                  border: `0.5px solid ${colors.border}`,
-                  color: colors.text,
-                  fontSize: 13,
-                  fontFamily: fonts.sans,
-                  marginBottom: 12,
-                }}
+                className="ug-input"
+                style={{ marginBottom: 12 }}
               />
 
               {catalogLoading ? (
                 <p style={{ color: colors.textMuted, fontSize: 12 }}>Loading…</p>
               ) : filteredCatalog.length === 0 ? (
                 <div
+                  className="ug-card"
                   style={{
                     padding: 16,
                     textAlign: "center",
                     color: colors.textMuted,
                     fontSize: 12,
-                    border: `0.5px dashed ${colors.border}`,
+                    borderStyle: "dashed",
                   }}
                 >
                   No catalog mods match. Try the <strong>CUSTOM</strong> tab.
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 360, overflow: "auto" }}>
-                  {filteredCatalog.map((m) => (
-                    <button
-                      key={m.id}
-                      onClick={() => handlePickCatalog(m.id)}
-                      disabled={submitting || existingCatalogIds.includes(m.id) || justAddedId === m.id}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "auto 1fr auto",
-                        gap: 12,
-                        padding: "10px 12px",
-                        background: justAddedId === m.id ? "rgba(80,200,120,0.12)" : (existingCatalogIds.includes(m.id) ? "rgba(255,255,255,0.02)" : "transparent"),
-                        border: justAddedId === m.id ? `0.5px solid rgb(120,220,150)` : `0.5px solid ${colors.border}`,
-                        color: existingCatalogIds.includes(m.id) ? colors.textDim : colors.text,
-                        textAlign: "left",
-                        cursor: (submitting || existingCatalogIds.includes(m.id)) ? "not-allowed" : "pointer",
-                        alignItems: "center",
-                        opacity: existingCatalogIds.includes(m.id) ? 0.5 : 1,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: fonts.mono,
-                          fontSize: 9,
-                          letterSpacing: "0.3em",
-                          color: colors.textMuted,
-                          fontWeight: 700,
-                          minWidth: 70,
-                        }}
-                      >
-                        {m.category?.toUpperCase() ?? "OTHER"}
-                      </span>
-                      <span style={{ fontSize: 13 }}>
-                        {m.brand ? <strong>{m.brand}</strong> : null} {m.name}
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: fonts.mono,
-                          fontSize: 11,
-                          color: justAddedId === m.id
-                            ? "rgb(120,220,150)"
-                            : existingCatalogIds.includes(m.id)
-                              ? colors.textDim
-                              : (m.hpDelta && m.hpDelta > 0 ? colors.accent : colors.textDim),
-                          fontWeight: (justAddedId === m.id || existingCatalogIds.includes(m.id)) ? 700 : 400,
-                          letterSpacing: (justAddedId === m.id || existingCatalogIds.includes(m.id)) ? "0.2em" : "0",
-                        }}
-                      >
-                        {justAddedId === m.id
-                          ? "+ ADDED"
-                          : existingCatalogIds.includes(m.id)
-                            ? "ALREADY ADDED"
-                            : (m.hpDelta != null ? `${m.hpDelta > 0 ? "+" : ""}${m.hpDelta} hp` : "")}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                <ul
+                  className="ug-list"
+                  style={{ maxHeight: 360, overflow: "auto" }}
+                >
+                  {filteredCatalog.map((m) => {
+                    const alreadyAdded = existingCatalogIds.includes(m.id);
+                    const justAdded = justAddedId === m.id;
+                    const disabled = submitting || alreadyAdded || justAdded;
+                    return (
+                      <li key={m.id}>
+                        <button
+                          onClick={() => handlePickCatalog(m.id)}
+                          disabled={disabled}
+                          className="ug-list-row"
+                          style={{
+                            background: justAdded
+                              ? "rgba(120,220,150,0.10)"
+                              : undefined,
+                            opacity: alreadyAdded ? 0.5 : 1,
+                            cursor: disabled ? "not-allowed" : "pointer",
+                            display: "grid",
+                            gridTemplateColumns: "auto 1fr auto",
+                            gap: 12,
+                            alignItems: "center",
+                          }}
+                        >
+                          <span
+                            className="ug-mono"
+                            style={{
+                              fontSize: 9,
+                              letterSpacing: "0.3em",
+                              color: colors.textMuted,
+                              fontWeight: 700,
+                              minWidth: 70,
+                            }}
+                          >
+                            {m.category?.toUpperCase() ?? "OTHER"}
+                          </span>
+                          <span style={{ fontSize: 13 }}>
+                            {m.brand ? <strong>{m.brand}</strong> : null} {m.name}
+                          </span>
+                          <span
+                            className="ug-list-meta"
+                            style={{
+                              color: justAdded
+                                ? colors.success
+                                : alreadyAdded
+                                  ? colors.textDim
+                                  : m.hpDelta && m.hpDelta > 0
+                                    ? colors.accent
+                                    : colors.textDim,
+                              fontWeight: justAdded || alreadyAdded ? 700 : 400,
+                              letterSpacing:
+                                justAdded || alreadyAdded ? "0.2em" : "0",
+                            }}
+                          >
+                            {justAdded
+                              ? "+ ADDED"
+                              : alreadyAdded
+                                ? "ALREADY ADDED"
+                                : m.hpDelta != null
+                                  ? `${m.hpDelta > 0 ? "+" : ""}${m.hpDelta} hp`
+                                  : ""}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
               )}
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <Field label="Name *">
+              <Field label="Name *" htmlFor="customModName">
                 <input
+                  id="customModName"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Catback exhaust"
-                  style={inputStyle}
+                  className="ug-input"
                 />
               </Field>
-              <Field label="Brand">
+              <Field label="Brand" htmlFor="customModBrand">
                 <input
+                  id="customModBrand"
                   type="text"
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
                   placeholder="e.g. Borla"
-                  style={inputStyle}
+                  className="ug-input"
                 />
               </Field>
-              <Field label="Category">
+              <Field label="Category" htmlFor="customModCategory">
                 <select
+                  id="customModCategory"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  style={inputStyle}
+                  className="ug-input"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c} value={c}>
@@ -385,44 +372,54 @@ export default function AddModModal({ vehicleId, open, onClose, existingCatalogI
                   ))}
                 </select>
               </Field>
-              <Field label="HP gain (optional)">
+              <Field label="HP gain (optional)" htmlFor="customModHp">
                 <input
+                  id="customModHp"
                   type="number"
                   value={hpDelta}
                   onChange={(e) => setHpDelta(e.target.value)}
                   placeholder="e.g. 15"
-                  style={inputStyle}
+                  className="ug-input"
                 />
               </Field>
-              <Field label="Notes (optional)">
+              <Field label="Notes (optional)" htmlFor="customModNotes">
                 <input
+                  id="customModNotes"
                   type="text"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="e.g. Stainless, dyno-tuned"
-                  style={inputStyle}
+                  className="ug-input"
                 />
               </Field>
 
-              <button
-                onClick={handleSubmitCustom}
-                disabled={submitting}
+              <div
                 style={{
                   marginTop: 8,
-                  padding: "10px 18px",
-                  background: colors.accent,
-                  color: "#0a0a0a",
-                  border: "none",
-                  fontFamily: fonts.mono,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: "0.3em",
-                  cursor: submitting ? "wait" : "pointer",
-                  opacity: submitting ? 0.6 : 1,
+                  display: "flex",
+                  flexDirection: "row-reverse",
+                  gap: 12,
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
                 }}
               >
-                {submitting ? "ADDING…" : "ADD MOD"}
-              </button>
+                <button
+                  onClick={handleSubmitCustom}
+                  disabled={submitting}
+                  className="ug-btn ug-btn-primary"
+                  style={{ flex: 1, minWidth: 200 }}
+                >
+                  {submitting ? "Adding…" : "Add mod →"}
+                </button>
+                <button
+                  onClick={onClose}
+                  disabled={submitting}
+                  className="ug-btn ug-btn-ghost"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -431,33 +428,22 @@ export default function AddModModal({ vehicleId, open, onClose, existingCatalogI
   );
 }
 
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "8px 10px",
-  background: "#0a0a0a",
-  border: "0.5px solid #222",
-  color: "#fafafa",
-  fontSize: 13,
-  fontFamily: "system-ui, -apple-system, sans-serif",
-};
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <label style={{ display: "block" }}>
-      <div
-        style={{
-          fontSize: 9,
-          letterSpacing: "0.3em",
-          color: "#888",
-          fontFamily: "ui-monospace, SFMono-Regular, monospace",
-          fontWeight: 700,
-          marginBottom: 4,
-        }}
-      >
-        {label.toUpperCase()}
-      </div>
+    <div>
+      <label className="ug-label" htmlFor={htmlFor}>
+        {label}
+      </label>
       {children}
-    </label>
+    </div>
   );
 }
 
@@ -473,18 +459,21 @@ function TabBtn({
   return (
     <button
       onClick={onClick}
+      className="ug-mono"
       style={{
         flex: 1,
         padding: "12px",
-        background: active ? "#111" : "transparent",
+        background: active ? "rgba(255,255,255,0.04)" : "transparent",
         border: "none",
-        borderBottom: active ? "2px solid #ff3030" : "2px solid transparent",
-        color: active ? "#fafafa" : "#888",
-        fontFamily: "ui-monospace, SFMono-Regular, monospace",
+        borderBottom: active
+          ? `2px solid ${colors.accent}`
+          : "2px solid transparent",
+        color: active ? colors.text : colors.textMuted,
         fontSize: 10,
         fontWeight: 700,
         letterSpacing: "0.3em",
         cursor: "pointer",
+        fontFamily: fonts.mono,
       }}
     >
       {children}

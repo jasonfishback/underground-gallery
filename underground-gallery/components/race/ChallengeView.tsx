@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { acceptChallenge, declineChallenge, runChallenge } from '@/app/race/actions';
 import { subscribeToRace, unsubscribeFromRace } from '@/lib/pusher/client';
-import { styles, colors, fonts } from '@/lib/design';
+import { colors, fonts } from '@/lib/design';
 
 const RACE_LABEL: Record<string, string> = {
   zero_sixty: '0–60 SPRINT',
@@ -122,22 +122,13 @@ export function ChallengeView({
   return (
     <div>
       {justSent && (
-        <div
-          style={{
-            padding: 16,
-            background: colors.accentSoft,
-            border: `1px solid ${colors.accent}`,
-            marginBottom: 24,
-            fontSize: 13,
-            color: colors.accent,
-          }}
-        >
+        <div className="ug-banner ug-banner-success" style={{ marginBottom: 24 }}>
           ✓ Challenge sent. {opponent.callsign ? `@${opponent.callsign}` : 'They'} will be notified by email and in-app.
         </div>
       )}
 
-      <div style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
-        CHALLENGE · {RACE_LABEL[raceType] ?? raceType.toUpperCase()}
+      <div className="ug-mono" style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, marginBottom: 8 }}>
+        ∕∕ CHALLENGE · {RACE_LABEL[raceType] ?? raceType.toUpperCase()}
       </div>
       <h1 style={{ fontSize: 28, margin: '0 0 24px', letterSpacing: '0.05em' }}>
         {status === 'pending' && (isOpponent ? 'You\'ve been challenged.' : 'Awaiting response…')}
@@ -149,6 +140,7 @@ export function ChallengeView({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 24, alignItems: 'stretch', marginBottom: 32 }}>
         <ParticipantCard p={challenger} role="CHALLENGER" />
         <div
+          className="ug-mono"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -156,7 +148,6 @@ export function ChallengeView({
             fontSize: 36,
             color: colors.accent,
             fontWeight: 700,
-            fontFamily: fonts.mono,
             letterSpacing: '0.1em',
           }}
         >
@@ -166,16 +157,14 @@ export function ChallengeView({
       </div>
 
       {message && (
-        <div style={{ ...styles.panel, marginBottom: 24 }}>
-          <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.textMuted, marginBottom: 8 }}>
-            MESSAGE
-          </div>
+        <div className="ug-card" style={{ padding: 20, marginBottom: 24 }}>
+          <div className="ug-label">MESSAGE</div>
           <div style={{ fontSize: 14, fontStyle: 'italic', color: colors.text }}>"{message}"</div>
         </div>
       )}
 
       {error && (
-        <div style={{ padding: '10px 14px', border: `0.5px solid ${colors.accent}`, color: colors.accent, fontSize: 12, marginBottom: 16 }}>
+        <div className="ug-banner ug-banner-error" style={{ marginBottom: 16 }}>
           {error}
         </div>
       )}
@@ -184,10 +173,10 @@ export function ChallengeView({
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
         {status === 'pending' && isOpponent && (
           <>
-            <button onClick={handleDecline} disabled={submitting} style={styles.buttonGhost}>
+            <button onClick={handleDecline} disabled={submitting} className="ug-btn ug-btn-ghost">
               DECLINE
             </button>
-            <button onClick={handleAccept} disabled={submitting} style={{ ...styles.buttonPrimary, padding: '14px 32px', fontSize: 13 }}>
+            <button onClick={handleAccept} disabled={submitting} className="ug-btn ug-btn-primary">
               {submitting ? 'WORKING…' : 'ACCEPT CHALLENGE'}
             </button>
           </>
@@ -202,19 +191,18 @@ export function ChallengeView({
           <button
             onClick={handleStartRace}
             disabled={submitting}
+            className="ug-btn ug-btn-primary"
             style={{
-              ...styles.buttonPrimary,
               padding: '20px 40px',
               fontSize: 16,
               letterSpacing: '0.4em',
-              opacity: submitting ? 0.5 : 1,
             }}
           >
             {submitting ? 'BURNING OUT…' : '▶ START THE RACE'}
           </button>
         )}
         {status === 'declined' && (
-          <a href="/race" style={{ ...styles.buttonGhost, textDecoration: 'none' }}>
+          <a href="/race" className="ug-btn ug-btn-ghost" style={{ textDecoration: 'none' }}>
             ← BACK TO RACE
           </a>
         )}
@@ -225,23 +213,21 @@ export function ChallengeView({
 
 function ParticipantCard({ p, role }: { p: Participant; role: string }) {
   return (
-    <div style={{ ...styles.panel, padding: 20 }}>
-      <div style={{ fontSize: 10, letterSpacing: '0.4em', color: colors.textMuted, marginBottom: 8 }}>
-        {role}
-      </div>
+    <div className="ug-card" style={{ padding: 20 }}>
+      <div className="ug-label">{role}</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <div style={{ fontSize: 18, fontWeight: 700, color: colors.accent, letterSpacing: '0.03em' }}>
           @{p.callsign ?? '???'}
         </div>
         {p.isModerator && (
           <span
+            className="ug-mono"
             style={{
               fontSize: 8,
               letterSpacing: '0.2em',
               color: colors.accent,
-              border: `0.5px solid ${colors.accent}`,
+              border: `1px solid ${colors.accentBorder}`,
               padding: '2px 6px',
-              fontFamily: fonts.mono,
               fontWeight: 700,
             }}
           >
@@ -250,7 +236,7 @@ function ParticipantCard({ p, role }: { p: Participant; role: string }) {
         )}
       </div>
       <div style={{ fontSize: 14, color: colors.text, marginBottom: 12 }}>{p.vehicleLabel}</div>
-      <div style={{ display: 'flex', gap: 16, fontSize: 11, fontFamily: fonts.mono, color: colors.textMuted }}>
+      <div className="ug-mono" style={{ display: 'flex', gap: 16, fontSize: 11, color: colors.textMuted }}>
         {p.vehicleHp != null && <span>{p.vehicleHp}hp</span>}{p.vehicleTorque != null && <span>{p.vehicleTorque}tq</span>}
         {p.vehicleWeight != null && <span>{p.vehicleWeight.toLocaleString()}lb</span>}
         {p.vehicleDrivetrain && <span>{p.vehicleDrivetrain}</span>}

@@ -10,6 +10,7 @@ import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Pusher from 'pusher-js';
 import { sendMessage, markThreadRead } from '@/app/market/actions';
+import { colors, fonts } from '@/lib/design';
 
 type Message = {
   id: string;
@@ -133,20 +134,18 @@ export function ThreadView({
 
   return (
     <div
+      className="ug-glass"
       style={{
         display: 'flex',
         flexDirection: 'column',
         height: 'calc(100vh - 200px)',
         minHeight: 480,
-        background: 'rgba(20,22,30,0.5)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 14,
       }}
     >
       <header
         style={{
           padding: '14px 18px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: `1px solid ${colors.border}`,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -157,13 +156,13 @@ export function ThreadView({
             style={{
               fontSize: 10,
               letterSpacing: '0.22em',
-              color: 'rgba(245,246,247,0.55)',
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              color: colors.textMuted,
+              fontFamily: fonts.mono,
             }}
           >
             CONVERSATION WITH
           </div>
-          <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: colors.text }}>
             {otherCallsign ?? 'Member'}
           </div>
         </div>
@@ -172,9 +171,9 @@ export function ThreadView({
           style={{
             fontSize: 11,
             letterSpacing: '0.2em',
-            color: '#ff5252',
+            color: colors.accent,
             textDecoration: 'none',
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontFamily: fonts.mono,
           }}
         >
           VIEW LISTING →
@@ -193,7 +192,7 @@ export function ThreadView({
         }}
       >
         {messages.length === 0 ? (
-          <div style={{ textAlign: 'center', color: 'rgba(245,246,247,0.5)', fontSize: 13, marginTop: 40 }}>
+          <div style={{ textAlign: 'center', color: colors.textDim, fontSize: 13, marginTop: 40 }}>
             No messages yet — say hi.
           </div>
         ) : (
@@ -206,12 +205,20 @@ export function ThreadView({
                   alignSelf: mine ? 'flex-end' : 'flex-start',
                   maxWidth: '80%',
                   padding: '10px 14px',
-                  borderRadius: 12,
-                  background: mine ? '#ff3030' : 'rgba(255,255,255,0.06)',
-                  color: mine ? '#fff' : 'rgba(245,246,247,0.92)',
+                  borderRadius: 14,
+                  background: mine
+                    ? 'linear-gradient(180deg, rgba(255,42,42,0.22) 0%, rgba(255,42,42,0.10) 100%)'
+                    : 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                  border: mine
+                    ? `1px solid ${colors.accentBorder}`
+                    : `1px solid ${colors.border}`,
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  color: colors.text,
                   fontSize: 14,
                   lineHeight: 1.45,
                   whiteSpace: 'pre-wrap',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)',
                 }}
               >
                 {m.body}
@@ -220,7 +227,7 @@ export function ThreadView({
                     fontSize: 10,
                     opacity: 0.6,
                     marginTop: 4,
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontFamily: fonts.mono,
                     letterSpacing: '0.05em',
                   }}
                 >
@@ -238,7 +245,7 @@ export function ThreadView({
           display: 'flex',
           gap: 8,
           padding: 12,
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          borderTop: `1px solid ${colors.border}`,
         }}
       >
         <input
@@ -246,23 +253,15 @@ export function ThreadView({
           onChange={(e) => setBody(e.target.value)}
           placeholder="Type a message…"
           maxLength={2000}
-          style={{
-            flex: 1,
-            background: '#0a0c12',
-            border: '1px solid rgba(255,255,255,0.12)',
-            color: '#fff',
-            borderRadius: 999,
-            padding: '10px 16px',
-            fontSize: 14,
-            fontFamily: "'Inter Tight', system-ui, sans-serif",
-          }}
+          className="ug-input"
+          style={{ flex: 1, borderRadius: 999 }}
         />
         <button type="submit" disabled={isPending || !body.trim()} className="ug-btn ug-btn-primary ug-pill">
           {isPending ? '…' : 'SEND'}
         </button>
       </form>
       {error && (
-        <div style={{ color: '#ff5252', fontSize: 12, padding: '0 12px 10px' }}>{error}</div>
+        <div className="ug-banner ug-banner-error" style={{ margin: '0 12px 10px' }}>{error}</div>
       )}
     </div>
   );

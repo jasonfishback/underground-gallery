@@ -25,7 +25,9 @@ export default function InviteSignupForm({ code }: { code: string }) {
   }
   return (
     <form onSubmit={handle} style={{ width: "100%", maxWidth: 380, margin: "0 auto" }}>
+      <label className="ug-label" htmlFor="invite-email" style={{ textAlign: "left" }}>Email</label>
       <input
+        id="invite-email"
         type="email"
         name="email"
         autoComplete="email"
@@ -38,13 +40,21 @@ export default function InviteSignupForm({ code }: { code: string }) {
         placeholder="your@email.com"
         required
         disabled={submitting}
-        style={{ width: "100%", padding: "16px 20px", background: colors.bg, border: `0.5px solid ${colors.border}`, color: colors.text, fontSize: 18, fontFamily: fonts.sans, marginBottom: 12, boxSizing: "border-box" }}
+        className="ug-input ug-input-lg"
+        style={{ marginBottom: 12 }}
       />
-      <button type="submit" disabled={submitting} style={{ width: "100%", padding: "16px 24px", background: colors.accent, color: "#0a0a0a", border: "none", fontFamily: fonts.mono, fontSize: 12, fontWeight: 700, letterSpacing: "0.4em", cursor: "pointer", opacity: submitting ? 0.5 : 1 }}>
-        {submitting ? "SENDING..." : "ACCEPT INVITE"}
+      <button
+        type="submit"
+        disabled={submitting}
+        className="ug-btn ug-btn-primary ug-btn-block"
+      >
+        {submitting ? "SENDING..." : "ACCEPT INVITE →"}
       </button>
       {msg && (
-        <div style={{ marginTop: 12, padding: 12, border: `0.5px solid ${msg.kind === "error" ? colors.danger : colors.success}`, color: msg.kind === "error" ? colors.danger : colors.success, fontSize: 12, fontFamily: fonts.mono }}>
+        <div
+          className={`ug-banner ${msg.kind === "error" ? "ug-banner-error" : "ug-banner-success"}`}
+          style={{ marginTop: 12, fontFamily: fonts.mono }}
+        >
           {msg.text}
         </div>
       )}

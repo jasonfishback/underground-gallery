@@ -6,6 +6,7 @@
 'use client';
 
 import { useState } from 'react';
+import { colors, fonts } from '@/lib/design';
 
 type GarageVehicle = {
   id: string;
@@ -28,13 +29,11 @@ export function GarageLinkPicker({ vehicles, onPick }: Props) {
 
   return (
     <div
+      className="ug-glass-tinted"
       style={{
         display: 'flex',
         flexDirection: 'column',
         gap: 6,
-        background: 'rgba(255,42,42,0.08)',
-        border: '1px solid rgba(255,42,42,0.25)',
-        borderRadius: 10,
         padding: 14,
       }}
     >
@@ -43,7 +42,7 @@ export function GarageLinkPicker({ vehicles, onPick }: Props) {
           fontSize: 10,
           letterSpacing: '0.22em',
           color: '#ff8585',
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontFamily: fonts.mono,
           fontWeight: 700,
         }}
       >
@@ -56,15 +55,7 @@ export function GarageLinkPicker({ vehicles, onPick }: Props) {
           const v = vehicles.find((x) => x.id === e.target.value) ?? null;
           onPick(v);
         }}
-        style={{
-          background: '#0a0c12',
-          border: '1px solid rgba(255,255,255,0.12)',
-          color: '#fff',
-          borderRadius: 8,
-          padding: '8px 12px',
-          fontSize: 14,
-          fontFamily: "'Inter Tight', system-ui, sans-serif",
-        }}
+        className="ug-input"
       >
         <option value="">— Don't link —</option>
         {vehicles.map((v) => (
@@ -74,7 +65,7 @@ export function GarageLinkPicker({ vehicles, onPick }: Props) {
           </option>
         ))}
       </select>
-      <div style={{ fontSize: 11, color: 'rgba(245,246,247,0.55)' }}>
+      <div style={{ fontSize: 11, color: colors.textMuted }}>
         Linking pulls in your build sheet, mods, photos, and dyno numbers.
       </div>
     </div>

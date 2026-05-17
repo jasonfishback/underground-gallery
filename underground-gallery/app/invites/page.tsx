@@ -75,19 +75,21 @@ export default async function InvitesPage() {
     >
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px" }}>
         <div
+          className="ug-mono"
           style={{
-            fontSize: 10,
+            fontSize: 11,
             letterSpacing: "0.4em",
             color: colors.accent,
             marginBottom: 8,
+            fontWeight: 700,
           }}
         >
-          INVITES
+          ∕∕ INVITES
         </div>
-        <h1 style={{ fontSize: 32, margin: "0 0 8px", letterSpacing: "0.05em" }}>
+        <h1 style={{ fontSize: 32, margin: "0 0 8px", letterSpacing: "-0.02em", fontWeight: 800 }}>
           Your Code.
         </h1>
-        <p style={{ fontSize: 13, color: colors.textMuted, marginBottom: 32, maxWidth: 600 }}>
+        <p style={{ fontSize: 13, color: colors.textMuted, marginBottom: 32, maxWidth: 600, lineHeight: 1.6 }}>
           Anyone who applies with your code is tied to you forever. Build the room you want to be in.
         </p>
 
@@ -111,9 +113,8 @@ export default async function InvitesPage() {
           />
         ) : (
           <div
+            className="ug-card"
             style={{
-              background: colors.bgElevated,
-              border: `0.5px solid ${colors.border}`,
               padding: 24,
               textAlign: "center",
             }}
@@ -124,17 +125,8 @@ export default async function InvitesPage() {
             <form action={regenerateMyCode}>
               <button
                 type="submit"
-                style={{
-                  padding: "10px 20px",
-                  background: colors.accent,
-                  color: "#0a0a0a",
-                  border: "none",
-                  fontFamily: fonts.mono,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: "0.3em",
-                  cursor: "pointer",
-                }}
+                className="ug-btn ug-btn-primary"
+                style={{ fontFamily: fonts.mono }}
               >
                 GENERATE CODE
               </button>
@@ -143,23 +135,22 @@ export default async function InvitesPage() {
         )}
 
         <h2
+          className="ug-mono"
           style={{
             fontSize: 11,
             letterSpacing: "0.4em",
             color: colors.textMuted,
-            fontFamily: fonts.mono,
             fontWeight: 700,
             margin: "40px 0 16px",
             textTransform: "uppercase",
           }}
         >
-          People You've Brought In
+          ∕∕ People You've Brought In
         </h2>
         {recentReferrals.length === 0 ? (
           <div
+            className="ug-card"
             style={{
-              background: colors.bgElevated,
-              border: `0.5px solid ${colors.border}`,
               padding: 24,
               textAlign: "center",
               color: colors.textMuted,
@@ -169,88 +160,72 @@ export default async function InvitesPage() {
             Nobody yet. Share your code.
           </div>
         ) : (
-          <div
-            style={{
-              background: colors.bgElevated,
-              border: `0.5px solid ${colors.border}`,
-              fontFamily: fonts.mono,
-              fontSize: 12,
-            }}
-          >
+          <ul className="ug-list" style={{ fontFamily: fonts.mono, fontSize: 12 }}>
             {recentReferrals.map((r, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr auto",
-                  gap: 16,
-                  padding: "12px 16px",
-                  borderTop: i === 0 ? "none" : `0.5px solid ${colors.border}`,
-                  alignItems: "center",
-                }}
-              >
-                <span style={{ color: colors.text }}>{r.callsign ?? r.email}</span>
-                <span
+              <li key={i}>
+                <div
+                  className="ug-list-row"
                   style={{
-                    color:
-                      r.status === "active"
-                        ? colors.accent
-                        : r.status === "pending"
-                          ? colors.warning
-                          : colors.textDim,
-                    fontSize: 10,
-                    letterSpacing: "0.3em",
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr auto",
+                    gap: 16,
+                    alignItems: "center",
+                    cursor: "default",
                   }}
                 >
-                  {r.status.toUpperCase()}
-                </span>
-                <span style={{ color: colors.textDim, fontSize: 11 }}>
-                  {new Date(r.submittedAt).toLocaleDateString()}
-                </span>
-              </div>
+                  <span style={{ color: colors.text }}>{r.callsign ?? r.email}</span>
+                  <span
+                    className="ug-list-meta"
+                    style={{
+                      color:
+                        r.status === "active"
+                          ? colors.accent
+                          : r.status === "pending"
+                            ? colors.warning
+                            : colors.textDim,
+                    }}
+                  >
+                    {r.status.toUpperCase()}
+                  </span>
+                  <span style={{ color: colors.textDim, fontSize: 11 }}>
+                    {new Date(r.submittedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
 
         {activeCode && (
           <div style={{ marginTop: 32 }}>
             <details>
               <summary
+                className="ug-mono"
                 style={{
                   cursor: "pointer",
                   color: colors.textMuted,
                   fontSize: 11,
-                  fontFamily: fonts.mono,
                   letterSpacing: "0.3em",
+                  textTransform: "uppercase",
                 }}
               >
-                ADVANCED â–¸
+                Advanced ▸
               </summary>
               <div
+                className="ug-card"
                 style={{
                   marginTop: 12,
                   padding: 16,
-                  background: colors.bgElevated,
-                  border: `0.5px solid ${colors.border}`,
                 }}
               >
-                <p style={{ fontSize: 12, color: colors.textMuted, marginBottom: 12 }}>
+                <p style={{ fontSize: 12, color: colors.textMuted, marginBottom: 12, lineHeight: 1.6 }}>
                   Regenerating creates a fresh code and revokes the old one. People with the old code or QR will get an error.
                 </p>
                 <form action={regenerateMyCode}>
                   <button
                     type="submit"
-                    style={{
-                      padding: "8px 16px",
-                      background: "transparent",
-                      color: "#ff8a8a",
-                      border: `0.5px solid #663030`,
-                      fontFamily: fonts.mono,
-                      fontSize: 10,
-                      fontWeight: 700,
-                      letterSpacing: "0.3em",
-                      cursor: "pointer",
-                    }}
+                    className="ug-btn ug-btn-ghost"
+                    style={{ fontFamily: fonts.mono, fontSize: 10, padding: "8px 16px" }}
                   >
                     REGENERATE CODE
                   </button>
@@ -265,20 +240,24 @@ export default async function InvitesPage() {
 }
 
 function Stat({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+  const isHot = !!highlight && value > 0;
   return (
     <div
+      className="ug-card"
       style={{
-        background: highlight && value > 0 ? colors.accentSoft : colors.bgElevated,
-        border: `0.5px solid ${highlight && value > 0 ? colors.accent : colors.border}`,
         padding: "16px 18px",
+        background: isHot
+          ? `linear-gradient(180deg, ${colors.accentSoft} 0%, rgba(255,42,42,0.04) 100%)`
+          : undefined,
+        borderColor: isHot ? colors.accentBorder : undefined,
       }}
     >
       <div
+        className="ug-mono"
         style={{
           fontSize: 9,
           letterSpacing: "0.3em",
-          color: highlight && value > 0 ? colors.accent : colors.textMuted,
-          fontFamily: fonts.mono,
+          color: isHot ? colors.accent : colors.textMuted,
           fontWeight: 700,
           marginBottom: 6,
         }}
@@ -289,7 +268,7 @@ function Stat({ label, value, highlight }: { label: string; value: number; highl
         style={{
           fontSize: 32,
           fontWeight: 700,
-          color: highlight && value > 0 ? colors.accent : colors.text,
+          color: isHot ? colors.accent : colors.text,
           letterSpacing: "-0.02em",
         }}
       >

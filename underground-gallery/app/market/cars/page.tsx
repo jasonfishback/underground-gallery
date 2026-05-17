@@ -5,6 +5,7 @@ import { browseListings } from '@/lib/market/queries';
 import { MarketSearchBar } from '@/components/market/MarketSearchBar';
 import { MarketFilters } from '@/components/market/MarketFilters';
 import { MarketGrid } from '@/components/market/MarketGrid';
+import { colors, fonts } from '@/lib/design';
 
 export const metadata: Metadata = { title: 'Cars for sale' };
 export const dynamic = 'force-dynamic';
@@ -50,12 +51,12 @@ export default async function CarsPage({
         padding: '40px 24px 80px',
         maxWidth: 1320,
         margin: '0 auto',
-        color: '#fff',
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: colors.text,
+        fontFamily: fonts.sans,
       }}
     >
       <header style={{ marginBottom: 32, maxWidth: 760 }}>
-        <div style={accentLabelStyle}>UNDERGROUND · CARS</div>
+        <div style={accentLabelStyle}>∕∕ UNDERGROUND · CARS</div>
         <h1
           style={{
             fontSize: 'clamp(36px, 5vw, 56px)',
@@ -67,7 +68,7 @@ export default async function CarsPage({
         >
           Cars for sale
         </h1>
-        <p style={{ fontSize: 17, color: 'rgba(245,246,247,0.65)', margin: 0, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 17, color: colors.textMuted, margin: 0, lineHeight: 1.5 }}>
           {total.toLocaleString()} car{total === 1 ? '' : 's'} listed by members of the gallery.
         </p>
       </header>
@@ -96,8 +97,8 @@ export default async function CarsPage({
 const accentLabelStyle: React.CSSProperties = {
   fontSize: 11,
   letterSpacing: '0.4em',
-  color: '#ff3030',
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+  color: colors.accent,
+  fontFamily: fonts.mono,
   fontWeight: 700,
   marginBottom: 4,
 };

@@ -12,6 +12,7 @@ import { listings, users } from '@/lib/db/schema';
 import { getAuthContext } from '@/lib/auth/gates';
 import { getThreadMessages } from '@/lib/market/queries';
 import { ThreadView } from '@/components/market/ThreadView';
+import { colors, fonts } from '@/lib/design';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,8 +75,8 @@ export default async function ThreadPage({
         padding: '24px 24px 40px',
         maxWidth: 880,
         margin: '0 auto',
-        color: '#fff',
-        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: colors.text,
+        fontFamily: fonts.sans,
       }}
     >
       <div style={{ marginBottom: 14 }}>
@@ -84,8 +85,8 @@ export default async function ThreadPage({
           style={{
             fontSize: 11,
             letterSpacing: '0.22em',
-            color: 'rgba(245,246,247,0.55)',
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            color: colors.textMuted,
+            fontFamily: fonts.mono,
             textDecoration: 'none',
           }}
         >
