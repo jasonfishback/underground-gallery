@@ -728,3 +728,177 @@ header nav::-webkit-scrollbar {
 @media (prefers-reduced-motion: reduce) {
   .ug-hero-logo-fade { animation: none; opacity: 0.85; }
 }
+
+/* ──────────────────────────────────────────────────────────
+   /race overhaul — editorial-technical aesthetic
+   ────────────────────────────────────────────────────────── */
+
+.race-hero-bg {
+  position: relative;
+  isolation: isolate;
+}
+.race-hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 520px;
+  background:
+    radial-gradient(60% 80% at 50% 0%, rgba(255, 42, 42, 0.16), transparent 65%),
+    radial-gradient(40% 60% at 100% 0%, rgba(255, 80, 80, 0.06), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+.race-hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: 0 0;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 70%);
+  mask-image: linear-gradient(to bottom, black 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0.6;
+  z-index: -1;
+}
+
+.race-rise {
+  animation: raceRise 520ms cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes raceRise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .race-rise { animation: none; }
+}
+
+/* Numbered step chip */
+.race-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255, 42, 42, 0.12);
+  border: 1px solid rgba(255, 80, 80, 0.35);
+  color: #ff8a8a;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* Selectable card (cars + race types) */
+.race-pick {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  color: #f5f6f7;
+  text-align: left;
+  transition: transform 160ms cubic-bezier(.2,.7,.2,1),
+              border-color 160ms ease,
+              background 160ms ease,
+              box-shadow 200ms ease;
+  overflow: hidden;
+}
+.race-pick:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+}
+.race-pick[data-selected="true"] {
+  border-color: rgba(255, 80, 80, 0.55);
+  background: linear-gradient(180deg, rgba(255, 42, 42, 0.14), rgba(255, 42, 42, 0.04));
+  box-shadow: 0 10px 30px -10px rgba(255, 42, 42, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.race-pick[data-selected="true"]::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 56px; height: 56px;
+  background: radial-gradient(circle at top right, rgba(255, 42, 42, 0.45), transparent 60%);
+  pointer-events: none;
+}
+
+/* Race-type pill (wrap row, not grid) */
+.race-pill {
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(245, 246, 247, 0.85);
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.race-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+.race-pill[data-selected="true"] {
+  background: linear-gradient(180deg, #ff3a3a 0%, #e01818 100%);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  box-shadow: 0 8px 24px -8px rgba(255, 42, 42, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.race-pill[data-selected="true"] .race-pill-sub { color: rgba(255, 255, 255, 0.78); }
+.race-pill-sub {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245, 246, 247, 0.45);
+}
+
+/* Segmented mode control (Practice / Challenge) */
+.race-segmented {
+  display: inline-flex;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+.race-segmented button {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: rgba(245, 246, 247, 0.6);
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 10px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 160ms ease, background 200ms ease, box-shadow 200ms ease;
+}
+.race-segmented button:hover { color: #f5f6f7; }
+.race-segmented button[data-active="true"] {
+  background: linear-gradient(180deg, #ff3a3a 0%, #e01818 100%);
+  color: #fff;
+  box-shadow: 0 6px 18px -6px rgba(255, 42, 42, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Specs chip (HP / weight / 0-60) under car name */
+.race-spec-chip {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245, 246, 247, 0.55);
+}
