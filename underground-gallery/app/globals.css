@@ -533,3 +533,23 @@ header nav::-webkit-scrollbar {
     text-align: left !important;
   }
 }
+
+/* ──────────────────────────────────────────────────────────
+   Video-hero landing crossfade (landing-v2). Logo overlay
+   pulses on top of the looping video every ~12 seconds.
+   ────────────────────────────────────────────────────────── */
+.ug-hero-logo-fade {
+  opacity: 0;
+  animation: ugHeroLogoFade 12s ease-in-out infinite;
+}
+@keyframes ugHeroLogoFade {
+  0%   { opacity: 0; }
+  30%  { opacity: 0; }
+  42%  { opacity: 1; }
+  62%  { opacity: 1; }
+  74%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ug-hero-logo-fade { animation: none; opacity: 0.85; }
+}
