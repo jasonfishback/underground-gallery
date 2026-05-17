@@ -29,6 +29,7 @@ import { reconcileTier } from '@/lib/auth/tier';
 import { calculateBuild } from '@/lib/race/build';
 import { runRace } from '@/lib/race/calculator';
 import { decodeVin as decodeVinProvider, getSpecs } from '@/lib/vehicle-data';
+import { llmProvider } from '@/lib/vehicle-data/llm';
 
 type Result<T = void> = { ok: true; data?: T } | { ok: false; error: string };
 
@@ -183,6 +184,116 @@ export async function addCarFromManual(
   revalidatePath('/me');
   if (ctx.callsign) revalidatePath(`/u/${ctx.callsign}`);
   return { ok: true, data: { vehicleId, vehicleSpecId: specId } };
+}
+
+/**
+ * Add a vehicle from a Y/M/M result (NHTSA picker output). This is the
+ * "I picked a car off the autocomplete but the catalog didn't have specs"
+ * path. We:
+ *   1. Check vehicle_specs for any existing row matching Y/M/M (any trim).
+ *      If found, use that spec — community-contributed data is preferred.
+ *   2. Otherwise, ask the LLM provider for stock specs and cache the result
+ *      in vehicle_specs so future users with the same Y/M/M get an
+ *      instant hit (and we don't re-pay for the lookup).
+ *   3. Fall back to a bare row with nulls if the LLM is unavailable
+ *      (no OPENAI_API_KEY set, error, etc.) — the user can still fill
+ *      manually later.
+ */
+export async function addCarFromYmm(raw: {
+  year: number;
+  make: string;
+  model: string;
+  trim?: string;
+  name?: string;
+  vin?: string;
+  color?: string;
+}): Promise<Result<{ vehicleId: string }>> {
+  const ctx = await requireSetupComplete();
+  if (isAuthError(ctx)) return { ok: false, error: 'Not authorized' };
+
+  const year = Number(raw.year);
+  const make = String(raw.make ?? '').trim();
+  const model = String(raw.model ?? '').trim();
+  const trim = String(raw.trim ?? '').trim();
+  if (!year || year < 1900 || year > 2100 || !make || !model) {
+    return { ok: false, error: 'Year, make, and model are required.' };
+  }
+
+  // 1. Reuse any existing community spec for this Y/M/M (trim agnostic — we
+  //    favour an existing match over a fresh LLM call).
+  const [existing] = await db
+    .select({ id: vehicleSpecs.id })
+    .from(vehicleSpecs)
+    .where(
+      and(
+        eq(vehicleSpecs.year, year),
+        sql`lower(${vehicleSpecs.make}) = ${make.toLowerCase()}`,
+        sql`lower(${vehicleSpecs.model}) = ${model.toLowerCase()}`,
+      ),
+    )
+    .limit(1);
+
+  let specId: string;
+  if (existing) {
+    specId = existing.id;
+  } else {
+    // 2. LLM lookup (best effort). Falls back to a null-spec row if absent.
+    const specs = await llmProvider.getSpecs!(year, make, model, trim);
+
+    specId = newId();
+    await db.insert(vehicleSpecs).values({
+      id: specId,
+      year,
+      make,
+      model,
+      trim,
+      bodyStyle: specs?.bodyStyle ?? null,
+      engine: specs?.engine ?? null,
+      displacement: specs?.displacement ?? null,
+      aspiration: (specs?.aspiration as any) ?? null,
+      fuelType: specs?.fuelType ?? null,
+      transmission: (specs?.transmission as any) ?? null,
+      drivetrain: (specs?.drivetrain as any) ?? null,
+      stockHp: specs?.stockHp ?? null,
+      stockTorque: specs?.stockTorque ?? null,
+      curbWeight: specs?.curbWeight ?? null,
+      zeroToSixty: specs?.zeroToSixty ?? null,
+      quarterMile: specs?.quarterMile ?? null,
+      topSpeed: specs?.topSpeed ?? null,
+      sourceProvider: specs ? 'llm' : 'manual',
+      sourceConfidence: specs ? 'estimated' : 'unverified',
+      submittedBy: ctx.userId,
+    });
+  }
+
+  const vehicleId = newId();
+  await db.transaction(async (tx) => {
+    const owned = await tx
+      .select({ id: vehicles.id })
+      .from(vehicles)
+      .where(eq(vehicles.userId, ctx.userId))
+      .limit(1);
+
+    await tx.insert(vehicles).values({
+      id: vehicleId,
+      userId: ctx.userId,
+      year,
+      make,
+      model,
+      trim: trim || null,
+      name: raw.name?.trim() || null,
+      vehicleSpecId: specId,
+      vin: raw.vin || null,
+      color: raw.color || null,
+      isPrimary: owned.length === 0,
+    });
+
+    await reconcileTier(tx, ctx.userId);
+  });
+
+  revalidatePath('/me');
+  if (ctx.callsign) revalidatePath(`/u/${ctx.callsign}`);
+  return { ok: true, data: { vehicleId } };
 }
 
 /**
