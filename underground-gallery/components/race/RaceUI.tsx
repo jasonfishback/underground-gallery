@@ -228,36 +228,47 @@ export function RaceUI({ myCars, communityCars, myUserId, myCallsign }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 4, marginBottom: 24, maxWidth: 480 }}>
-        <ModeButton active={mode === 'practice'} onClick={() => setMode('practice')}>PRACTICE</ModeButton>
-        <ModeButton active={mode === 'challenge'} onClick={() => setMode('challenge')}>CHALLENGE A DRIVER</ModeButton>
+      <div className="race-segmented race-rise" style={{ marginBottom: 14, animationDelay: '40ms' }}>
+        <button
+          type="button"
+          data-active={mode === 'practice'}
+          onClick={() => setMode('practice')}
+        >
+          Practice
+        </button>
+        <button
+          type="button"
+          data-active={mode === 'challenge'}
+          onClick={() => setMode('challenge')}
+        >
+          Challenge a driver
+        </button>
       </div>
 
-      <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 24, maxWidth: 600 }}>
+      <div
+        className="race-rise"
+        style={{
+          fontSize: 14,
+          color: 'rgba(245, 246, 247, 0.55)',
+          marginBottom: 48,
+          maxWidth: 620,
+          lineHeight: 1.55,
+          animationDelay: '80ms',
+        }}
+      >
         {mode === 'practice'
-          ? 'Pick any vehicle to race against. Result is for your eyes only — nothing is saved unless you choose to.'
-          : 'Send a formal challenge. Opponent gets a notification, accepts, and either party can hit "start" to watch the race live together.'}
+          ? 'Pick any vehicle to race against. Results are for your eyes only — nothing is saved unless you choose to.'
+          : 'Send a formal challenge. Your opponent gets a notification; either party can hit start to watch the race live.'}
       </div>
 
-      <Section title="STEP 1 · YOUR CAR">
+      <Section number="01" title="Your car" delay={120}>
         <CarGrid cars={myCars} selectedId={myCarId} onSelect={setMyCarId} />
       </Section>
 
-      <Section title="STEP 2 · OPPONENT">
+      <Section number="02" title="Opponent" delay={180}>
         {myCarsAsOpponents.length > 0 && (
-          <div style={{ marginBottom: 20 }}>
-            <div
-              style={{
-                fontSize: 10,
-                letterSpacing: '0.3em',
-                color: colors.textMuted,
-                fontFamily: fonts.mono,
-                fontWeight: 700,
-                marginBottom: 8,
-              }}
-            >
-              MY GARAGE
-            </div>
+          <div style={{ marginBottom: 24 }}>
+            <SubLabel>From your garage</SubLabel>
             <CarGrid
               cars={myCarsAsOpponents}
               selectedId={oppCarId}
@@ -266,52 +277,35 @@ export function RaceUI({ myCars, communityCars, myUserId, myCallsign }: Props) {
             />
           </div>
         )}
-        <div
-          style={{
-            fontSize: 10,
-            letterSpacing: '0.3em',
-            color: colors.textMuted,
-            fontFamily: fonts.mono,
-            fontWeight: 700,
-            marginBottom: 8,
-          }}
-        >
-          COMMUNITY
-        </div>
+        <SubLabel>Community</SubLabel>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by callsign, make, or model…"
-          style={{ ...styles.input, marginBottom: 16, maxWidth: 400 }}
+          style={{ ...styles.input, marginBottom: 16, maxWidth: 420 }}
         />
         <CarGrid cars={filteredOpponents} selectedId={oppCarId} onSelect={setOppCarId} showCallsign />
       </Section>
 
-      <Section title="STEP 3 · RACE TYPE">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 8 }}>
+      <Section number="03" title="Race type" delay={240}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
           {RACE_TYPES.map((rt) => (
             <button
               key={rt.value}
+              type="button"
+              className="race-pill"
+              data-selected={raceType === rt.value}
               onClick={() => setRaceType(rt.value)}
-              style={{
-                padding: '14px 16px',
-                background: raceType === rt.value ? colors.accentSoft : 'transparent',
-                border: `0.5px solid ${raceType === rt.value ? colors.accentBorder : colors.border}`,
-                color: raceType === rt.value ? colors.accent : colors.text,
-                fontFamily: fonts.mono,
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
             >
-              <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '0.05em' }}>{rt.label}</div>
-              <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>{rt.sublabel}</div>
+              <span>{rt.label}</span>
+              <span className="race-pill-sub">{rt.sublabel}</span>
             </button>
           ))}
         </div>
       </Section>
 
       {mode === 'challenge' && (
-        <Section title="STEP 4 · MESSAGE (OPTIONAL)">
+        <Section number="04" title="Message" subtitle="Optional" delay={280}>
           <input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -323,42 +317,62 @@ export function RaceUI({ myCars, communityCars, myUserId, myCallsign }: Props) {
       )}
 
       {error && (
-        <div style={{ padding: '10px 14px', border: `0.5px solid ${colors.accent}`, color: colors.accent, fontSize: 12, marginBottom: 16 }}>
+        <div
+          style={{
+            padding: '12px 16px',
+            border: `1px solid ${colors.accentBorder}`,
+            background: 'rgba(255, 42, 42, 0.08)',
+            color: '#ffb3b3',
+            borderRadius: 12,
+            fontSize: 13,
+            marginBottom: 20,
+            maxWidth: 600,
+          }}
+        >
           {error}
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 12 }}>
+      <div
+        className="race-rise"
+        style={{ display: 'flex', gap: 12, alignItems: 'flex-start', animationDelay: '320ms' }}
+      >
         {mode === 'practice' ? (
           <button
+            type="button"
             onClick={runPractice}
             disabled={!myCarId || !oppCarId || submitting}
             style={{
               ...styles.buttonPrimary,
-              opacity: !myCarId || !oppCarId || submitting ? 0.4 : 1,
-              fontSize: 14,
-              padding: '16px 32px',
+              opacity: !myCarId || !oppCarId || submitting ? 0.45 : 1,
+              fontSize: 13,
+              padding: '16px 28px',
+              borderRadius: 999,
+              transition: 'transform 160ms ease, opacity 160ms ease',
             }}
           >
-            {submitting ? 'CALCULATING…' : 'RUN THE RACE →'}
+            {submitting ? 'Calculating…' : 'Run the race  →'}
           </button>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <button
+              type="button"
               onClick={submitChallenge}
               disabled={!myCarId || !oppCarId || submitting || oppIsMine}
               style={{
                 ...styles.buttonPrimary,
-                opacity: !myCarId || !oppCarId || submitting || oppIsMine ? 0.4 : 1,
-                fontSize: 14,
-                padding: '16px 32px',
+                opacity: !myCarId || !oppCarId || submitting || oppIsMine ? 0.45 : 1,
+                fontSize: 13,
+                padding: '16px 28px',
+                borderRadius: 999,
+                transition: 'transform 160ms ease, opacity 160ms ease',
               }}
             >
-              {submitting ? 'SENDING…' : 'SEND CHALLENGE →'}
+              {submitting ? 'Sending…' : 'Send challenge  →'}
             </button>
             {oppIsMine && (
-              <div style={{ fontSize: 11, color: colors.textMuted, fontFamily: fonts.mono, letterSpacing: '0.05em' }}>
-                Can&apos;t challenge yourself — use PRACTICE to race your own cars.
+              <div style={{ fontSize: 12, color: colors.textMuted, lineHeight: 1.5 }}>
+                Can&apos;t challenge yourself — use practice to race your own cars.
               </div>
             )}
           </div>
@@ -368,34 +382,70 @@ export function RaceUI({ myCars, communityCars, myUserId, myCallsign }: Props) {
   );
 }
 
-function ModeButton({
-  active, onClick, children,
-}: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function SubLabel({ children }: { children: React.ReactNode }) {
   return (
-    <button
-      onClick={onClick}
+    <div
       style={{
-        flex: 1,
-        padding: '12px 16px',
-        background: active ? colors.accentSoft : 'transparent',
-        border: `0.5px solid ${active ? colors.accentBorder : colors.border}`,
-        color: active ? colors.accent : colors.textMuted,
+        fontSize: 10,
+        letterSpacing: '0.28em',
+        color: 'rgba(245, 246, 247, 0.42)',
         fontFamily: fonts.mono,
-        fontSize: 11,
-        letterSpacing: '0.2em',
-        cursor: 'pointer',
-        fontWeight: 700,
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        marginBottom: 10,
       }}
     >
       {children}
-    </button>
+    </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  number,
+  title,
+  subtitle,
+  delay,
+  children,
+}: {
+  number: string;
+  title: string;
+  subtitle?: string;
+  delay?: number;
+  children: React.ReactNode;
+}) {
   return (
-    <div style={{ marginBottom: 32 }}>
-      <div style={{ fontSize: 11, letterSpacing: '0.4em', color: colors.accent, marginBottom: 12 }}>{title}</div>
+    <div
+      className="race-rise"
+      style={{ marginBottom: 44, animationDelay: delay ? `${delay}ms` : undefined }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+        <span className="race-step-num">{number}</span>
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 22,
+            fontWeight: 700,
+            letterSpacing: '-0.015em',
+            color: '#f5f6f7',
+          }}
+        >
+          {title}
+        </h2>
+        {subtitle && (
+          <span
+            style={{
+              fontSize: 11,
+              color: 'rgba(245, 246, 247, 0.42)',
+              fontFamily: fonts.mono,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginLeft: 4,
+            }}
+          >
+            {subtitle}
+          </span>
+        )}
+      </div>
       {children}
     </div>
   );
@@ -411,59 +461,107 @@ function CarGrid({
   mineBadge?: boolean;
 }) {
   if (cars.length === 0) {
-    return <div style={{ color: colors.textMuted, fontSize: 13, padding: 16 }}>No vehicles available.</div>;
+    return (
+      <div
+        style={{
+          color: colors.textMuted,
+          fontSize: 13,
+          padding: '18px 20px',
+          border: `1px dashed ${colors.border}`,
+          borderRadius: 12,
+        }}
+      >
+        No vehicles available.
+      </div>
+    );
   }
   return (
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-        gap: 8,
-        maxHeight: 320,
+        gridTemplateColumns: 'repeat(auto-fill, minmax(248px, 1fr))',
+        gap: 12,
+        maxHeight: 380,
         overflowY: 'auto',
-        padding: 4,
+        paddingRight: 4,
       }}
     >
       {cars.map((c) => {
         const selected = selectedId === c.id;
+        const tagline = c.ownerCallsign && showCallsign ? `@${c.ownerCallsign}` : mineBadge ? 'In your garage' : null;
         return (
           <button
             key={c.id}
+            type="button"
+            className="race-pick"
+            data-selected={selected}
             onClick={() => onSelect(c.id)}
-            style={{
-              padding: 12,
-              background: selected ? colors.accentSoft : 'transparent',
-              border: `0.5px solid ${selected ? colors.accentBorder : colors.border}`,
-              color: colors.text,
-              fontFamily: fonts.mono,
-              cursor: 'pointer',
-              textAlign: 'left',
-              display: 'flex',
-              gap: 12,
-              alignItems: 'center',
-            }}
           >
             {c.thumbUrl ? (
-              <img src={c.thumbUrl} alt="" style={{ width: 48, height: 48, objectFit: 'cover', flexShrink: 0 }} />
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={c.thumbUrl}
+                alt=""
+                style={{
+                  width: 64,
+                  height: 64,
+                  objectFit: 'cover',
+                  borderRadius: 10,
+                  flexShrink: 0,
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                }}
+              />
             ) : (
-              <div style={{ width: 48, height: 48, background: '#1a1a1a', flexShrink: 0 }} />
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: 10,
+                  flexShrink: 0,
+                }}
+              />
             )}
             <div style={{ minWidth: 0, flex: 1 }}>
-              {mineBadge && (
-                <div style={{ fontSize: 9, letterSpacing: '0.25em', color: colors.accent, marginBottom: 2 }}>
-                  MINE
+              {tagline && (
+                <div
+                  style={{
+                    fontSize: 9,
+                    letterSpacing: '0.24em',
+                    color: mineBadge ? 'rgba(245,246,247,0.55)' : colors.accent,
+                    fontFamily: fonts.mono,
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    marginBottom: 4,
+                  }}
+                >
+                  {tagline}
                 </div>
               )}
-              {showCallsign && c.ownerCallsign && (
-                <div style={{ fontSize: 9, letterSpacing: '0.25em', color: colors.accent, marginBottom: 2 }}>
-                  @{c.ownerCallsign}
-                </div>
-              )}
-              <div style={{ fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  letterSpacing: '-0.01em',
+                }}
+              >
                 {c.year} {c.make} {c.model}
               </div>
               {c.trim && (
-                <div style={{ fontSize: 10, color: colors.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: 'rgba(245, 246, 247, 0.55)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    marginTop: 2,
+                  }}
+                >
                   {c.trim}
                 </div>
               )}

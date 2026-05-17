@@ -69,28 +69,40 @@ export default async function RacePage() {
     .limit(20);
 
   return (
-    <div style={{ minHeight: '100dvh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 80px' }}>
-        <header style={{ marginBottom: 36, maxWidth: 720 }}>
+    <div
+      className="race-hero-bg"
+      style={{ minHeight: '100dvh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}
+    >
+      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '56px 24px 96px' }}>
+        <header className="race-rise" style={{ marginBottom: 56, maxWidth: 760 }}>
           <div
             style={{
-              fontSize: 11,
-              letterSpacing: '0.4em',
-              color: colors.accent,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 10,
+              fontSize: 10,
+              letterSpacing: '0.32em',
+              color: 'rgba(255, 138, 138, 0.85)',
               fontFamily: fonts.mono,
-              fontWeight: 700,
-              marginBottom: 12,
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              marginBottom: 18,
+              padding: '6px 12px',
+              border: '1px solid rgba(255, 80, 80, 0.28)',
+              borderRadius: 999,
+              background: 'rgba(255, 42, 42, 0.06)',
             }}
           >
-            UNDERGROUND · RACE
+            <span style={{ width: 6, height: 6, borderRadius: 999, background: colors.accent, boxShadow: '0 0 8px rgba(255, 42, 42, 0.8)' }} />
+            Underground · Race
           </div>
           <h1
             style={{
-              fontSize: 'clamp(36px, 5vw, 56px)',
+              fontSize: 'clamp(42px, 5.5vw, 68px)',
               fontWeight: 800,
-              margin: '0 0 14px',
-              lineHeight: 1.05,
-              letterSpacing: '-0.025em',
+              margin: '0 0 18px',
+              lineHeight: 1.02,
+              letterSpacing: '-0.035em',
             }}
           >
             Pick your fight.
@@ -98,14 +110,15 @@ export default async function RacePage() {
           <p
             style={{
               fontSize: 17,
-              color: 'rgba(245,246,247,0.65)',
+              color: 'rgba(245,246,247,0.62)',
               margin: 0,
-              lineHeight: 1.5,
+              lineHeight: 1.55,
+              maxWidth: 620,
             }}
           >
-            Race any car instantly in practice mode, or send a formal challenge.
-            Side-by-side ¼-mile simulation with a live light tree — outcomes use real
-            HP, weight, drivetrain, tires, and your installed mods.
+            Race instantly in practice, or send a formal challenge. Side-by-side
+            ¼-mile simulation modeled on real HP, weight, drivetrain, tires, and
+            your installed mods.
           </p>
         </header>
 
