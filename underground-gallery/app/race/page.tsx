@@ -111,7 +111,12 @@ export default async function RacePage() {
 
         {inbox.length > 0 && <ChallengeInbox challenges={inbox} />}
 
-        <RaceUI myCars={myCars} communityCars={communityCarsRaw} />
+        <RaceUI
+          myCars={myCars}
+          communityCars={communityCarsRaw}
+          myUserId={ctx.userId}
+          myCallsign={ctx.callsign}
+        />
 
         <div style={{ marginTop: 64, textAlign: 'center' }}>
           <a
