@@ -506,7 +506,7 @@ async function loadVehicleForRace(vehicleId: string) {
   const builtWeight = stockWeight != null ? stockWeight + totalWeightChange : null;
 
   return {
-    label: `  `,
+    label: `${v.vehicle.year} ${v.vehicle.make} ${v.vehicle.model}${v.vehicle.trim ? ' ' + v.vehicle.trim : ''}`,
     userId: v.vehicle.userId,
     stock: {
       hp: builtHp,
