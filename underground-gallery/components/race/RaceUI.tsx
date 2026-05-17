@@ -116,15 +116,19 @@ export function RaceUI({ myCars, communityCars }: Props) {
         label: `${myCar!.make} ${myCar!.model}`,
         estimatedEt: result.details.challenger.estimatedQuarterMile,
         estimatedTrapSpeed: result.details.challenger.estimatedTrapSpeed,
+        estimatedTopSpeed: result.details.challenger.estimatedTopSpeed,
         drivetrain: data.chalBuild.drivetrain,
         callsign: 'YOU',
+        thumbUrl: myCar!.thumbUrl ?? null,
       },
       opponent: {
         label: `${oppCar!.make} ${oppCar!.model}`,
         estimatedEt: result.details.opponent.estimatedQuarterMile,
         estimatedTrapSpeed: result.details.opponent.estimatedTrapSpeed,
+        estimatedTopSpeed: result.details.opponent.estimatedTopSpeed,
         drivetrain: data.oppBuild.drivetrain,
         callsign: oppCar!.ownerCallsign ?? undefined,
+        thumbUrl: oppCar!.thumbUrl ?? null,
       },
     });
     setStage('animate');
@@ -157,6 +161,7 @@ export function RaceUI({ myCars, communityCars }: Props) {
       <RaceAnimation
         challenger={animCars.challenger}
         opponent={animCars.opponent}
+        raceType={raceType}
         autoStart
         onFinish={() => setStage('done')}
       />
