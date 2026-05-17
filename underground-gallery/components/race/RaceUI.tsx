@@ -213,12 +213,14 @@ export function RaceUI({ myCars, communityCars, myUserId, myCallsign }: Props) {
           >
             ← RACE AGAIN
           </button>
-          <button
-            onClick={() => { setMode('challenge'); setStage('pick'); setAnimCars(null); setResultData(null); }}
-            style={styles.buttonPrimary}
-          >
-            CHALLENGE THIS DRIVER
-          </button>
+          {!oppIsMine && (
+            <button
+              onClick={() => { setMode('challenge'); setStage('pick'); setAnimCars(null); setResultData(null); }}
+              style={styles.buttonPrimary}
+            >
+              CHALLENGE THIS DRIVER
+            </button>
+          )}
         </div>
       </div>
     );

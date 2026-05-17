@@ -50,6 +50,16 @@ export function RaceResultCard({
   const isTie = winner === 'tie';
   const challengerWon = winner === 'challenger';
 
+  // Race types that produce a 1/4-mile timeslip. Other types (highway pull,
+  // rolling start, 0-60 sprint) leave et/trap null, so the dragstrip ticket
+  // would just be a wall of `---`.
+  const hasTimeslip =
+    (raceType === 'quarter_mile' || raceType === 'dig' || raceType === 'half_mile') &&
+    challengerEt != null;
+
+  const winnerName = challengerWon ? challengerCallsign ?? challengerLabel : opponentCallsign ?? opponentLabel;
+  const winnerIsYou = winnerName === 'YOU';
+
   return (
     <div style={{ width: '100%', maxWidth: 900, margin: '0 auto' }}>
       <div
@@ -69,9 +79,7 @@ export function RaceResultCard({
           )}
         </div>
         <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: '0.05em' }}>
-          {isTie
-            ? 'DEAD HEAT'
-            : `${challengerWon ? challengerCallsign ?? challengerLabel : opponentCallsign ?? opponentLabel} WINS`}
+          {isTie ? 'DEAD HEAT' : `${winnerName} ${winnerIsYou ? 'WIN' : 'WINS'}`}
         </div>
         {!isTie && (
           <div className="ug-mono" style={{ fontSize: 12, color: colors.textMuted, marginTop: 8, letterSpacing: '0.2em' }}>
@@ -105,17 +113,19 @@ export function RaceResultCard({
           Real outcomes vary with driver, weather, surface, and the day's vibe.
         </div>
       </div>
-      <RaceTicket
-        challengerLabel={challengerLabel}
-        challengerCallsign={challengerCallsign}
-        opponentLabel={opponentLabel}
-        opponentCallsign={opponentCallsign}
-        challengerEt={challengerEt}
-        opponentEt={opponentEt}
-        challengerTrap={challengerTrap}
-        opponentTrap={opponentTrap}
-        raceType={raceType}
-      />
+      {hasTimeslip && (
+        <RaceTicket
+          challengerLabel={challengerLabel}
+          challengerCallsign={challengerCallsign}
+          opponentLabel={opponentLabel}
+          opponentCallsign={opponentCallsign}
+          challengerEt={challengerEt}
+          opponentEt={opponentEt}
+          challengerTrap={challengerTrap}
+          opponentTrap={opponentTrap}
+          raceType={raceType}
+        />
+      )}
     </div>
   );
 }
