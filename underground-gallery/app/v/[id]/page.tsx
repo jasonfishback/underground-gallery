@@ -4,7 +4,7 @@
 
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc, inArray } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import {
@@ -14,10 +14,12 @@ import {
   vehicleSpecs,
   userCarMods,
   modCatalog,
+  buildEntries,
 } from '@/lib/db/schema';
 import { CallsignWithBadge } from '@/components/AdminBadge';
 import { colors, fonts } from '@/lib/design';
 import VehicleOwnerPanel from '@/components/vehicle/VehicleOwnerPanel';
+import BuildTimeline, { type TimelineEntry } from '@/components/build/BuildTimeline';
 
 export const dynamic = 'force-dynamic';
 
@@ -114,6 +116,46 @@ export default async function VehicleDetailPage({ params }: Params) {
         )
         .orderBy(photos.sortOrder)
     : [];
+
+  // ---- Build log entries + their photos (visible to everyone) ----
+  const entryRows = await db
+    .select({
+      id: buildEntries.id,
+      title: buildEntries.title,
+      category: buildEntries.category,
+      body: buildEntries.body,
+      entryDate: buildEntries.entryDate,
+      costCents: buildEntries.costCents,
+    })
+    .from(buildEntries)
+    .where(eq(buildEntries.vehicleId, v.id))
+    .orderBy(desc(buildEntries.entryDate), desc(buildEntries.createdAt));
+
+  const entryPhotoRows = entryRows.length
+    ? await db
+        .select({
+          id: photos.id,
+          urlFull: photos.urlFull,
+          buildEntryId: photos.buildEntryId,
+          sortOrder: photos.sortOrder,
+          createdAt: photos.createdAt,
+        })
+        .from(photos)
+        .where(inArray(photos.buildEntryId, entryRows.map((e) => e.id)))
+        .orderBy(photos.sortOrder, photos.createdAt)
+    : [];
+
+  const timelineEntries: TimelineEntry[] = entryRows.map((e) => ({
+    id: e.id,
+    title: e.title,
+    category: e.category,
+    body: e.body,
+    entryDate: e.entryDate.toISOString().slice(0, 10),
+    costCents: e.costCents,
+    photos: entryPhotoRows
+      .filter((p) => p.buildEntryId === e.id)
+      .map((p) => ({ id: p.id, url: p.urlFull })),
+  }));
 
   // ---- Build display values ----
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(' ');
@@ -228,6 +270,13 @@ export default async function VehicleDetailPage({ params }: Params) {
             </Link>
           )}
         </div>
+
+        {/* Build Log — the story of the car, front and center */}
+        <BuildTimeline
+          vehicleId={v.id}
+          isOwner={isOwner}
+          entries={timelineEntries}
+        />
 
         {/* Spec sheet */}
         <section style={{ marginTop: 32 }}>

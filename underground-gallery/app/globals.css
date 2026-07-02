@@ -535,7 +535,6 @@ header nav::-webkit-scrollbar {
 }
 
 /* ──────────────────────────────────────────────────────────
-<<<<<<< HEAD
    Boot-up intro overlay (ported from public/landing.html).
    Cinematic flicker reveal, ~4.5s total. Plays once per session.
    Tap anywhere to skip. Honors prefers-reduced-motion.
@@ -707,6 +706,15 @@ header nav::-webkit-scrollbar {
   }
   /* Reserve bottom space so the spec card / report link isn't hidden */
   .ug-market-detail-padded { padding-bottom: 108px; }
+}
+
+/* When the mobile tab bar is present (<720px), lift the market action bar
+   above it and reserve extra scroll room. */
+@media (max-width: 719px) {
+  body:has(.ug-tabbar) .ug-market-mobile-bar {
+    bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+  }
+  body:has(.ug-tabbar) .ug-market-detail-padded { padding-bottom: 170px; }
 }
 
 /* ──────────────────────────────────────────────────────────
@@ -901,4 +909,56 @@ header nav::-webkit-scrollbar {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(245, 246, 247, 0.55);
+}
+
+/* ──────────────────────────────────────────────────────────
+   Nav (2026-07-01) — desktop pill row / mobile bottom tab bar
+   ────────────────────────────────────────────────────────── */
+
+/* Mobile-only header utilities (invite/admin pills) — hidden on desktop
+   because the pill row already carries them. */
+.ug-nav-mobile-only { display: none !important; }
+
+@media (max-width: 719px) {
+  .ug-nav-desktop { display: none !important; }
+  .ug-nav-mobile-only { display: inline-flex !important; }
+
+  /* Reserve space above the fixed tab bar */
+  body:has(.ug-tabbar) {
+    padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.ug-tabbar {
+  display: none;
+}
+@media (max-width: 719px) {
+  .ug-tabbar {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: linear-gradient(180deg, rgba(12,14,20,0.92), rgba(8,9,14,0.97));
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   Build Log (2026-07-01) — timeline photo strips
+   ────────────────────────────────────────────────────────── */
+.ug-photo-strip {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+.ug-photo-strip::-webkit-scrollbar { height: 5px; }
+.ug-photo-strip::-webkit-scrollbar-track { background: transparent; }
+.ug-photo-strip::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
 }

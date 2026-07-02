@@ -6,10 +6,10 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, inArray, sql } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { users, vehicles, photos, vehicleSpecs, userCarMods, modCatalog } from '@/lib/db/schema';
+import { users, vehicles, photos, vehicleSpecs, userCarMods, modCatalog, buildEntries } from '@/lib/db/schema';
 import { CallsignWithBadge } from '@/components/AdminBadge';
 import { MeView } from '@/components/me/MeView';
 import { colors, fonts } from '@/lib/design';
@@ -33,8 +33,9 @@ export default async function MePage() {
       make: vehicles.make,
       model: vehicles.model,
       trim: vehicles.trim,
+      name: vehicles.name,
       isPrimary: vehicles.isPrimary,
-      thumbUrl: photos.urlThumb,
+      heroUrl: photos.urlFull,
       stockHp: vehicleSpecs.stockHp,
       stockTorque: vehicleSpecs.stockTorque,
       curbWeight: vehicleSpecs.curbWeight,
@@ -78,6 +79,20 @@ export default async function MePage() {
       modGains[c.id] = { hp: hpSum, tq: tqSum };
     }),
   );
+
+  // Build log entry counts per vehicle (one grouped query)
+  const buildCounts: Record<string, number> = {};
+  if (myCars.length > 0) {
+    const countRows = await db
+      .select({
+        vehicleId: buildEntries.vehicleId,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(buildEntries)
+      .where(inArray(buildEntries.vehicleId, myCars.map((c) => c.id)))
+      .groupBy(buildEntries.vehicleId);
+    for (const r of countRows) buildCounts[r.vehicleId] = r.count;
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
@@ -170,7 +185,7 @@ export default async function MePage() {
           </div>
         </header>
 
-        <MeView userId={userId} cars={myCars} modCounts={modCounts} modGains={modGains} />
+        <MeView userId={userId} cars={myCars} modCounts={modCounts} modGains={modGains} buildCounts={buildCounts} />
       </div>
     </div>
   );

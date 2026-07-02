@@ -31,7 +31,8 @@ import {
   addCarFromYmm,
   type SpecSearchResult,
 } from "@/app/garage/actions";
-import { colors } from "@/lib/design";
+import { uploadVehiclePhotos } from "@/lib/client/photo-upload";
+import { colors, fonts } from "@/lib/design";
 
 type NhtsaResult = {
   source: "nhtsa";
@@ -57,8 +58,16 @@ type Props = {
 
 export default function AddCarWizard({ open, onClose }: Props) {
   const router = useRouter();
-  const [step, setStep] = useState<"search" | "confirm" | "manual">("search");
+  const [step, setStep] = useState<"search" | "confirm" | "manual" | "photos">("search");
   const [picked, setPicked] = useState<Picked | null>(null);
+
+  // photo step state (after the car is created)
+  const [newVehicleId, setNewVehicleId] = useState<string | null>(null);
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+  const [photoProgress, setPhotoProgress] = useState<{ done: number; total: number } | null>(null);
+  const [photoErr, setPhotoErr] = useState<string | null>(null);
+  const libraryRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   // search state
   const [query, setQuery] = useState("");
@@ -93,6 +102,10 @@ export default function AddCarWizard({ open, onClose }: Props) {
       setMModel("");
       setMTrim("");
       setSubmitErr(null);
+      setNewVehicleId(null);
+      setUploadedUrls([]);
+      setPhotoProgress(null);
+      setPhotoErr(null);
     }
   }, [open]);
 
@@ -197,13 +210,18 @@ export default function AddCarWizard({ open, onClose }: Props) {
     startSubmit(async () => {
       try {
         const cleanName = carName.trim();
-        let res: { ok: boolean; error?: string } | undefined;
+        type AddCarResult = {
+          ok: boolean;
+          error?: string;
+          data?: { vehicleId: string };
+        };
+        let res: AddCarResult | undefined;
 
         if (picked?.kind === "catalog") {
           res = (await addCarFromSpec({
             vehicleSpecId: picked.specId,
             name: cleanName || undefined,
-          })) as { ok: boolean; error?: string };
+          })) as AddCarResult;
         } else if (picked?.kind === "nhtsa") {
           // NHTSA gives Y/M/M only — addCarFromYmm looks up specs via the
           // LLM provider (and caches them) before creating the vehicle.
@@ -212,7 +230,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
             make: picked.make,
             model: picked.model,
             name: cleanName || undefined,
-          })) as { ok: boolean; error?: string };
+          })) as AddCarResult;
         } else if (picked?.kind === "manual") {
           const yearNum = parseInt(mYear, 10);
           if (!yearNum || yearNum < 1900 || yearNum > 2100) {
@@ -231,7 +249,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
               trim: mTrim.trim(),
             },
             name: cleanName || undefined,
-          })) as { ok: boolean; error?: string };
+          })) as AddCarResult;
         } else {
           setSubmitErr("Pick a vehicle first.");
           return;
@@ -242,8 +260,16 @@ export default function AddCarWizard({ open, onClose }: Props) {
           return;
         }
 
-        onClose();
-        router.refresh();
+        // Car created — go straight to the photo step so the garage card
+        // is never an empty gray tile.
+        if (res.data?.vehicleId) {
+          setNewVehicleId(res.data.vehicleId);
+          setStep("photos");
+          router.refresh();
+        } else {
+          onClose();
+          router.refresh();
+        }
       } catch (err) {
         console.error("[AddCarWizard] submit failed", err);
         setSubmitErr(
@@ -251,6 +277,29 @@ export default function AddCarWizard({ open, onClose }: Props) {
         );
       }
     });
+  }
+
+  async function handlePhotoFiles(files: FileList | null) {
+    if (!files || !newVehicleId) return;
+    const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (arr.length === 0) return;
+    setPhotoErr(null);
+    setPhotoProgress({ done: 0, total: arr.length });
+    const { photos: done, firstError } = await uploadVehiclePhotos(
+      arr,
+      newVehicleId,
+      { onProgress: (d, t) => setPhotoProgress({ done: d, total: t }) },
+    );
+    setUploadedUrls((prev) => [...prev, ...done.map((p) => p.url)]);
+    if (firstError) setPhotoErr(firstError);
+    setPhotoProgress(null);
+  }
+
+  function finishToVehicle() {
+    const id = newVehicleId;
+    onClose();
+    router.refresh();
+    if (id) router.push(`/v/${id}`);
   }
 
   // ---------- render ----------
@@ -487,6 +536,181 @@ export default function AddCarWizard({ open, onClose }: Props) {
               >
                 ← Back to search
               </button>
+            </div>
+          </div>
+        )}
+
+        {step === "photos" && (
+          <div>
+            <div
+              className="ug-mono"
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.35em",
+                color: colors.accent,
+                fontWeight: 700,
+                marginBottom: 8,
+              }}
+            >
+              ∕∕ IT&apos;S IN THE GARAGE
+            </div>
+            <p style={{ fontSize: 20, fontWeight: 800, margin: "0 0 6px" }}>
+              Now give it a face.
+            </p>
+            <p style={{ fontSize: 13, color: colors.textMuted, margin: "0 0 20px", lineHeight: 1.55 }}>
+              Cars with photos get raced, followed, and talked about. The first
+              shot becomes your hero image — you can change it any time.
+            </p>
+
+            <input
+              ref={libraryRef}
+              type="file"
+              accept="image/*"
+              multiple
+              style={{ display: "none" }}
+              onChange={(e) => {
+                handlePhotoFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <input
+              ref={cameraRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                handlePhotoFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+
+            {/* Uploaded previews + add tiles */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
+                gap: 8,
+                marginBottom: 18,
+              }}
+            >
+              {uploadedUrls.map((url, i) => (
+                <div
+                  key={url}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "1 / 1",
+                    borderRadius: 10,
+                    overflow: "hidden",
+                    border: i === 0 ? `1.5px solid ${colors.accent}` : `1px solid ${colors.border}`,
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt=""
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                  {i === 0 && (
+                    <span
+                      className="ug-mono"
+                      style={{
+                        position: "absolute",
+                        top: 5,
+                        left: 5,
+                        background: colors.accent,
+                        color: "#0a0a0a",
+                        padding: "2px 7px",
+                        borderRadius: 4,
+                        fontSize: 8,
+                        fontWeight: 700,
+                        letterSpacing: "0.25em",
+                      }}
+                    >
+                      ★ HERO
+                    </span>
+                  )}
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => cameraRef.current?.click()}
+                disabled={!!photoProgress}
+                style={{
+                  aspectRatio: "1 / 1",
+                  borderRadius: 10,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  cursor: "pointer",
+                  border: `1px dashed ${colors.accentBorder}`,
+                  background: colors.accentSoft,
+                  color: colors.accent,
+                  fontFamily: fonts.mono,
+                }}
+              >
+                <span style={{ fontSize: 24, lineHeight: 1 }}>📸</span>
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em" }}>
+                  CAMERA
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => libraryRef.current?.click()}
+                disabled={!!photoProgress}
+                style={{
+                  aspectRatio: "1 / 1",
+                  borderRadius: 10,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  cursor: "pointer",
+                  border: "1px dashed rgba(255,255,255,0.25)",
+                  background: "rgba(255,255,255,0.03)",
+                  color: colors.textMuted,
+                  fontFamily: fonts.mono,
+                }}
+              >
+                <span style={{ fontSize: 24, lineHeight: 1 }}>🖼️</span>
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em" }}>
+                  LIBRARY
+                </span>
+              </button>
+            </div>
+
+            {photoErr && (
+              <div className="ug-banner ug-banner-error" style={{ marginBottom: 14 }}>
+                {photoErr}
+              </div>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "row-reverse", gap: 12, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
+              <button
+                onClick={finishToVehicle}
+                disabled={!!photoProgress}
+                className="ug-btn ug-btn-primary ug-btn-block"
+                style={{ flex: 1, minWidth: 200 }}
+              >
+                {photoProgress
+                  ? `UPLOADING ${photoProgress.done} / ${photoProgress.total}…`
+                  : uploadedUrls.length > 0
+                    ? "Done — view my build →"
+                    : "View my build →"}
+              </button>
+              {uploadedUrls.length === 0 && (
+                <button
+                  onClick={finishToVehicle}
+                  disabled={!!photoProgress}
+                  className="ug-btn ug-btn-text"
+                >
+                  Skip for now
+                </button>
+              )}
             </div>
           </div>
         )}

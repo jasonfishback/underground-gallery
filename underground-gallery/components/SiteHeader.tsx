@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { getAuthContext } from '@/lib/auth/gates';
 import { getRecentNotifications } from '@/lib/notifications/fetch';
 import { NotificationBell } from '@/components/NotificationBell';
+import { DesktopNav, MobileTabBar } from '@/components/SiteNav';
 import { colors, fonts } from '@/lib/design';
 
 export async function SiteHeader() {
@@ -70,54 +71,47 @@ export async function SiteHeader() {
         GALLERY
       </Link>
 
-      <nav
+      <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 4,
-          overflowX: 'auto',
-          flexWrap: 'nowrap',
-          WebkitOverflowScrolling: 'touch',
-          maxWidth: '100%',
+          gap: 8,
+          minWidth: 0,
         }}
       >
-        <NavLink href="/me">GARAGE</NavLink>
-        <NavLink href="/discover">DISCOVER</NavLink>
-        <NavLink href="/race">RACE</NavLink>
-        <NavLink href="/market">MARKET</NavLink>
-        <NavLink href="/members">MEMBERS</NavLink>
-        <Link
-          href="/invites"
-          className="ug-btn ug-btn-primary ug-pill"
-          style={{ marginLeft: 6 }}
-        >
-          + INVITE
-        </Link>
-        {ctx.isModerator && <NavLink href="/admin">ADMIN</NavLink>}
-        <NotificationBell notifications={notifs} />
-        <NavLink href="/profile">PROFILE</NavLink>
-      </nav>
-    </header>
-  );
-}
+        {/* Full pill nav — hidden < 720px (mobile gets the bottom tab bar) */}
+        <DesktopNav isModerator={ctx.isModerator} />
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="ug-pill ug-mono"
-      style={{
-        fontSize: 10,
-        letterSpacing: '0.22em',
-        color: colors.textMuted,
-        whiteSpace: 'nowrap',
-        flexShrink: 0,
-        textDecoration: 'none',
-        fontWeight: 700,
-        transition: 'background 0.15s ease, color 0.15s ease',
-      }}
-    >
-      {children}
-    </Link>
+        {/* Always-visible utilities: invite (mobile), admin (mobile), bell */}
+        <span className="ug-nav-mobile-utils" style={{ display: 'contents' }}>
+          <Link
+            href="/invites"
+            className="ug-btn ug-btn-primary ug-pill ug-nav-mobile-only"
+          >
+            + INVITE
+          </Link>
+          {ctx.isModerator && (
+            <Link
+              href="/admin"
+              className="ug-pill ug-mono ug-nav-mobile-only"
+              style={{
+                fontSize: 10,
+                letterSpacing: '0.22em',
+                color: colors.textMuted,
+                textDecoration: 'none',
+                fontWeight: 700,
+                border: `1px solid ${colors.border}`,
+              }}
+            >
+              ADMIN
+            </Link>
+          )}
+        </span>
+        <NotificationBell notifications={notifs} />
+      </div>
+
+      {/* App-style bottom tab bar on phones */}
+      <MobileTabBar />
+    </header>
   );
 }

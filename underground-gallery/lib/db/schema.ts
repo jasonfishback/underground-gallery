@@ -224,13 +224,48 @@ export const photos = pgTable(
     height: integer('height').notNull(),
     exifJson: jsonb('exif_json'),
     sortOrder: integer('sort_order').notNull().default(0),
+    // Optional link to a build log entry (migration 0011). Photos keep
+    // subjectType='vehicle' so they also appear in the car's main gallery.
+    buildEntryId: text('build_entry_id').references((): AnyPgColumn => buildEntries.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
     subjectIdx: index('photos_subject_idx').on(t.subjectType, t.subjectId, t.sortOrder),
     uploaderIdx: index('photos_uploader_idx').on(t.uploaderId),
+    buildEntryIdx: index('photos_build_entry_idx').on(t.buildEntryId),
   }),
 );
+
+// ─── build_entries (Build Log, migration 0011) ──────────────────────────────
+// Dated, photo-backed build documentation per vehicle — the story of the car.
+
+export const BUILD_CATEGORIES = [
+  'Engine', 'Turbo', 'Exhaust', 'Suspension', 'Brakes', 'Wheels/Tires',
+  'Exterior', 'Interior', 'Electrical', 'Audio', 'Drivetrain',
+  'Maintenance', 'Milestone', 'Other',
+] as const;
+export type BuildCategory = (typeof BUILD_CATEGORIES)[number];
+
+export const buildEntries = pgTable(
+  'build_entries',
+  {
+    id: text('id').primaryKey(),
+    vehicleId: text('vehicle_id').notNull().references(() => vehicles.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    category: text('category'),
+    body: text('body'),
+    costCents: integer('cost_cents'),
+    entryDate: timestamp('entry_date', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    vehicleIdx: index('build_entries_vehicle_idx').on(t.vehicleId, t.entryDate),
+  }),
+);
+
+export type BuildEntry = typeof buildEntries.$inferSelect;
+export type NewBuildEntry = typeof buildEntries.$inferInsert;
 
 export const appSettings = pgTable('app_settings', {
   key: text('key').primaryKey(),

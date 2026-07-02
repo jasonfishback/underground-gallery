@@ -124,12 +124,43 @@ export default async function RacePage() {
 
         {inbox.length > 0 && <ChallengeInbox challenges={inbox} />}
 
-        <RaceUI
-          myCars={myCars}
-          communityCars={communityCarsRaw}
-          myUserId={ctx.userId}
-          myCallsign={ctx.callsign}
-        />
+        {myCars.length === 0 ? (
+          <div
+            className="ug-card race-rise"
+            style={{
+              padding: '56px 24px',
+              textAlign: 'center',
+              maxWidth: 560,
+              margin: '0 auto',
+            }}
+          >
+            <div style={{ fontSize: 34, marginBottom: 12 }}>🏁</div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px' }}>
+              You need a car to race.
+            </h2>
+            <p
+              style={{
+                fontSize: 13,
+                color: colors.textMuted,
+                margin: '0 0 24px',
+                lineHeight: 1.6,
+              }}
+            >
+              Add your ride to the garage — specs auto-fill from the catalog —
+              then come back and pick your fight.
+            </p>
+            <a href="/me" className="ug-btn ug-btn-primary">
+              + Add your car
+            </a>
+          </div>
+        ) : (
+          <RaceUI
+            myCars={myCars}
+            communityCars={communityCarsRaw}
+            myUserId={ctx.userId}
+            myCallsign={ctx.callsign}
+          />
+        )}
 
         <div style={{ marginTop: 64, textAlign: 'center' }}>
           <a

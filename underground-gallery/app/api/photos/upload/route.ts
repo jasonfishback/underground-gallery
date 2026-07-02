@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { vehicles, photos } from "@/lib/db/schema";
+import { vehicles, photos, buildEntries } from "@/lib/db/schema";
 import { r2Upload } from "@/lib/storage/r2";
 import { randomUUID } from "crypto";
 
@@ -33,6 +33,10 @@ export async function POST(req: NextRequest) {
     const form = await req.formData();
     const vehicleId = form.get("vehicleId");
     const file = form.get("file");
+    // Optional: attach this photo to a build log entry on the same vehicle.
+    const buildEntryIdRaw = form.get("buildEntryId");
+    const buildEntryId =
+      typeof buildEntryIdRaw === "string" && buildEntryIdRaw ? buildEntryIdRaw : null;
 
     if (typeof vehicleId !== "string" || !vehicleId) {
       return NextResponse.json(
@@ -76,6 +80,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // If attaching to a build entry, it must belong to this vehicle.
+    if (buildEntryId) {
+      const [entry] = await db
+        .select({ vehicleId: buildEntries.vehicleId })
+        .from(buildEntries)
+        .where(eq(buildEntries.id, buildEntryId))
+        .limit(1);
+      if (!entry || entry.vehicleId !== vehicleId) {
+        return NextResponse.json(
+          { ok: false, error: "Build entry not on this vehicle." },
+          { status: 400 },
+        );
+      }
+    }
+
     // Upload to R2
     const ext =
       file.type === "image/png"
@@ -105,6 +124,7 @@ export async function POST(req: NextRequest) {
       height: 0,
       exifJson: null,
       sortOrder: 0,
+      buildEntryId,
     } as any);
 
     // If vehicle has no hero photo yet, set this one as the hero.

@@ -5,10 +5,10 @@
 
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, inArray, sql } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { users, vehicles, photos, vehicleSpecs, userCarMods, modCatalog } from '@/lib/db/schema';
+import { users, vehicles, photos, vehicleSpecs, userCarMods, modCatalog, buildEntries } from '@/lib/db/schema';
 import { CallsignWithBadge } from '@/components/AdminBadge';
 import { colors, fonts } from '@/lib/design';
 
@@ -39,8 +39,9 @@ export default async function ProfilePage({
       make: vehicles.make,
       model: vehicles.model,
       trim: vehicles.trim,
+      name: vehicles.name,
       isPrimary: vehicles.isPrimary,
-      thumbUrl: photos.urlThumb,
+      thumbUrl: photos.urlFull,
       stockHp: vehicleSpecs.stockHp,
       stockTorque: vehicleSpecs.stockTorque,
       currentHpOverride: vehicles.currentHpOverride,
@@ -76,6 +77,20 @@ export default async function ProfilePage({
       modGains[vc.id] = { hp: hpSum, tq: tqSum };
     }),
   );
+
+  // Build log entry counts per vehicle (one grouped query)
+  const buildCounts: Record<string, number> = {};
+  if (cars.length > 0) {
+    const countRows = await db
+      .select({
+        vehicleId: buildEntries.vehicleId,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(buildEntries)
+      .where(inArray(buildEntries.vehicleId, cars.map((c) => c.id)))
+      .groupBy(buildEntries.vehicleId);
+    for (const r of countRows) buildCounts[r.vehicleId] = r.count;
+  }
 
   const isMe = session.user.id === profile.id;
 
@@ -174,16 +189,21 @@ export default async function ProfilePage({
                   />
                   <div style={{ padding: 14 }}>
                     <div style={{ fontSize: 14, fontWeight: 700 }}>
-                      {c.year} {c.make} {c.model}
+                      {c.name || `${c.year} ${c.make} ${c.model}`}
                     </div>
-                    {c.trim && (
-                      <div className="ug-mono" style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>
-                        {c.trim}
-                      </div>
-                    )}
-                    <div className="ug-mono" style={{ marginTop: 10, display: 'flex', gap: 12, fontSize: 11, color: colors.textMuted }}>
+                    <div className="ug-mono" style={{ fontSize: 10, color: colors.textMuted, marginTop: 2, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                      {c.name
+                        ? `${c.year} ${c.make} ${c.model}${c.trim ? ' ' + c.trim : ''}`
+                        : c.trim ?? ''}
+                    </div>
+                    <div className="ug-mono" style={{ marginTop: 10, display: 'flex', gap: 12, fontSize: 11, color: colors.textMuted, flexWrap: 'wrap' }}>
                       {hp != null && <span style={{ color: colors.text }}>{hp} hp</span>}{tq != null && tq > 0 && <span style={{ color: colors.text }}>{tq} tq</span>}
                       {c.drivetrain && <span>{c.drivetrain}</span>}
+                      {(buildCounts[c.id] ?? 0) > 0 && (
+                        <span style={{ color: colors.accent }}>
+                          {buildCounts[c.id]} LOG {buildCounts[c.id] === 1 ? 'ENTRY' : 'ENTRIES'}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </Link>
