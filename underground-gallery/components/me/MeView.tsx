@@ -5,9 +5,11 @@
 // nickname + Y/M/M, and a stat strip (HP / drivetrain / mods / log entries).
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import AddCarWizard from '@/components/garage/AddCarWizard';
+import { deleteVehicle } from '@/app/me/actions';
 import { colors, fonts } from '@/lib/design';
 
 type Car = {
@@ -40,7 +42,36 @@ type Props = {
 };
 
 export function MeView({ cars, modCounts, modGains, buildCounts }: Props) {
+  const router = useRouter();
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [, startDelete] = useTransition();
+
+  function handleDelete(car: Car) {
+    const label = car.name || `${car.year} ${car.make} ${car.model}`;
+    if (
+      !confirm(
+        `Delete "${label}" from your garage?\n\nThis removes the car, its photos, mods, and build log. This cannot be undone.`,
+      )
+    )
+      return;
+    setDeletingId(car.id);
+    startDelete(async () => {
+      try {
+        const res = await deleteVehicle(car.id);
+        if (!res.ok) {
+          alert(res.error ?? 'Could not delete vehicle.');
+          setDeletingId(null);
+          return;
+        }
+        router.refresh();
+      } catch (err) {
+        console.error('[MeView] delete failed', err);
+        alert('Could not delete vehicle.');
+        setDeletingId(null);
+      }
+    });
+  }
 
   return (
     <div>
@@ -115,19 +146,58 @@ export function MeView({ cars, modCounts, modGains, buildCounts }: Props) {
             const hp = c.currentHpOverride
               ?? (c.stockHp != null ? c.stockHp + (modGains?.[c.id]?.hp ?? 0) : null);
 
+            const isDeleting = deletingId === c.id;
             return (
-              <Link
+              <div
                 key={c.id}
-                href={`/v/${c.id}`}
-                className="ug-card"
                 style={{
-                  display: 'block',
-                  padding: 0,
-                  overflow: 'hidden',
-                  textDecoration: 'none',
-                  color: colors.text,
+                  position: 'relative',
+                  opacity: isDeleting ? 0.5 : 1,
+                  pointerEvents: isDeleting ? 'none' : 'auto',
+                  transition: 'opacity 140ms ease',
                 }}
               >
+                {/* Delete button — sibling of the Link so it doesn't trigger nav */}
+                <button
+                  type="button"
+                  onClick={() => handleDelete(c)}
+                  aria-label={`Delete ${displayName}`}
+                  title="Delete vehicle"
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    left: 10,
+                    zIndex: 3,
+                    width: 30,
+                    height: 30,
+                    borderRadius: 999,
+                    border: '1px solid rgba(255,255,255,0.14)',
+                    background: 'rgba(0,0,0,0.55)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)' as any,
+                    color: '#ff8a8a',
+                    fontSize: 13,
+                    cursor: 'pointer',
+                    lineHeight: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {isDeleting ? '…' : '🗑'}
+                </button>
+
+                <Link
+                  href={`/v/${c.id}`}
+                  className="ug-card"
+                  style={{
+                    display: 'block',
+                    padding: 0,
+                    overflow: 'hidden',
+                    textDecoration: 'none',
+                    color: colors.text,
+                  }}
+                >
                 {/* Hero image */}
                 <div
                   style={{
@@ -262,7 +332,8 @@ export function MeView({ cars, modCounts, modGains, buildCounts }: Props) {
                       : 'NO LOG YET'}
                   </span>
                 </div>
-              </Link>
+                </Link>
+              </div>
             );
           })}
 

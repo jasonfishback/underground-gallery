@@ -7,7 +7,8 @@
 // ============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { vehicles, photos, buildEntries } from "@/lib/db/schema";
@@ -127,20 +128,31 @@ export async function POST(req: NextRequest) {
       buildEntryId,
     } as any);
 
-    // If vehicle has no hero photo yet, set this one as the hero.
+    // If vehicle has no hero photo yet, set this one as the hero. Guard on
+    // primary_photo_id IS NULL so concurrent uploads (the wizard sends a batch
+    // in parallel) don't fight — the first to land wins, cleanly.
+    let becameHero = false;
     if (!vehicle.primaryPhotoId) {
-      await db
+      const updated = await db
         .update(vehicles)
         .set({ primaryPhotoId: photoId })
-        .where(eq(vehicles.id, vehicleId));
+        .where(and(eq(vehicles.id, vehicleId), isNull(vehicles.primaryPhotoId)))
+        .returning({ id: vehicles.id });
+      becameHero = updated.length > 0;
     }
+
+    // Route handlers don't auto-invalidate the App Router cache the way server
+    // actions do, so the garage (/me) and the car page would otherwise keep
+    // showing the pre-upload render (no hero photo). Revalidate them.
+    revalidatePath("/me");
+    revalidatePath(`/v/${vehicleId}`);
 
     return NextResponse.json({
       ok: true,
       photo: {
         id: photoId,
         url,
-        isHero: !vehicle.primaryPhotoId,
+        isHero: becameHero,
       },
     });
   } catch (err) {
