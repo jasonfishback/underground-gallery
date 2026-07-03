@@ -8,9 +8,22 @@ import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { DiscoverCard } from '@/app/discover/page';
 
-const SWIPE_THRESHOLD = 110; // px from center → commit
-const ROTATE_AT_FULL_THROW = 18; // degrees of tilt at the threshold
-const FLY_DURATION_MS = 280;
+// Tinder-style feel: the card lags the finger (resistance), ignores tiny
+// touches, and needs a deliberate drag past ~40% of the card width to commit —
+// so a quick flick doesn't fire an accidental swipe.
+const DRAG_DAMP = 0.68; // card moves 68% of the finger — adds weight
+const DEAD_ZONE = 12; // px of finger travel before the card starts moving
+const THRESHOLD_FRACTION = 0.4; // commit past this fraction of card width…
+const THRESHOLD_MIN = 150; // …but never less than this many px
+const ROTATE_AT_FULL_THROW = 14; // degrees of tilt at the threshold
+const FLY_DURATION_MS = 300;
+
+// Card displacement for a given raw finger delta (dead zone + damping).
+function dampen(rawDx: number): number {
+  const a = Math.abs(rawDx);
+  if (a < DEAD_ZONE) return 0;
+  return Math.sign(rawDx) * (a - DEAD_ZONE) * DRAG_DAMP;
+}
 
 export function SwipeCard({
   card,
@@ -26,6 +39,11 @@ export function SwipeCard({
   const [dragging, setDragging] = useState(false);
   const [flying, setFlying] = useState<'left' | 'right' | null>(null);
   const startRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const widthRef = useRef(340);
+
+  function commitThreshold(): number {
+    return Math.max(THRESHOLD_MIN, widthRef.current * THRESHOLD_FRACTION);
+  }
 
   // Keyboard support on the top card
   useEffect(() => {
@@ -41,19 +59,20 @@ export function SwipeCard({
   function onPointerDown(e: React.PointerEvent) {
     if (!interactive || flying) return;
     ref.current?.setPointerCapture(e.pointerId);
+    widthRef.current = ref.current?.offsetWidth ?? 340;
     startRef.current = { x: e.clientX, y: e.clientY, t: Date.now() };
     setDragging(true);
   }
 
   function onPointerMove(e: React.PointerEvent) {
     if (!startRef.current || flying) return;
-    const dx = e.clientX - startRef.current.x;
-    setDragX(dx);
+    const rawDx = e.clientX - startRef.current.x;
+    setDragX(dampen(rawDx));
   }
 
   function onPointerUp(e: React.PointerEvent) {
     if (!startRef.current) return;
-    const dx = e.clientX - startRef.current.x;
+    const rawDx = e.clientX - startRef.current.x;
     const dt = Date.now() - startRef.current.t;
     const dyAbs = Math.abs(e.clientY - startRef.current.y);
     ref.current?.releasePointerCapture(e.pointerId);
@@ -61,13 +80,15 @@ export function SwipeCard({
     setDragging(false);
 
     // Tap (no real drag, low time): let Link handle navigation
-    if (Math.abs(dx) < 6 && dyAbs < 6 && dt < 250) {
+    if (Math.abs(rawDx) < 8 && dyAbs < 8 && dt < 250) {
       setDragX(0);
       return;
     }
 
-    if (dx > SWIPE_THRESHOLD) startFly('right');
-    else if (dx < -SWIPE_THRESHOLD) startFly('left');
+    const disp = dampen(rawDx);
+    const threshold = commitThreshold();
+    if (disp > threshold) startFly('right');
+    else if (disp < -threshold) startFly('left');
     else setDragX(0);
   }
 
@@ -77,16 +98,19 @@ export function SwipeCard({
     setTimeout(() => onSwipe(dir), FLY_DURATION_MS);
   }
 
-  const rotation = (dragX / SWIPE_THRESHOLD) * ROTATE_AT_FULL_THROW;
+  const rotation = Math.max(-ROTATE_AT_FULL_THROW, Math.min(ROTATE_AT_FULL_THROW,
+    (dragX / commitThreshold()) * ROTATE_AT_FULL_THROW));
   const opacity = flying ? 0 : 1;
   const transform = `translateX(${dragX}px) rotate(${rotation}deg)`;
   const transition = dragging
     ? 'none'
     : flying
       ? `transform ${FLY_DURATION_MS}ms ease-out, opacity ${FLY_DURATION_MS}ms ease-out`
-      : 'transform 220ms cubic-bezier(.2,.8,.2,1)';
+      : 'transform 260ms cubic-bezier(.2,.8,.2,1)';
 
-  const intent = dragX > 40 ? 'save' : dragX < -40 ? 'pass' : null;
+  // Only reveal SAVE/PASS once the drag is clearly committing (half threshold).
+  const intentAt = commitThreshold() * 0.5;
+  const intent = dragX > intentAt ? 'save' : dragX < -intentAt ? 'pass' : null;
 
   const subtitle = [card.year, card.make, card.model, card.trim].filter(Boolean).join(' ');
 
