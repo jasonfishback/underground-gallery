@@ -20,6 +20,11 @@ import { CallsignWithBadge } from '@/components/AdminBadge';
 import { colors, fonts } from '@/lib/design';
 import VehicleOwnerPanel from '@/components/vehicle/VehicleOwnerPanel';
 import BuildTimeline, { type TimelineEntry } from '@/components/build/BuildTimeline';
+import {
+  isScalablePowerMod,
+  platformRelativeHpGain,
+  platformRelativeTorqueGain,
+} from '@/lib/race/mod-scaling';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +63,7 @@ export default async function VehicleDetailPage({ params }: Params) {
       drivetrain: vehicleSpecs.drivetrain,
       transmission: vehicleSpecs.transmission,
       engine: vehicleSpecs.engine,
+      aspiration: vehicleSpecs.aspiration,
     })
     .from(vehicles)
     .innerJoin(users, eq(users.id, vehicles.userId))
@@ -88,16 +94,30 @@ export default async function VehicleDetailPage({ params }: Params) {
     .leftJoin(modCatalog, eq(userCarMods.modCatalogId, modCatalog.id))
     .where(eq(userCarMods.vehicleId, v.id));
 
-  const mods = modsRaw.map((m) => ({
-    id: m.id,
-    name: m.customName ?? m.catalogName ?? "Mod",
-    category: m.category,
-    brand: null as string | null,
-    hpDelta: m.hpGain ?? m.catalogHp ?? 0,
-    tqDelta: m.torqueGain,
-    notes: m.notes,
-    modCatalogId: m.modCatalogId,
-  }));
+  // Apply the same platform-relative power scaling the race engine uses, so
+  // the displayed HP/torque matches what the car actually races at.
+  const mods = modsRaw.map((m) => {
+    const flatHp = m.hpGain ?? m.catalogHp ?? 0;
+    const untouched =
+      m.hpGain == null || (m.catalogHp != null && m.hpGain === m.catalogHp);
+    const scalable = isScalablePowerMod(m.modCatalogId) && untouched;
+    const hpDelta = scalable
+      ? platformRelativeHpGain(m.modCatalogId, v.stockHp, v.aspiration, flatHp)
+      : flatHp;
+    const tqDelta = scalable
+      ? platformRelativeTorqueGain(hpDelta, v.aspiration)
+      : m.torqueGain;
+    return {
+      id: m.id,
+      name: m.customName ?? m.catalogName ?? "Mod",
+      category: m.category,
+      brand: null as string | null,
+      hpDelta,
+      tqDelta,
+      notes: m.notes,
+      modCatalogId: m.modCatalogId,
+    };
+  });
 
   // ---- Photos (used by owner panel) ----
   const vehiclePhotos = isOwner

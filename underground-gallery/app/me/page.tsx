@@ -10,6 +10,7 @@ import { eq, desc, inArray, sql } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { users, vehicles, photos, vehicleSpecs, userCarMods, modCatalog, buildEntries } from '@/lib/db/schema';
+import { isScalablePowerMod, platformRelativeHpGain, platformRelativeTorqueGain } from '@/lib/race/mod-scaling';
 import { CallsignWithBadge } from '@/components/AdminBadge';
 import { MeView } from '@/components/me/MeView';
 import { colors, fonts } from '@/lib/design';
@@ -41,6 +42,7 @@ export default async function MePage() {
       curbWeight: vehicleSpecs.curbWeight,
       drivetrain: vehicleSpecs.drivetrain,
       transmission: vehicleSpecs.transmission,
+      aspiration: vehicleSpecs.aspiration,
       currentHpOverride: vehicles.currentHpOverride,
       currentTorqueOverride: vehicles.currentTorqueOverride,
       currentWeightOverride: vehicles.currentWeightOverride,
@@ -63,6 +65,7 @@ export default async function MePage() {
           id: userCarMods.id,
           hpGain: userCarMods.hpGain,
           torqueGain: userCarMods.torqueGain,
+          modCatalogId: userCarMods.modCatalogId,
           catalogHp: modCatalog.defaultHpGain,
         })
         .from(userCarMods)
@@ -71,8 +74,13 @@ export default async function MePage() {
       modCounts[c.id] = rows.length;
       let hpSum = 0, tqSum = 0;
       for (const r of rows) {
-        const hp = r.hpGain ?? r.catalogHp ?? 0;
-        const tq = (r.torqueGain != null && r.torqueGain !== 0) ? r.torqueGain : Math.round(hp * 0.9);
+        const flatHp = r.hpGain ?? r.catalogHp ?? 0;
+        const untouched = r.hpGain == null || (r.catalogHp != null && r.hpGain === r.catalogHp);
+        const scalable = isScalablePowerMod(r.modCatalogId) && untouched;
+        const hp = scalable ? platformRelativeHpGain(r.modCatalogId, c.stockHp, c.aspiration, flatHp) : flatHp;
+        const tq = scalable
+          ? platformRelativeTorqueGain(hp, c.aspiration)
+          : (r.torqueGain != null && r.torqueGain !== 0) ? r.torqueGain : Math.round(hp * 0.9);
         hpSum += hp;
         tqSum += tq;
       }

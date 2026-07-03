@@ -4,6 +4,13 @@
 // suitable for passing to the race calculator. Pure function.
 
 import type { RaceCar, Drivetrain, Transmission, TireType } from './calculator';
+import { rawQuarterMile, rawZeroToSixty, rawTopSpeed } from './calculator';
+import {
+  isScalablePowerMod,
+  platformRelativeHpGain,
+  platformRelativeTorqueGain,
+  type AspirationLike,
+} from './mod-scaling';
 
 export type StockSpecs = {
   hp: number | null;
@@ -11,6 +18,13 @@ export type StockSpecs = {
   weight: number | null;
   drivetrain: string | null;
   transmission: string | null;
+  // Optional: engine aspiration + published factory performance. When present,
+  // aspiration drives platform-relative mod scaling and the factory times
+  // calibrate this car's estimates to reality.
+  aspiration?: string | null;
+  zeroToSixty?: number | null;
+  quarterMile?: number | null;
+  topSpeed?: number | null;
 };
 
 export type Mod = {
@@ -21,7 +35,13 @@ export type Mod = {
   launchModifier: number | null;
   shiftModifier: number | null;
   handlingModifier: number | null;
+  // Optional catalog linkage — enables platform-relative power scaling for
+  // catalog power mods the user hasn't hand-tuned.
+  modCatalogId?: string | null;
+  catalogDefaultHp?: number | null;
 };
+
+const clamp = (x: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, x));
 
 export type VehicleOverrides = {
   currentHpOverride: number | null;
@@ -96,16 +116,40 @@ export function calculateBuild(
   const stockHp = stock.hp ?? 0;
   const stockTorque = stock.torque ?? 0;
   const stockWeight = stock.weight ?? 0;
+  const aspiration = (stock.aspiration ?? null) as AspirationLike;
 
-  // Sum mod contributions
+  // Sum mod contributions ONCE (callers pass raw stock, not pre-built specs).
+  // Catalog power mods left at their default gain are rescaled to a percentage
+  // of this engine's stock power (platform-relative); hand-tuned values and
+  // non-power mods pass through unchanged.
   let totalHpGain = 0;
   let totalTorqueGain = 0;
   let totalWeightChange = 0;
   const modBonuses = { traction: 0, launch: 0, shift: 0, handling: 0 };
 
   for (const m of mods) {
-    totalHpGain += m.hpGain ?? 0;
-    totalTorqueGain += m.torqueGain ?? 0;
+    const catDefault = m.catalogDefaultHp ?? null;
+    const storedHp = m.hpGain;
+    const flatHp = storedHp ?? catDefault ?? 0;
+
+    // Rescale only when it's a catalog power mod the user hasn't customized.
+    const untouched =
+      storedHp == null || (catDefault != null && storedHp === catDefault);
+    const scalable = isScalablePowerMod(m.modCatalogId) && untouched;
+
+    const hpGain = scalable
+      ? platformRelativeHpGain(m.modCatalogId, stockHp, aspiration, flatHp)
+      : flatHp;
+
+    const storedTq = m.torqueGain;
+    const tqGain = scalable
+      ? platformRelativeTorqueGain(hpGain, aspiration)
+      : storedTq != null && storedTq !== 0
+        ? storedTq
+        : Math.round(hpGain * 0.9);
+
+    totalHpGain += hpGain;
+    totalTorqueGain += tqGain;
     totalWeightChange += m.weightChange ?? 0;
     modBonuses.traction += m.tractionModifier ?? 0;
     modBonuses.launch += m.launchModifier ?? 0;
@@ -122,6 +166,38 @@ export function calculateBuild(
   const transmission = normalizeTransmission(overrides.transmissionOverride ?? stock.transmission);
   const tireType = normalizeTireType(overrides.tireType);
 
+  // ── Factory calibration ──────────────────────────────────────────────────
+  // Anchor this car's estimates to its real published numbers. We measure how
+  // far the raw formula is off for the BONE-STOCK car, then carry that
+  // correction onto the (possibly modded) estimate. A stock car reports its
+  // real factory time; mods scale from that true baseline.
+  const calib: NonNullable<RaceCar['calib']> = {};
+  if (stockHp > 0 && stockWeight > 0) {
+    const stockRef: RaceCar = {
+      label,
+      hp: stockHp,
+      torque: stockTorque,
+      weight: stockWeight,
+      drivetrain,
+      transmission,
+      tireType: 'Performance', // factory tests run on performance/summer tires
+      driverSkill: 5,
+      modBonuses: {},
+    };
+    if (stock.quarterMile && stock.quarterMile > 0) {
+      const raw = rawQuarterMile(stockRef);
+      if (raw > 0) calib.et = clamp(stock.quarterMile / raw, 0.75, 1.35);
+    }
+    if (stock.zeroToSixty && stock.zeroToSixty > 0) {
+      const raw = rawZeroToSixty(stockRef);
+      if (raw > 0) calib.z60 = clamp(stock.zeroToSixty / raw, 0.7, 1.4);
+    }
+    if (stock.topSpeed && stock.topSpeed > 0) {
+      const raw = rawTopSpeed(stockRef);
+      if (raw > 0) calib.top = clamp(stock.topSpeed / raw, 0.7, 1.4);
+    }
+  }
+
   const raceCar: RaceCar = {
     label,
     hp: currentHp,
@@ -132,6 +208,7 @@ export function calculateBuild(
     tireType,
     driverSkill: overrides.driverSkill ?? 5,
     modBonuses,
+    calib,
   };
 
   return {

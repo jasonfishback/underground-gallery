@@ -474,7 +474,10 @@ async function loadVehicleForRace(vehicleId: string) {
     .limit(1);
   if (!v) return null;
 
-  const modsRaw = await db
+  // Pass RAW stored mod values + catalog linkage; calculateBuild handles
+  // platform-relative scaling and sums exactly once (no pre-summing here —
+  // that previously double-counted gains against calculateBuild's own sum).
+  const mods = await db
     .select({
       id: userCarMods.id,
       hpGain: userCarMods.hpGain,
@@ -482,38 +485,28 @@ async function loadVehicleForRace(vehicleId: string) {
       weightChange: userCarMods.weightChange,
       tractionModifier: userCarMods.tractionModifier,
       launchModifier: userCarMods.launchModifier,
+      shiftModifier: userCarMods.shiftModifier,
+      handlingModifier: userCarMods.handlingModifier,
+      modCatalogId: userCarMods.modCatalogId,
       catalogDefaultHp: modCatalog.defaultHpGain,
     })
     .from(userCarMods)
     .leftJoin(modCatalog, eq(modCatalog.id, userCarMods.modCatalogId))
     .where(eq(userCarMods.vehicleId, vehicleId));
-  const mods = modsRaw.map(m => {
-    const effectiveHp = m.hpGain ?? m.catalogDefaultHp ?? 0;
-    const explicitTq = m.torqueGain;
-    const effectiveTq = (explicitTq != null && explicitTq !== 0) ? explicitTq : Math.round(effectiveHp * 0.9);
-    return { id: m.id, hpGain: effectiveHp, torqueGain: effectiveTq, weightChange: m.weightChange ?? 0, tractionModifier: m.tractionModifier ?? 0, launchModifier: m.launchModifier ?? 0, shiftModifier: 0, handlingModifier: 0 };
-  });
-
-  // Sum mod gains so trap speed/HP reflect the actual build, not just stock
-  const totalHpGain = mods.reduce((s, m) => s + (m.hpGain ?? 0), 0);
-  const totalTorqueGain = mods.reduce((s, m) => s + (m.torqueGain ?? 0), 0);
-  const totalWeightChange = mods.reduce((s, m) => s + (m.weightChange ?? 0), 0);
-  const stockHp = v.spec?.stockHp ?? null;
-  const stockTorque = v.spec?.stockTorque ?? null;
-  const stockWeight = v.spec?.curbWeight ?? null;
-  const builtHp = stockHp != null ? stockHp + totalHpGain : null;
-  const builtTorque = stockTorque != null ? stockTorque + totalTorqueGain : null;
-  const builtWeight = stockWeight != null ? stockWeight + totalWeightChange : null;
 
   return {
     label: `${v.vehicle.year} ${v.vehicle.make} ${v.vehicle.model}${v.vehicle.trim ? ' ' + v.vehicle.trim : ''}`,
     userId: v.vehicle.userId,
     stock: {
-      hp: builtHp,
-      torque: builtTorque,
-      weight: builtWeight,
+      hp: v.spec?.stockHp ?? null,
+      torque: v.spec?.stockTorque ?? null,
+      weight: v.spec?.curbWeight ?? null,
       drivetrain: v.spec?.drivetrain ?? null,
       transmission: v.spec?.transmission ?? null,
+      aspiration: v.spec?.aspiration ?? null,
+      zeroToSixty: v.spec?.zeroToSixty ?? null,
+      quarterMile: v.spec?.quarterMile ?? null,
+      topSpeed: v.spec?.topSpeed ?? null,
     },
     mods,
     overrides: {

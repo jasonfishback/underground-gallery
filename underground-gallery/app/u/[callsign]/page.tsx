@@ -9,6 +9,7 @@ import { eq, desc, inArray, sql } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { users, vehicles, photos, vehicleSpecs, userCarMods, modCatalog, buildEntries } from '@/lib/db/schema';
+import { isScalablePowerMod, platformRelativeHpGain, platformRelativeTorqueGain } from '@/lib/race/mod-scaling';
 import { CallsignWithBadge } from '@/components/AdminBadge';
 import { colors, fonts } from '@/lib/design';
 
@@ -44,6 +45,7 @@ export default async function ProfilePage({
       thumbUrl: photos.urlFull,
       stockHp: vehicleSpecs.stockHp,
       stockTorque: vehicleSpecs.stockTorque,
+      aspiration: vehicleSpecs.aspiration,
       currentHpOverride: vehicles.currentHpOverride,
       currentTorqueOverride: vehicles.currentTorqueOverride,
       drivetrain: vehicleSpecs.drivetrain,
@@ -62,6 +64,7 @@ export default async function ProfilePage({
         .select({
           hpGain: userCarMods.hpGain,
           torqueGain: userCarMods.torqueGain,
+          modCatalogId: userCarMods.modCatalogId,
           catalogHp: modCatalog.defaultHpGain,
         })
         .from(userCarMods)
@@ -69,8 +72,13 @@ export default async function ProfilePage({
         .where(eq(userCarMods.vehicleId, vc.id));
       let hpSum = 0, tqSum = 0;
       for (const r of rows) {
-        const hp = r.hpGain ?? r.catalogHp ?? 0;
-        const tq = (r.torqueGain != null && r.torqueGain !== 0) ? r.torqueGain : Math.round(hp * 0.9);
+        const flatHp = r.hpGain ?? r.catalogHp ?? 0;
+        const untouched = r.hpGain == null || (r.catalogHp != null && r.hpGain === r.catalogHp);
+        const scalable = isScalablePowerMod(r.modCatalogId) && untouched;
+        const hp = scalable ? platformRelativeHpGain(r.modCatalogId, vc.stockHp, vc.aspiration, flatHp) : flatHp;
+        const tq = scalable
+          ? platformRelativeTorqueGain(hp, vc.aspiration)
+          : (r.torqueGain != null && r.torqueGain !== 0) ? r.torqueGain : Math.round(hp * 0.9);
         hpSum += hp;
         tqSum += tq;
       }

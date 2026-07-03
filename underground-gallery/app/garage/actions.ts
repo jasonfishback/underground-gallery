@@ -579,9 +579,23 @@ async function loadVehicleForRace(vehicleId: string) {
     .limit(1);
   if (!v) return null;
 
+  // Include the catalog default so calculateBuild can platform-relative-scale
+  // untouched catalog power mods.
   const mods = await db
-    .select()
+    .select({
+      id: userCarMods.id,
+      hpGain: userCarMods.hpGain,
+      torqueGain: userCarMods.torqueGain,
+      weightChange: userCarMods.weightChange,
+      tractionModifier: userCarMods.tractionModifier,
+      launchModifier: userCarMods.launchModifier,
+      shiftModifier: userCarMods.shiftModifier,
+      handlingModifier: userCarMods.handlingModifier,
+      modCatalogId: userCarMods.modCatalogId,
+      catalogDefaultHp: modCatalog.defaultHpGain,
+    })
     .from(userCarMods)
+    .leftJoin(modCatalog, eq(modCatalog.id, userCarMods.modCatalogId))
     .where(eq(userCarMods.vehicleId, vehicleId));
 
   return {
@@ -593,6 +607,10 @@ async function loadVehicleForRace(vehicleId: string) {
       weight: v.spec?.curbWeight ?? null,
       drivetrain: v.spec?.drivetrain ?? null,
       transmission: v.spec?.transmission ?? null,
+      aspiration: v.spec?.aspiration ?? null,
+      zeroToSixty: v.spec?.zeroToSixty ?? null,
+      quarterMile: v.spec?.quarterMile ?? null,
+      topSpeed: v.spec?.topSpeed ?? null,
     },
     mods,
     overrides: {

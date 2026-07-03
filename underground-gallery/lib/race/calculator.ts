@@ -49,6 +49,17 @@ export type RaceCar = {
     shift?: number;
     handling?: number;
   };
+  /**
+   * Per-metric calibration multipliers that anchor this car's estimates to its
+   * real published factory numbers (computed in build.ts from the bone-stock
+   * baseline). 1.0 = no correction. Carries the car-specific gap the empirical
+   * formulas miss (gearing, aero, powerband) forward onto the modded estimate.
+   */
+  calib?: {
+    et?: number;   // quarter-mile ET
+    z60?: number;  // 0-60
+    top?: number;  // top speed
+  };
 };
 
 export type RaceResult = {
@@ -165,12 +176,17 @@ function driverSkillBonus(car: RaceCar): number {
 
 // ── ET / trap-speed estimates ─────────────────────────────────────────────
 
+// ── Raw (uncalibrated) estimates ──────────────────────────────────────────
+// These are the pure empirical formulas. build.ts calls them on the bone-stock
+// car to derive each calibration multiplier; the public estimate* wrappers
+// below apply that multiplier. Exported for calibration + testing.
+
 /**
- * Quarter-mile elapsed time estimate. Based on the classic Hale formula:
+ * Quarter-mile elapsed time, uncalibrated. Classic Hale formula:
  *   ET = 5.825 * (weight / hp) ^ (1/3)
- * Then adjusted by drivetrain, tire, transmission, and skill.
+ * then adjusted by drivetrain, tire, transmission, and skill.
  */
-export function estimateQuarterMile(car: RaceCar): number {
+export function rawQuarterMile(car: RaceCar): number {
   if (car.hp <= 0 || car.weight <= 0) return 0;
   const baseEt = 5.825 * Math.pow(car.weight / car.hp, 1 / 3);
 
@@ -184,40 +200,27 @@ export function estimateQuarterMile(car: RaceCar): number {
   return baseEt * launchAdj * tractionAdj * shiftAdj * skillAdj;
 }
 
-/**
- * Trap speed estimate (mph at end of quarter-mile).
- *   trap = 234 * (hp / weight) ^ (1/3)
- */
-export function estimateTrapSpeed(car: RaceCar): number {
+/** Trap speed (mph at end of quarter-mile): 234 * (hp/weight)^(1/3). */
+export function rawTrapSpeed(car: RaceCar): number {
   if (car.hp <= 0 || car.weight <= 0) return 0;
   return 234 * Math.pow(car.hp / car.weight, 1 / 3);
 }
 
-/**
- * Estimated unrestricted top speed (mph). Trap speed × ratio that grows
- * slightly with horsepower (more HP overcomes drag past trap). Capped at
- * sane values for show-friendly numbers.
- */
-export function estimateTopSpeed(car: RaceCar): number {
-  const trap = estimateTrapSpeed(car);
+/** Unrestricted top speed (mph), uncalibrated. */
+export function rawTopSpeed(car: RaceCar): number {
+  const trap = rawTrapSpeed(car);
   if (trap <= 0) return 0;
-  // Aero mods (lower drag) push the ratio up; high-HP push it up; AWD slightly down.
   const aeroFactor = 1 + (car.modBonuses?.handling ?? 0) / 600;
   const hpFactor = 1 + Math.min(0.15, Math.max(-0.05, (car.hp - 300) / 4000));
   const drivetrainFactor = car.drivetrain === 'AWD' || car.drivetrain === '4WD' ? 0.97 : 1.0;
   const top = trap * 1.42 * aeroFactor * hpFactor * drivetrainFactor;
-  // Hard rails so a typo doesn't show 400 mph
   return Math.max(70, Math.min(240, top));
 }
 
-/**
- * 0-60 estimate. Derived from quarter-mile ET — a reasonable rule of thumb
- * is 0-60 ≈ ET * 0.36 to 0.40 depending on drivetrain.
- */
-export function estimateZeroToSixty(car: RaceCar): number {
-  const et = estimateQuarterMile(car);
+/** 0-60, uncalibrated. Derived from the raw quarter-mile ET. */
+export function rawZeroToSixty(car: RaceCar): number {
+  const et = rawQuarterMile(car);
   if (et <= 0) return 0;
-  // AWD cars hit 60 closer to 0.36 of their ET, FWD/RWD closer to 0.40.
   const ratio =
     car.drivetrain === 'AWD' || car.drivetrain === '4WD'
       ? 0.36
@@ -225,6 +228,28 @@ export function estimateZeroToSixty(car: RaceCar): number {
         ? 0.40
         : 0.38;
   return et * ratio;
+}
+
+// ── Public (calibrated) estimates ─────────────────────────────────────────
+// Each applies the car's per-metric calibration multiplier when present, so a
+// stock car reports its real factory number and mods scale from that baseline.
+
+export function estimateQuarterMile(car: RaceCar): number {
+  return rawQuarterMile(car) * (car.calib?.et ?? 1);
+}
+
+export function estimateTrapSpeed(car: RaceCar): number {
+  // No factory trap number to calibrate against; report the raw estimate.
+  return rawTrapSpeed(car);
+}
+
+export function estimateTopSpeed(car: RaceCar): number {
+  const top = rawTopSpeed(car) * (car.calib?.top ?? 1);
+  return top <= 0 ? 0 : Math.max(70, Math.min(240, top));
+}
+
+export function estimateZeroToSixty(car: RaceCar): number {
+  return rawZeroToSixty(car) * (car.calib?.z60 ?? 1);
 }
 
 // ── Score functions for each race type ────────────────────────────────────
