@@ -11,6 +11,7 @@ import {
 } from "@/app/me/actions";
 import { deleteMod } from "@/app/garage/actions";
 import AddModModal from "@/components/garage/AddModModal";
+import ModPreviewPanel from "@/components/mod-preview/ModPreviewPanel";
 import { resizeImage } from "@/lib/client/photo-upload";
 import { colors, fonts } from "@/lib/design";
 
@@ -63,7 +64,11 @@ export default function VehicleOwnerPanel({
   const [uploadErr, setUploadErr] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [showModPreview, setShowModPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const heroUrl =
+    photos.find((p) => p.id === heroId)?.urlFull ?? photos[0]?.urlFull ?? null;
 
   const [actionPending, startAction] = useTransition();
   const uploading = uploadProgress !== null;
@@ -208,6 +213,15 @@ export default function VehicleOwnerPanel({
                 style={{ display: "none" }}
                 onChange={(e) => onFilesPicked(e.target.files)}
               />
+              <button
+                onClick={() => setShowModPreview(true)}
+                disabled={uploading || !heroUrl}
+                className="ug-btn ug-btn-ghost"
+                title={heroUrl ? "AI mod mock-up" : "Add a photo first"}
+                style={{ marginRight: 8 }}
+              >
+                ✨ PREVIEW MODS
+              </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
@@ -467,6 +481,13 @@ export default function VehicleOwnerPanel({
           }}
         />
       ) : null}
+
+      <ModPreviewPanel
+        vehicleId={vehicleId}
+        heroUrl={heroUrl}
+        open={showModPreview}
+        onClose={() => setShowModPreview(false)}
+      />
     </div>
   );
 }
