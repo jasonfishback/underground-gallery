@@ -9,30 +9,56 @@ function SignInForm() {
   const params = useSearchParams();
   const errorParam = params?.get('error');
   const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(
-    errorParam ? 'Authentication failed. Try again.' : null,
+    errorParam ? 'That code or link was invalid or expired. Try again.' : null,
   );
-  const [sentTo, setSentTo] = useState<string | null>(null);
+  // Two-step: 'email' → send code, 'code' → enter it (completes IN the app so
+  // installed home-screen apps don't get bounced into Safari).
+  const [phase, setPhase] = useState<'email' | 'code'>('email');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const clean = email.trim().toLowerCase();
+    if (!clean || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
       setErrorMsg('Valid email required.');
       return;
     }
     setSubmitting(true);
     try {
+      // redirect:false → send the email but stay here so we can take the code.
+      // redirectTo → where the emailed magic link lands (for same-device use).
       await signIn('resend', {
-        email: email.trim().toLowerCase(),
+        email: clean,
+        redirect: false,
         redirectTo: '/pending',
       });
-      setSentTo(email.trim().toLowerCase());
+      setEmail(clean);
+      setPhase('code');
     } catch {
-      setErrorMsg('Could not send link. Try again.');
+      setErrorMsg('Could not send the code. Try again.');
+    } finally {
       setSubmitting(false);
     }
+  }
+
+  function handleCodeSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErrorMsg(null);
+    const clean = code.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (clean.length < 6) {
+      setErrorMsg('Enter the code from your email.');
+      return;
+    }
+    setSubmitting(true);
+    // Complete verification within THIS browsing context (the PWA), so the
+    // session cookie lands in the app — not a separate Safari jar.
+    const target =
+      `/api/auth/callback/resend?callbackUrl=${encodeURIComponent('/pending')}` +
+      `&token=${encodeURIComponent(clean)}&email=${encodeURIComponent(email)}`;
+    window.location.href = target;
   }
 
   return (
@@ -105,18 +131,12 @@ function SignInForm() {
             lineHeight: 1.5,
           }}
         >
-          Enter your email. We&apos;ll send you a one-time sign-in link.
+          {phase === 'email'
+            ? "Enter your email. We'll send you a one-time code."
+            : 'Enter the code we emailed you.'}
         </p>
 
-        {sentTo ? (
-          <div className="ug-banner ug-banner-success" style={{ textAlign: 'center' }}>
-            Check <strong>{sentTo}</strong> for the sign-in link.
-            <br />
-            <span style={{ fontSize: 11, opacity: 0.8 }}>
-              Link expires in 24 hours · check spam if you don&apos;t see it
-            </span>
-          </div>
-        ) : (
+        {phase === 'email' ? (
           <form onSubmit={handleSubmit}>
             <label className="ug-label" htmlFor="signin-email">Email</label>
             <input
@@ -141,13 +161,74 @@ function SignInForm() {
               className="ug-btn ug-btn-primary ug-btn-block"
               style={{ marginTop: 16 }}
             >
-              {submitting ? 'Sending…' : 'Send sign-in link →'}
+              {submitting ? 'Sending…' : 'Send code →'}
             </button>
             {errorMsg && (
               <div className="ug-banner ug-banner-error" style={{ marginTop: 16 }}>
                 {errorMsg}
               </div>
             )}
+          </form>
+        ) : (
+          <form onSubmit={handleCodeSubmit}>
+            <div
+              className="ug-banner ug-banner-success"
+              style={{ textAlign: 'center', marginBottom: 16, fontSize: 13 }}
+            >
+              Code sent to <strong>{email}</strong> · check spam if needed
+            </div>
+            <label className="ug-label" htmlFor="signin-code">Sign-in code</label>
+            <input
+              id="signin-code"
+              type="text"
+              inputMode="text"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+              autoComplete="one-time-code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="XXXX-XXXX"
+              required
+              autoFocus
+              disabled={submitting}
+              className="ug-input ug-input-lg"
+              style={{
+                textAlign: 'center',
+                letterSpacing: '0.35em',
+                fontFamily: fonts.mono,
+                textTransform: 'uppercase',
+              }}
+            />
+            <button
+              type="submit"
+              disabled={submitting}
+              className="ug-btn ug-btn-primary ug-btn-block"
+              style={{ marginTop: 16 }}
+            >
+              {submitting ? 'Verifying…' : 'Sign in →'}
+            </button>
+            {errorMsg && (
+              <div className="ug-banner ug-banner-error" style={{ marginTop: 16 }}>
+                {errorMsg}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setPhase('email');
+                setCode('');
+                setErrorMsg(null);
+              }}
+              className="ug-btn ug-btn-text"
+              style={{ width: '100%', marginTop: 8 }}
+            >
+              ← Use a different email
+            </button>
+            <p style={{ fontSize: 11, color: colors.textDim, textAlign: 'center', marginTop: 8, lineHeight: 1.5 }}>
+              On your phone? Enter the code here rather than tapping the email
+              link, so you stay signed in inside the app.
+            </p>
           </form>
         )}
 

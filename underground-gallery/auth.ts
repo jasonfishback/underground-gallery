@@ -19,6 +19,7 @@
 import NextAuth from 'next-auth';
 import Resend from 'next-auth/providers/resend';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
+import { customAlphabet } from 'nanoid';
 import { db } from '@/lib/db';
 import {
   users,
@@ -27,6 +28,13 @@ import {
   verificationTokens,
 } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+
+// Short, typeable sign-in code (also the magic-link token). Ambiguous
+// characters removed (no 0/O/1/I/L). ~31^8 combos + 1h single-use expiry.
+// Lets the PWA complete sign-in with a CODE the user types IN THE APP, instead
+// of a link that opens Safari in a separate cookie jar (iOS home-screen apps).
+const CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+const generateSignInCode = customAlphabet(CODE_ALPHABET, 8);
 
 const FROM_EMAIL =
   process.env.RESEND_FROM_EMAIL || 'accessrestricted@undergroundgallery.ai';
@@ -58,13 +66,18 @@ session: { strategy: 'database', maxAge: 90 * 24 * 60 * 60 },
     Resend({
       apiKey: process.env.RESEND_API_KEY,
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      // Codes/links expire in 1 hour (short since it's now a typeable code too).
+      maxAge: 60 * 60,
+      generateVerificationToken: () => generateSignInCode(),
       // Custom email so it matches the brand
       sendVerificationRequest: async ({
         identifier: email,
         url,
+        token,
         provider,
       }) => {
         const { host } = new URL(url);
+        const code = token; // same value the magic link carries
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -74,9 +87,9 @@ session: { strategy: 'database', maxAge: 90 * 24 * 60 * 60 },
           body: JSON.stringify({
             from: provider.from,
             to: email,
-            subject: `Sign in to ${host} // ACCESS RESTRICTED`,
-            html: buildEmail({ url, host }),
-            text: buildEmailText({ url, host }),
+            subject: `Your ${host} code: ${code} // ACCESS RESTRICTED`,
+            html: buildEmail({ url, host, code }),
+            text: buildEmailText({ url, host, code }),
           }),
         });
         if (!res.ok) {
@@ -141,7 +154,13 @@ session: { strategy: 'database', maxAge: 90 * 24 * 60 * 60 },
 
 // ─── Email templates ──────────────────────────────────────────────────────
 
-function buildEmail({ url, host }: { url: string; host: string }) {
+function formatCode(code: string): string {
+  // Group as XXXX-XXXX for readability; the app strips the dash on entry.
+  return code.length === 8 ? `${code.slice(0, 4)}-${code.slice(4)}` : code;
+}
+
+function buildEmail({ url, host, code }: { url: string; host: string; code: string }) {
+  const pretty = formatCode(code);
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -162,11 +181,21 @@ function buildEmail({ url, host }: { url: string; host: string }) {
               </div>
 
               <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.02em;color:#f5f6f7;margin:0 0 16px;line-height:1.1;">
-                Your sign-in link
+                Your sign-in code
               </h1>
 
-              <p style="font-size:15px;color:rgba(201,204,209,0.75);line-height:1.6;margin:0 0 32px;">
-                Click the button below to sign in to ${host}. This link expires in 24 hours and can only be used once.
+              <p style="font-size:15px;color:rgba(201,204,209,0.75);line-height:1.6;margin:0 0 24px;">
+                Enter this code in the app to sign in to ${host}. Best if you opened the app from your home screen.
+              </p>
+
+              <div style="margin:0 0 28px;padding:20px;background:#05060a;border:1px solid rgba(255,42,42,0.35);text-align:center;">
+                <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:34px;font-weight:800;letter-spacing:0.22em;color:#ff5a5a;">
+                  ${pretty}
+                </div>
+              </div>
+
+              <p style="font-size:13px;color:rgba(201,204,209,0.55);line-height:1.6;margin:0 0 28px;">
+                Or just tap this button to sign in on this device:
               </p>
 
               <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
@@ -179,13 +208,8 @@ function buildEmail({ url, host }: { url: string; host: string }) {
                 </tr>
               </table>
 
-              <p style="font-size:12px;color:rgba(201,204,209,0.4);line-height:1.6;margin:32px 0 0;">
-                If the button doesn't work, paste this URL into your browser:<br/>
-                <span style="color:rgba(201,204,209,0.6);word-break:break-all;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;">${url}</span>
-              </p>
-
               <div style="margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.08);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;color:rgba(201,204,209,0.4);letter-spacing:0.24em;">
-                If you didn't request this, ignore the email. No account will be created.
+                Code and link expire in 1 hour, single use. If you didn't request this, ignore it — no account is created.
               </div>
 
             </td>
@@ -201,14 +225,19 @@ function buildEmail({ url, host }: { url: string; host: string }) {
 </html>`;
 }
 
-function buildEmailText({ url, host }: { url: string; host: string }) {
+function buildEmailText({ url, host, code }: { url: string; host: string; code: string }) {
   return `// ACCESS RESTRICTED
 
-Sign in to ${host}.
+Your sign-in code for ${host}:
 
+    ${formatCode(code)}
+
+Enter it in the app to sign in (best if you opened the app from your home screen).
+
+Or sign in on this device with this link:
 ${url}
 
-This link expires in 24 hours and can only be used once.
+Code and link expire in 1 hour and can only be used once.
 
 If you didn't request this, ignore the email. No account will be created.
 
