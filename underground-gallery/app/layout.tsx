@@ -4,6 +4,7 @@ import { NotificationBell } from '@/components/NotificationBell';
 import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/react';
 import { SiteHeader } from '@/components/SiteHeader';
+import { PwaRegister } from '@/components/PwaRegister';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -38,6 +39,11 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon.png',
   },
+  appleWebApp: {
+    capable: true,
+    title: 'Underground',
+    statusBarStyle: 'black-translucent',
+  },
   robots: {
     index: true,
     follow: true,
@@ -45,7 +51,14 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, maximumScale: 1, userScalable: false };
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#05060a',
+  viewportFit: 'cover',
+};
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -54,6 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SiteHeader />
         {children}
         <Analytics />
+        <PwaRegister />
       </body>
     </html>
   );
