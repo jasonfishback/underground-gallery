@@ -219,18 +219,24 @@ export async function addCarFromYmm(raw: {
     return { ok: false, error: 'Year, make, and model are required.' };
   }
 
-  // 1. Reuse any existing community spec for this Y/M/M (trim agnostic — we
-  //    favour an existing match over a fresh LLM call).
+  // 1. Reuse an existing spec for this vehicle. When a trim/variant is given
+  //    (e.g. "GT 55" vs "GT 63") the reuse must be trim-specific — otherwise
+  //    every variant of a model collapses onto whichever one was cached first.
+  //    With no trim we fall back to any Y/M/M match to avoid a needless LLM call.
+  const specConds = [
+    eq(vehicleSpecs.year, year),
+    sql`lower(${vehicleSpecs.make}) = ${make.toLowerCase()}`,
+    sql`lower(${vehicleSpecs.model}) = ${model.toLowerCase()}`,
+  ];
+  if (trim) {
+    specConds.push(
+      sql`lower(coalesce(${vehicleSpecs.trim}, '')) = ${trim.toLowerCase()}`,
+    );
+  }
   const [existing] = await db
     .select({ id: vehicleSpecs.id })
     .from(vehicleSpecs)
-    .where(
-      and(
-        eq(vehicleSpecs.year, year),
-        sql`lower(${vehicleSpecs.make}) = ${make.toLowerCase()}`,
-        sql`lower(${vehicleSpecs.model}) = ${model.toLowerCase()}`,
-      ),
-    )
+    .where(and(...specConds))
     .limit(1);
 
   let specId: string;

@@ -47,20 +47,36 @@ async function lookupViaLlm(
 
   const trimPart = trim?.trim() ? ` ${trim.trim()}` : '';
   const label = `${year} ${make} ${model}${trimPart}`;
+  const hasTrim = !!trim?.trim();
 
   try {
     const { object } = await generateObject({
-      model: openai('gpt-4o-mini'),
+      model: openai('gpt-4o'),
       schema: specSchema,
+      // Deterministic: factual recall, not creativity.
+      temperature: 0,
       system:
-        'You are a vehicle specification database. Return factual stock-trim ' +
-        'specs for the vehicle described. Use the manufacturer-rated values ' +
-        'for the BASE or most common trim if no specific trim is given. If a ' +
-        'value is genuinely unknown or not applicable (e.g. top speed of a ' +
-        'work truck), return null for that field rather than guessing.',
-      prompt: `Specs for: ${label}`,
-      // Keep latency reasonable; spec lookups should feel snappy.
-      abortSignal: AbortSignal.timeout(15_000),
+        'You are an automotive specifications database. Return the EXACT ' +
+        'factory specifications for the specified year/make/model/trim.\n' +
+        '- stockHp / stockTorque: manufacturer SAE-net CRANK (flywheel) ' +
+        'ratings in hp and lb-ft — never wheel/dyno numbers.\n' +
+        '- curbWeight: manufacturer curb weight in lb (fueled, no occupants).\n' +
+        '- When a specific trim or variant is named (e.g. "GT 55", "GT 63 S", ' +
+        '"Competition", "Type R", "Z51", "Hellcat"), return THAT variant\'s ' +
+        'exact numbers. Do NOT substitute the base model. Distinguish variants ' +
+        'that share a model name but differ mechanically (AMG GT 43 vs 55 vs 63; ' +
+        'M3 vs M3 Competition; Golf GTI vs R).\n' +
+        '- Use official published 0-60, 1/4-mile, and top speed where available; ' +
+        'otherwise null.\n' +
+        '- If you cannot confidently identify the exact variant, return null for ' +
+        'the numeric fields rather than guessing a different trim.' +
+        (hasTrim
+          ? ''
+          : '\n- No trim was given: use the highest-volume base trim and ' +
+            'set trim expectations conservatively.'),
+      prompt: `Return factory specs for: ${label}`,
+      // gpt-4o is a touch slower than mini; give it room but keep it snappy.
+      abortSignal: AbortSignal.timeout(20_000),
     });
 
     // Reject low-confidence responses. If the LLM couldn't anchor on stock

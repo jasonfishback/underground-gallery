@@ -78,6 +78,10 @@ export default function AddCarWizard({ open, onClose }: Props) {
 
   // optional nickname (used by both confirm and manual paths)
   const [carName, setCarName] = useState("");
+  // optional trim/variant refinement for AI-resolved (nhtsa) picks — lets the
+  // user pin an exact variant (e.g. "GT 55", "Competition") the model list
+  // doesn't distinguish, so specs resolve to the right car.
+  const [carTrim, setCarTrim] = useState("");
 
   // manual state
   const [mYear, setMYear] = useState("");
@@ -97,6 +101,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
       setQuery("");
       setHits([]);
       setCarName("");
+      setCarTrim("");
       setMYear("");
       setMMake("");
       setMModel("");
@@ -229,6 +234,7 @@ export default function AddCarWizard({ open, onClose }: Props) {
             year: picked.year,
             make: picked.make,
             model: picked.model,
+            trim: carTrim.trim() || undefined,
             name: cleanName || undefined,
           })) as AddCarResult;
         } else if (picked?.kind === "manual") {
@@ -404,10 +410,27 @@ export default function AddCarWizard({ open, onClose }: Props) {
             <p className="ug-label" style={{ marginBottom: 4 }}>You picked</p>
             <p style={{ fontSize: 20, fontWeight: 700, margin: "0 0 12px" }}>{picked.label}</p>
             {picked.kind === "nhtsa" && (
-              <p style={{ fontSize: 12, color: colors.textMuted, margin: "0 0 24px", letterSpacing: "0.04em" }}>
-                ∕∕ Stock HP, torque, weight and drivetrain will be auto-filled
-                when you add it. May take a moment.
-              </p>
+              <>
+                <p style={{ fontSize: 12, color: colors.textMuted, margin: "0 0 16px", letterSpacing: "0.04em" }}>
+                  ∕∕ Stock HP, torque, weight and drivetrain will be auto-filled
+                  when you add it. May take a moment.
+                </p>
+                <label className="ug-label">Trim / variant (optional)</label>
+                <input
+                  type="text"
+                  value={carTrim}
+                  onChange={(e) => setCarTrim(e.target.value)}
+                  placeholder="e.g. GT 55, 63 S Competition, Type R, Hellcat"
+                  maxLength={60}
+                  className="ug-input"
+                  style={{ marginBottom: 6 }}
+                />
+                <p style={{ fontSize: 11, color: colors.textDim, margin: "0 0 20px", lineHeight: 1.5 }}>
+                  The model list doesn&apos;t separate variants — pin the exact
+                  one (e.g. <strong>GT 55</strong> vs GT 63) so the specs come
+                  back right.
+                </p>
+              </>
             )}
             {picked.kind === "catalog" && (
               <div style={{ marginBottom: 24 }} />
