@@ -29,7 +29,13 @@ export async function SiteHeader() {
         borderBottom: `1px solid ${colors.border}`,
         boxShadow:
           '0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.35)',
-        padding: '14px 20px',
+        // Pad below the iOS status bar / notch in installed (standalone) PWAs —
+        // otherwise the translucent status bar sits on top of the header and it
+        // reads as hidden until you overscroll. env() is 0 in normal browsers.
+        paddingTop: 'calc(14px + env(safe-area-inset-top, 0px))',
+        paddingRight: 'calc(20px + env(safe-area-inset-right, 0px))',
+        paddingBottom: 14,
+        paddingLeft: 'calc(20px + env(safe-area-inset-left, 0px))',
         display: 'flex',
         flexWrap: 'wrap',
         alignItems: 'center',
