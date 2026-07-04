@@ -1,7 +1,11 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: #05060a;
+  /* Gunmetal charcoal base with a subtle vertical lift — not flat black. */
+  background:
+    radial-gradient(120% 80% at 50% -10%, #14181f 0%, transparent 60%),
+    #0c0e13;
+  background-attachment: fixed;
   color: #f5f6f7;
   font-family: 'Inter Tight', system-ui, -apple-system, sans-serif;
 }
@@ -27,15 +31,17 @@ header nav::-webkit-scrollbar {
 /* ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --ug-bg:           #05060a;
-  --ug-bg-elev:      #0a0c12;
+  --ug-bg:           #0c0e13;
+  --ug-bg-elev:      #181c25;
+  --ug-surface:      #1a1f28;
+  --ug-surface-hi:   #20252f;
   --ug-fg:           #f5f6f7;
-  --ug-fg-dim:       rgba(245, 246, 247, 0.70);
-  --ug-fg-muted:     rgba(245, 246, 247, 0.45);
+  --ug-fg-dim:       rgba(233, 237, 243, 0.72);
+  --ug-fg-muted:     rgba(233, 237, 243, 0.48);
   --ug-accent:       #ff2a2a;
   --ug-accent-soft:  rgba(255, 42, 42, 0.18);
-  --ug-border:       rgba(255, 255, 255, 0.08);
-  --ug-border-soft:  rgba(255, 255, 255, 0.04);
+  --ug-border:       rgba(168, 180, 199, 0.14);
+  --ug-border-soft:  rgba(168, 180, 199, 0.07);
 
   --ug-radius-sm: 8px;
   --ug-radius-md: 12px;
@@ -53,34 +59,29 @@ header nav::-webkit-scrollbar {
 /* ── Frosted glass surfaces ──────────────────────────────────────────────── */
 
 .ug-glass {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.045) 0%,
-    rgba(255, 255, 255, 0.015) 100%
-  );
+  background: linear-gradient(180deg, #20252f 0%, #171b23 100%);
   backdrop-filter: var(--ug-blur);
   -webkit-backdrop-filter: var(--ug-blur);
   border: 1px solid var(--ug-border);
   border-radius: var(--ug-radius-md);
-  box-shadow: var(--ug-shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: var(--ug-shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .ug-card {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.035) 0%,
-    rgba(255, 255, 255, 0.01) 100%
-  );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* Elevated gunmetal surface — reads clearly above the charcoal base for depth. */
+  background: linear-gradient(180deg, #1c212b 0%, #14181f 100%);
   border: 1px solid var(--ug-border);
   border-radius: var(--ug-radius-md);
-  box-shadow: var(--ug-shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .ug-card:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: var(--ug-shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: var(--ug-border-strong, rgba(178, 190, 209, 0.24));
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
 }
 
 /* ── Buttons with depth ──────────────────────────────────────────────────── */
@@ -140,16 +141,15 @@ header nav::-webkit-scrollbar {
 
 /* Ghost / secondary: frosted, tonal */
 .ug-btn-ghost {
-  background: rgba(255, 255, 255, 0.04);
+  background: linear-gradient(180deg, #22272f 0%, #191d25 100%);
   color: var(--ug-fg-dim);
   border: 1px solid var(--ug-border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .ug-btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #2a303a 0%, #20252e 100%);
   color: var(--ug-fg);
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(178, 190, 209, 0.28);
 }
 .ug-btn-ghost:active { transform: translateY(1px); }
 
@@ -181,17 +181,18 @@ header nav::-webkit-scrollbar {
   font-family: 'Inter Tight', system-ui, sans-serif;
   font-size: 16px;
   color: var(--ug-fg);
-  background: rgba(255, 255, 255, 0.03);
+  background: #12151b;
   border: 1px solid var(--ug-border);
   border-radius: var(--ug-radius-md);
   outline: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
   transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 .ug-input::placeholder { color: var(--ug-fg-muted); }
 .ug-input:focus {
   border-color: var(--ug-accent);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 3px rgba(255, 42, 42, 0.18);
+  background: #171b22;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(255, 42, 42, 0.18);
 }
 .ug-input:disabled { opacity: 0.6; cursor: not-allowed; }
 
@@ -236,8 +237,8 @@ header nav::-webkit-scrollbar {
   max-width: 560px;
   background: linear-gradient(
     180deg,
-    rgba(20, 22, 28, 0.80) 0%,
-    rgba(10, 12, 18, 0.85) 100%
+    rgba(32, 37, 46, 0.92) 0%,
+    rgba(20, 24, 31, 0.94) 100%
   );
   backdrop-filter: var(--ug-blur-strong);
   -webkit-backdrop-filter: var(--ug-blur-strong);
@@ -370,11 +371,11 @@ header nav::-webkit-scrollbar {
 /* Mono font helper */
 .ug-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 
-/* CTA shimmer overlay (used inside positioned container) */
+/* CTA shimmer overlay (used inside positioned container). Spans the FULL
+   button so the sweep crosses edge to edge. */
 .ug-shimmer {
   position: absolute;
-  top: 0; bottom: 0;
-  width: 60%;
+  inset: 0;
   pointer-events: none;
   overflow: hidden;
 }
@@ -943,11 +944,11 @@ header nav::-webkit-scrollbar {
     bottom: 0;
     z-index: 60;
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    background: linear-gradient(180deg, rgba(12,14,20,0.92), rgba(8,9,14,0.97));
+    background: linear-gradient(180deg, rgba(28,33,42,0.92), rgba(18,21,28,0.97));
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border-top: 1px solid rgba(255, 255, 255, 0.09);
-    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+    border-top: 1px solid rgba(178, 190, 209, 0.14);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.5);
   }
 }
 

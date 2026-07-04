@@ -23,7 +23,7 @@ export async function SiteHeader() {
         top: 0,
         zIndex: 50,
         background:
-          'linear-gradient(180deg, rgba(10,12,18,0.85) 0%, rgba(10,12,18,0.65) 100%)',
+          'linear-gradient(180deg, rgba(28,33,42,0.82) 0%, rgba(18,22,29,0.66) 100%)',
         backdropFilter: 'blur(22px) saturate(160%)',
         WebkitBackdropFilter: 'blur(22px) saturate(160%)',
         borderBottom: `1px solid ${colors.border}`,

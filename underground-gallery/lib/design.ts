@@ -7,24 +7,29 @@
 // `--ug-*` system). Keep them in sync.
 
 export const colors = {
-  // Backgrounds
-  bg: '#05060a',
-  bgElevated: '#0a0c12',
-  bgSubtle: '#07080d',
+  // Backgrounds — dark, but a cool gunmetal charcoal rather than flat black,
+  // with elevated surfaces that read clearly above the base for real depth.
+  bg: '#0c0e13',
+  bgElevated: '#181c25',
+  bgSubtle: '#101319',
+
+  // Gunmetal surfaces (elevated cards / toolbars)
+  surface: '#1a1f28',
+  surfaceHi: '#20252f',
 
   // Text
   text: '#f5f6f7',
-  textMuted: 'rgba(245,246,247,0.62)',
-  textDim: 'rgba(245,246,247,0.38)',
+  textMuted: 'rgba(233,237,243,0.64)',
+  textDim: 'rgba(233,237,243,0.40)',
 
   // Brand red
   accent: '#ff2a2a',
   accentSoft: 'rgba(255,42,42,0.18)',
   accentBorder: 'rgba(255,80,80,0.45)',
 
-  // Borders
-  border: 'rgba(255,255,255,0.08)',
-  borderStrong: 'rgba(255,255,255,0.16)',
+  // Borders — cool steel instead of pure white alpha
+  border: 'rgba(168,180,199,0.14)',
+  borderStrong: 'rgba(178,190,209,0.24)',
 
   // Status
   success: 'rgb(120,220,150)',
@@ -41,13 +46,13 @@ export const fonts = {
 // styles where adding a className isn't convenient.
 const glassCardSurface: React.CSSProperties = {
   background:
-    'linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.01) 100%)',
+    'linear-gradient(180deg, #1c212b 0%, #14181f 100%)',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)' as any,
   border: `1px solid ${colors.border}`,
   borderRadius: 12,
   boxShadow:
-    '0 1px 2px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04)',
+    '0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
 };
 
 export const styles = {
