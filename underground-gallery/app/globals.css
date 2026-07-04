@@ -1,10 +1,10 @@
 html, body {
   margin: 0;
   padding: 0;
-  /* Gunmetal charcoal base with a subtle vertical lift — not flat black. */
+  /* Deep charcoal base with a subtle top lift — elevated surfaces pop above it. */
   background:
-    radial-gradient(120% 80% at 50% -10%, #14181f 0%, transparent 60%),
-    #0c0e13;
+    radial-gradient(120% 80% at 50% -10%, #14181f 0%, transparent 55%),
+    #090a0e;
   background-attachment: fixed;
   color: #f5f6f7;
   font-family: 'Inter Tight', system-ui, -apple-system, sans-serif;
@@ -31,10 +31,10 @@ header nav::-webkit-scrollbar {
 /* ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --ug-bg:           #0c0e13;
-  --ug-bg-elev:      #181c25;
-  --ug-surface:      #1a1f28;
-  --ug-surface-hi:   #20252f;
+  --ug-bg:           #090a0e;
+  --ug-bg-elev:      #1b2029;
+  --ug-surface:      #1d222c;
+  --ug-surface-hi:   #242a35;
   --ug-fg:           #f5f6f7;
   --ug-fg-dim:       rgba(233, 237, 243, 0.72);
   --ug-fg-muted:     rgba(233, 237, 243, 0.48);
@@ -68,20 +68,22 @@ header nav::-webkit-scrollbar {
 }
 
 .ug-card {
-  /* Elevated gunmetal surface — reads clearly above the charcoal base for depth. */
-  background: linear-gradient(180deg, #1c212b 0%, #14181f 100%);
+  /* Elevated gunmetal surface — brighter top + deeper shadow for clear depth. */
+  background: linear-gradient(180deg, #232935 0%, #151a22 100%);
   border: 1px solid var(--ug-border);
   border-radius: var(--ug-radius-md);
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 6px 20px rgba(0, 0, 0, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .ug-card:hover {
-  border-color: var(--ug-border-strong, rgba(178, 190, 209, 0.24));
+  border-color: rgba(178, 190, 209, 0.26);
   box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.11);
 }
 
 /* ── Buttons with depth ──────────────────────────────────────────────────── */
@@ -166,9 +168,9 @@ header nav::-webkit-scrollbar {
 /* Block sizing modifier */
 .ug-btn-block { width: 100%; }
 
-/* Compact pill (for nav, chips) */
+/* Compact pill (for nav, chips) — roomy enough to tap on a phone */
 .ug-pill {
-  padding: 6px 12px;
+  padding: 9px 15px;
   font-size: 11px;
   border-radius: 999px;
 }

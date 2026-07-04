@@ -7,15 +7,15 @@
 // `--ug-*` system). Keep them in sync.
 
 export const colors = {
-  // Backgrounds — dark, but a cool gunmetal charcoal rather than flat black,
-  // with elevated surfaces that read clearly above the base for real depth.
-  bg: '#0c0e13',
-  bgElevated: '#181c25',
-  bgSubtle: '#101319',
+  // Backgrounds — dark cool charcoal base with elevated gunmetal surfaces that
+  // sit clearly above it (stronger contrast + shadows = more depth).
+  bg: '#090a0e',
+  bgElevated: '#1b2029',
+  bgSubtle: '#0e1116',
 
   // Gunmetal surfaces (elevated cards / toolbars)
-  surface: '#1a1f28',
-  surfaceHi: '#20252f',
+  surface: '#1d222c',
+  surfaceHi: '#242a35',
 
   // Text
   text: '#f5f6f7',
@@ -46,13 +46,13 @@ export const fonts = {
 // styles where adding a className isn't convenient.
 const glassCardSurface: React.CSSProperties = {
   background:
-    'linear-gradient(180deg, #1c212b 0%, #14181f 100%)',
+    'linear-gradient(180deg, #232935 0%, #151a22 100%)',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)' as any,
   border: `1px solid ${colors.border}`,
   borderRadius: 12,
   boxShadow:
-    '0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
+    '0 6px 20px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
 };
 
 export const styles = {

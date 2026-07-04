@@ -107,28 +107,31 @@ export function MobileTabBar() {
             className="ug-mono"
             style={{
               flex: 1,
+              minHeight: 58,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 5,
-              padding: '10px 2px',
-              fontSize: 8.5,
+              gap: 7,
+              padding: '12px 2px',
+              fontSize: 9.5,
               fontWeight: 700,
-              letterSpacing: '0.16em',
+              letterSpacing: '0.12em',
               textDecoration: 'none',
               color: active ? colors.text : colors.textDim,
-              transition: 'color 0.15s ease',
+              background: active ? 'rgba(255,42,42,0.08)' : 'transparent',
+              transition: 'color 0.15s ease, background 0.15s ease',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
             <span
               aria-hidden
               style={{
                 display: 'inline-block',
-                width: 5,
-                height: 5,
+                width: 6,
+                height: 6,
                 borderRadius: 999,
-                background: active ? colors.accent : 'rgba(255,255,255,0.14)',
+                background: active ? colors.accent : 'rgba(255,255,255,0.16)',
                 boxShadow: active ? '0 0 8px rgba(255,42,42,0.8)' : 'none',
                 transition: 'background 0.15s ease, box-shadow 0.15s ease',
               }}
