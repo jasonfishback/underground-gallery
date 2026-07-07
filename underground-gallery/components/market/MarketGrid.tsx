@@ -1,8 +1,12 @@
 // components/market/MarketGrid.tsx
 //
-// Grid of MarketCards + a pagination footer. Server-friendly (no hooks).
+// Facebook-Marketplace style browse grid: dense card grid + infinite scroll.
+// First page arrives server-rendered via props; subsequent pages stream in
+// from /api/market/browse as the sentinel scrolls into view.
 
-import Link from 'next/link';
+'use client';
+
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { MarketCard } from './MarketCard';
 import type { ListingCard } from '@/lib/market/queries';
 import { colors, fonts } from '@/lib/design';
@@ -24,7 +28,72 @@ export function MarketGrid({
   searchParams: Record<string, string | undefined>;
   emptyHint?: string;
 }) {
-  if (rows.length === 0) {
+  // /market/cars and /market/parts scope the feed by listing type.
+  const type =
+    basePath === '/market/cars' ? 'car' : basePath === '/market/parts' ? 'part' : undefined;
+
+  // Changing filters re-renders the page with new props; reset client state.
+  const filterKey = useMemo(
+    () => `${basePath}|${JSON.stringify(searchParams)}`,
+    [basePath, searchParams],
+  );
+
+  const [extraRows, setExtraRows] = useState<ListingCard[]>([]);
+  const [nextPage, setNextPage] = useState(page + 1);
+  const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setExtraRows([]);
+    setNextPage(page + 1);
+    setFailed(false);
+  }, [filterKey, page]);
+
+  const allRows = useMemo(() => {
+    const seen = new Set(rows.map((r) => r.id));
+    return [...rows, ...extraRows.filter((r) => !seen.has(r.id))];
+  }, [rows, extraRows]);
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const hasMore = nextPage <= totalPages;
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore || failed) return;
+
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        observer.disconnect();
+        setLoading(true);
+        try {
+          const qs = new URLSearchParams(
+            Object.entries(searchParams).filter(([k, v]) => !!v && k !== 'page') as [
+              string,
+              string,
+            ][],
+          );
+          if (type) qs.set('type', type);
+          qs.set('page', String(nextPage));
+          const res = await fetch(`/api/market/browse?${qs.toString()}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data: { rows: ListingCard[] } = await res.json();
+          setExtraRows((prev) => [...prev, ...data.rows]);
+          setNextPage((p) => p + 1);
+        } catch {
+          setFailed(true);
+        } finally {
+          setLoading(false);
+        }
+      },
+      { rootMargin: '600px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, failed, nextPage, searchParams, type]);
+
+  if (allRows.length === 0) {
     return (
       <div
         className="ug-card"
@@ -43,64 +112,50 @@ export function MarketGrid({
     );
   }
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-  function pageHref(p: number) {
-    const next = new URLSearchParams(
-      Object.entries(searchParams).filter(([, v]) => !!v) as [string, string][],
-    );
-    if (p === 1) next.delete('page');
-    else next.set('page', String(p));
-    const qs = next.toString();
-    return qs ? `${basePath}?${qs}` : basePath;
-  }
-
   return (
     <>
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-          gap: 16,
+          gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+          gap: '26px 14px',
         }}
       >
-        {rows.map((r) => (
+        {allRows.map((r) => (
           <MarketCard key={r.id} listing={r} />
         ))}
       </div>
 
-      {totalPages > 1 && (
-        <div
-          style={{
-            display: 'flex',
-            gap: 8,
-            justifyContent: 'center',
-            marginTop: 24,
-            fontFamily: fonts.mono,
-          }}
-        >
-          {page > 1 && (
-            <Link href={pageHref(page - 1)} className="ug-btn ug-btn-ghost">
-              ← Prev
-            </Link>
-          )}
-          <span
-            style={{
-              padding: '8px 14px',
-              fontSize: 11,
-              letterSpacing: '0.18em',
-              color: colors.textMuted,
-            }}
-          >
-            {page} / {totalPages}
-          </span>
-          {page < totalPages && (
-            <Link href={pageHref(page + 1)} className="ug-btn ug-btn-ghost">
-              Next →
-            </Link>
-          )}
-        </div>
-      )}
+      <div
+        ref={sentinelRef}
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          padding: '28px 0 8px',
+          fontFamily: fonts.mono,
+          fontSize: 10,
+          letterSpacing: '0.24em',
+          color: colors.textDim,
+        }}
+      >
+        {loading
+          ? 'LOADING MORE…'
+          : failed
+            ? (
+                <button
+                  onClick={() => setFailed(false)}
+                  className="ug-btn ug-btn-ghost"
+                  style={{ fontFamily: fonts.mono }}
+                >
+                  COULDN&apos;T LOAD — RETRY
+                </button>
+              )
+            : hasMore
+              ? '· · ·'
+              : allRows.length > pageSize
+                ? "THAT'S EVERYTHING"
+                : null}
+      </div>
     </>
   );
 }

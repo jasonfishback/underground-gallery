@@ -1,16 +1,17 @@
-// app/market/new/page.tsx — picker between car / part listing.
+// app/market/new/page.tsx — FB-Marketplace style quick list: one screen,
+// photos first, post in one click. Full car/part editors linked below.
 
-import Link from 'next/link';
+import { QuickListForm } from '@/components/market/QuickListForm';
 import { colors, fonts } from '@/lib/design';
 
 export const metadata = { title: 'List something' };
 
-export default function NewListingPicker() {
+export default function NewListingPage() {
   return (
     <main
       style={{
-        padding: '48px 24px',
-        maxWidth: 720,
+        padding: '48px 24px 80px',
+        maxWidth: 640,
         margin: '0 auto',
         color: colors.text,
         fontFamily: fonts.sans,
@@ -28,52 +29,11 @@ export default function NewListingPicker() {
       >
         ∕∕ UNDERGROUND · MARKET
       </div>
-      <h1 style={{ fontSize: 28, margin: '0 0 8px' }}>What are you selling?</h1>
-      <p style={{ color: colors.textMuted, marginBottom: 28 }}>
-        Listings are visible only to approved members.
+      <h1 style={{ fontSize: 28, margin: '0 0 8px' }}>Sell something</h1>
+      <p style={{ color: colors.textMuted, marginBottom: 24 }}>
+        Photos, price, post. Visible only to approved members.
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <PickerCard
-          href="/market/new/car"
-          title="A whole car"
-          body="The car itself. Daily, project, race build, parts car — all welcome."
-        />
-        <PickerCard
-          href="/market/new/part"
-          title="A part or piece"
-          body="Anything from turbos to seats to a single coilover. Fitment matters."
-        />
-      </div>
+      <QuickListForm />
     </main>
-  );
-}
-
-function PickerCard({
-  href,
-  title,
-  body,
-}: {
-  href: string;
-  title: string;
-  body: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="ug-card"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        padding: 24,
-        textDecoration: 'none',
-        color: 'inherit',
-        gap: 8,
-      }}
-    >
-      <h2 style={{ fontSize: 22, margin: 0, color: colors.text }}>{title}</h2>
-      <p style={{ fontSize: 14, color: colors.textMuted, margin: 0, lineHeight: 1.5 }}>
-        {body}
-      </p>
-    </Link>
   );
 }

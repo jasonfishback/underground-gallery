@@ -86,6 +86,19 @@ header nav::-webkit-scrollbar {
     inset 0 1px 0 rgba(255, 255, 255, 0.11);
 }
 
+/* ── Marketplace cards (FB-style: chrome-less photo + text stack) ────────── */
+
+.ug-market-card .ug-market-card-photo {
+  transition: transform 0.35s ease;
+}
+.ug-market-card:hover .ug-market-card-photo {
+  transform: scale(1.045);
+}
+.ug-market-card:hover {
+  /* subtle whole-card affordance, no heavy chrome */
+  opacity: 0.96;
+}
+
 /* ── Buttons with depth ──────────────────────────────────────────────────── */
 
 .ug-btn {

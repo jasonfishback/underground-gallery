@@ -27,6 +27,7 @@ export type ListingCard = Pick<
   | 'sellerId'
   | 'listingType'
   | 'title'
+  | 'description'
   | 'priceCents'
   | 'currency'
   | 'priceType'
@@ -59,6 +60,7 @@ const cardSelect = {
   sellerId: listings.sellerId,
   listingType: listings.listingType,
   title: listings.title,
+  description: listings.description,
   priceCents: listings.priceCents,
   currency: listings.currency,
   priceType: listings.priceType,

@@ -1,6 +1,7 @@
 // app/market/page.tsx — Cars-and-Bids style browse (all listings).
 
 import { Metadata } from 'next';
+import Link from 'next/link';
 import { browseListings } from '@/lib/market/queries';
 import { MarketSearchBar } from '@/components/market/MarketSearchBar';
 import { MarketFilters } from '@/components/market/MarketFilters';
@@ -56,41 +57,55 @@ export default async function MarketBrowsePage({
         fontFamily: fonts.sans,
       }}
     >
-      <header style={{ marginBottom: 32, maxWidth: 760 }}>
-        <div
-          style={{
-            fontSize: 11,
-            letterSpacing: '0.4em',
-            color: colors.accent,
-            fontFamily: fonts.mono,
-            fontWeight: 700,
-            marginBottom: 12,
-          }}
-        >
-          ∕∕ UNDERGROUND · MARKET
+      <header
+        style={{
+          marginBottom: 32,
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          gap: 20,
+          flexWrap: 'wrap',
+        }}
+      >
+        <div style={{ maxWidth: 760 }}>
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: '0.4em',
+              color: colors.accent,
+              fontFamily: fonts.mono,
+              fontWeight: 700,
+              marginBottom: 12,
+            }}
+          >
+            ∕∕ UNDERGROUND · MARKET
+          </div>
+          <h1
+            style={{
+              fontSize: 'clamp(36px, 5vw, 56px)',
+              fontWeight: 800,
+              margin: '0 0 14px',
+              lineHeight: 1.05,
+              letterSpacing: '-0.025em',
+            }}
+          >
+            For sale among members
+          </h1>
+          <p
+            style={{
+              fontSize: 17,
+              color: colors.textMuted,
+              margin: 0,
+              lineHeight: 1.5,
+            }}
+          >
+            {total.toLocaleString()} listing{total === 1 ? '' : 's'} live ·
+            buyer-and-seller direct, contact only, zero platform fees.
+          </p>
         </div>
-        <h1
-          style={{
-            fontSize: 'clamp(36px, 5vw, 56px)',
-            fontWeight: 800,
-            margin: '0 0 14px',
-            lineHeight: 1.05,
-            letterSpacing: '-0.025em',
-          }}
-        >
-          For sale among members
-        </h1>
-        <p
-          style={{
-            fontSize: 17,
-            color: colors.textMuted,
-            margin: 0,
-            lineHeight: 1.5,
-          }}
-        >
-          {total.toLocaleString()} listing{total === 1 ? '' : 's'} live ·
-          buyer-and-seller direct, contact only, zero platform fees.
-        </p>
+        <Link href="/market/new" className="ug-btn ug-btn-primary ug-pill">
+          + SELL SOMETHING
+        </Link>
       </header>
 
       <MarketSearchBar />
